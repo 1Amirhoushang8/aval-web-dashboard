@@ -1,0 +1,73 @@
+/* ============================= */
+/* Light Theme (Default) */
+/* ============================= */
+
+:root {
+  /* Backgrounds */
+  --bg-main: #f6f7fb;
+  --bg-card: #ffffff;
+  --bg-table: #ffffff;
+  --bg-hover: #eef1ff;
+
+  /* Sidebar */
+  --sidebar-gradient-start: #5869df;
+  --sidebar-gradient-end: #5297fe;
+  --sidebar-text: #ffffff;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+
+  /* Borders */
+  --border-color: #e5e7eb;
+
+  /* Accent */
+  --primary: #5869df;
+  --primary-hover: #4f5bd5;
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Shadows */
+  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================= */
+/* Dark Theme */
+/* ============================= */
+
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-main: #0b1220;
+  --bg-card: #121a2f;
+  --bg-table: #121a2f;
+  --bg-hover: #1e293b;
+
+  /* Sidebar (same gradient, darker base) */
+  --sidebar-gradient-start: #4857c7;
+  --sidebar-gradient-end: #3f82f2;
+  --sidebar-text: #e5e7eb;
+
+  /* Text */
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  /* Borders */
+  --border-color: #1e293b;
+
+  /* Accent */
+  --primary: #6b7cff;
+  --primary-hover: #7c8cff;
+
+  /* Status */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  /* Shadows */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
