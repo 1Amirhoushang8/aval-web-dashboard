@@ -1,7 +1,10 @@
-export type StoredTicket = {
+export interface StoredTicket {
     title: string;
     description: string;
-    fileName: string;
-    fileType: string;
-    fileUrl: string;
-};
+    file?: {
+        name: string;
+        type: string;
+        size: number;
+        url: string;
+    };
+}

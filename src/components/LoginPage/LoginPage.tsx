@@ -6,10 +6,24 @@ import type {FormInputProps, FormButtonProps} from "../../models/LoginPageInterf
 const LoginForm: React.FC = () => {
     return (
         <div className="login-page">
-            <div id="loginform" dir="rtl">
-                <FormHeader title="ورود به حساب کاربری" />
-                <Form />
-                <OtherMethods />
+            <div className="login-container">
+                {/* Left Side - Interactive Image Section */}
+                <div className="login-image-section">
+                    <div className="image-wrapper">
+                        <img
+                            src="../../../public/vite.svg"
+                            alt="Login Visual"
+                            className="interactive-image"
+                        />
+                    </div>
+                </div>
+
+                {/* Right Side - Login Form */}
+                <div id="loginform" dir="rtl">
+                    <FormHeader title="ورود به حساب کاربری" />
+                    <Form />
+                    <OtherMethods />
+                </div>
             </div>
         </div>
     );
@@ -100,8 +114,5 @@ const FormButton: React.FC<FormButtonProps> = ({ title, onClick }) => (
 const OtherMethods: React.FC = () => (
     <div id="alternativeLogin">
         <label className="link-info cursor">فراموشی رمز عبور</label>
-
     </div>
 );
-
-
