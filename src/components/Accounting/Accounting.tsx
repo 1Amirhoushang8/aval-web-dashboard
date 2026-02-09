@@ -151,32 +151,35 @@ export default function Accounting() {
 
     const open = Boolean(anchorEl);
 
-    // Helper function to format price with تومان symbol in English numbers
+    // Helper function to format price with تومان symbol in English numbers - FIXED
     const formatPriceWithToman = (priceInput: string): string => {
         if (!priceInput || priceInput.trim() === '') return "0 تومان";
 
+        // Remove all non-digit characters except commas
         let cleanPrice = priceInput.replace(/ تومان/g, '').replace(/ R/g, '').trim();
-        // Keep only digits and commas
         cleanPrice = cleanPrice.replace(/[^\d,]/g, '');
 
-        const parts = cleanPrice.split(',');
-        let numberPart = parts[0] || '0';
-        const decimalPart = parts.length > 1 ? parts[1] : '';
+        // Remove all commas first to get the raw number
+        const rawNumber = cleanPrice.replace(/,/g, '');
 
-        // Format with English commas
-        numberPart = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        if (rawNumber === '' || rawNumber === '0') return "0 تومان";
 
-        const formattedPrice = decimalPart
-            ? `${numberPart}.${decimalPart} تومان`
-            : `${numberPart} تومان`;
+        // Convert to number and format with English commas
+        const number = parseInt(rawNumber, 10);
+        if (isNaN(number)) return "0 تومان";
 
-        return formattedPrice;
+        // Format with English commas for thousands
+        const formattedNumber = number.toLocaleString('en-US');
+
+        return `${formattedNumber} تومان`;
     };
 
-    // Helper to extract just the number from price string
+    // Helper to extract just the number from price string - FIXED
     const extractPriceNumber = (priceString: string): string => {
         if (!priceString) return "0";
-        return priceString.replace(/ تومان/g, '').replace(/ R/g, '').replace(/,/g, '').trim();
+        // Remove تومان and all non-digit characters except commas
+        const cleanString = priceString.replace(/ تومان/g, '').replace(/ R/g, '').trim();
+        return cleanString.replace(/,/g, ''); // Remove commas for calculation
     };
 
     // Calculate monthly payment from total price and months
@@ -231,44 +234,42 @@ export default function Accounting() {
         return result;
     };
 
-    // Clean input to ensure only English numbers and commas
+    // Clean input to ensure only English numbers and commas - FIXED
     const cleanNumberInput = (value: string): string => {
         // First convert any Persian/Arabic numbers to English
         let englishValue = convertPersianToEnglish(value);
 
-        // Keep only digits and commas
+        // Remove all non-digit characters except commas
         englishValue = englishValue.replace(/[^\d,]/g, '');
 
-        // Remove extra commas and format properly
+        // Handle multiple commas by splitting and joining
         const parts = englishValue.split(',');
+
+        // If there are multiple parts, it's likely someone typed "1,000,000"
+        // We need to remove all commas and then format properly
         if (parts.length > 1) {
-            // Keep only one comma for thousands separator
-            const mainPart = parts[0].replace(/,/g, '');
-            const decimalPart = parts.slice(1).join('');
-            englishValue = mainPart + (decimalPart ? ',' + decimalPart : '');
-        } else {
-            englishValue = englishValue.replace(/,/g, '');
+            // Join all parts without commas (they're already separated)
+            englishValue = parts.join('');
         }
 
         return englishValue;
     };
 
-    // Format number with commas for display as user types
+    // Format number with commas for display as user types - FIXED
     const formatNumberWithCommas = (value: string): string => {
         if (!value) return '';
 
-        // Clean the input
+        // Clean the input (remove all non-digits)
         const cleanValue = cleanNumberInput(value);
 
-        // Remove all commas first
-        const withoutCommas = cleanValue.replace(/,/g, '');
+        if (cleanValue === '') return '';
 
-        if (withoutCommas === '') return '';
+        // Parse as integer
+        const numberValue = parseInt(cleanValue, 10);
+        if (isNaN(numberValue)) return '';
 
-        // Add commas for thousands
-        const withCommas = withoutCommas.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-        return withCommas;
+        // Format with commas for thousands
+        return numberValue.toLocaleString('en-US');
     };
 
     // Open Add Modal
@@ -283,7 +284,7 @@ export default function Accounting() {
             serialnumber: user.serialnumber,
             fullname: user.fullname,
             service: user.service,
-            price: extractPriceNumber(user.price),
+            price: extractPriceNumber(user.price), // This already returns without commas
             status: user.status,
             paymentType: user.paymentType,
             monthlyPayment: user.monthlyPayment ? extractPriceNumber(user.monthlyPayment) : "",
@@ -391,7 +392,7 @@ export default function Accounting() {
         });
     };
 
-    // Save New Transaction - FIXED
+    // Save New Transaction
     const handleSaveTransaction = () => {
         if (!newTransaction.serialnumber.trim() ||
             !newTransaction.fullname.trim() ||
@@ -406,7 +407,7 @@ export default function Accounting() {
         let totalMonths = null;
 
         if (newTransaction.paymentType === "پرداخت-دوره-ای") {
-            // FIX: Check if totalMonths is provided
+            // Check if totalMonths is provided
             if (!newTransaction.totalMonths || parseInt(newTransaction.totalMonths) < 1) {
                 alert("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                 return;
@@ -433,7 +434,7 @@ export default function Accounting() {
         handleCloseModal();
     };
 
-    // Save Edited Transaction - FIXED
+    // Save Edited Transaction
     const handleSaveEditTransaction = () => {
         if (!editTransaction.serialnumber.trim() ||
             !editTransaction.fullname.trim() ||
@@ -449,7 +450,7 @@ export default function Accounting() {
         let totalMonths = null;
 
         if (editTransaction.paymentType === "پرداخت-دوره-ای") {
-            // FIX: Check if totalMonths is provided
+            // Check if totalMonths is provided
             if (!editTransaction.totalMonths || parseInt(editTransaction.totalMonths) < 1) {
                 alert("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                 return;

@@ -78,8 +78,9 @@ export default function ManageSite() {
         setShowTicketList(!showTicketList);
     };
 
+    // Fixed: Format currency with English numbers
     const formatCurrency = (amount: number) => {
-        return amount.toLocaleString('fa-IR') + ' تومان';
+        return amount.toLocaleString('en-US') + ' تومان';
     };
 
     const currentData = financialData[timeFilter];
@@ -91,7 +92,7 @@ export default function ManageSite() {
     };
 
     return (
-        <div className="mainchart" dir="rtl" style={{ fontFamily: "Vazirani, system-ui, sans-serif" }}>
+        <div className="mainchart" dir="rtl" style={{ fontFamily: "Vazirmatn, Vazir, system-ui, sans-serif" }}>
             {/* Dashboard Heading */}
             <div className="dash-h1">
                 <h1 className="dashtext">داشبورد مدیریت اول وب</h1>
