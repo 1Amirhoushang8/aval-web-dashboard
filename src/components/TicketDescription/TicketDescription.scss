@@ -1,0 +1,58 @@
+// components/DescriptionInput/DescriptionInput.scss
+
+.field.textarea {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.95rem;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 120px;
+    transition: all 0.3s ease;
+    direction: rtl;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-primary-light);
+    }
+
+    &.disabled {
+      background-color: #f5f5f5;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    &::placeholder {
+      color: var(--color-text-light);
+      opacity: 0.7;
+    }
+  }
+
+  .char-count {
+    text-align: left;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.3rem;
+    font-family: 'Vazirmatn', sans-serif;
+    direction: ltr;
+  }
+}

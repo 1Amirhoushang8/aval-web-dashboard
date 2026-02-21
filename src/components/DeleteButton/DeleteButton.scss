@@ -1,0 +1,177 @@
+// components/DeleteButton/DeleteButton.scss
+
+.delete-button {
+  color: #ef4444 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    z-index: 0;
+  }
+
+  &:hover {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    transform: scale(1.1) rotate(3deg);
+
+    &::before {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(-3deg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+  }
+
+  .delete-icon {
+    font-size: 1.3rem;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover .delete-icon {
+    transform: scale(1.1);
+  }
+
+  /* Size Variations */
+  &.small {
+    padding: 4px !important;
+
+    .delete-icon {
+      font-size: 1rem;
+    }
+  }
+
+  &.medium {
+    padding: 8px !important;
+
+    .delete-icon {
+      font-size: 1.3rem;
+    }
+  }
+
+  &.large {
+    padding: 12px !important;
+
+    .delete-icon {
+      font-size: 1.6rem;
+    }
+  }
+
+  /* Disabled State */
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #9ca3af !important;
+
+    &:hover {
+      background-color: transparent !important;
+      transform: none;
+    }
+  }
+}
+
+/* Animation for shake effect */
+@keyframes shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.delete-button:not(:active):hover .delete-icon {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Ripple Effect */
+.delete-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(239, 68, 68, 0.3);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+  z-index: 0;
+}
+
+.delete-button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(40, 40);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .delete-button {
+    &.medium {
+      padding: 6px !important;
+
+      .delete-icon {
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-button {
+    &.medium {
+      padding: 4px !important;
+
+      .delete-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .delete-button {
+    color: #f87171 !important;
+
+    &:hover {
+      background-color: rgba(248, 113, 113, 0.15) !important;
+    }
+  }
+}

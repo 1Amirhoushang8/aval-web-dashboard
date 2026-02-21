@@ -1,0 +1,211 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "SerialNumber": "۱۲۴۹۲۴۲۴۶",
+      "FullName": "علی محمدی",
+      "service": "طراحی وب سایت",
+      "price": "۶,۵۳۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "2",
+      "SerialNumber": "۱۹۲۰۴۸۳۶",
+      "FullName": "مریم کریمی",
+      "service": "پشتیبانی سالانه",
+      "price": "۵۵,۰۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۵,۵۰۰,۰۰۰ تومان",
+      "totalMonths": 10
+    },
+    {
+      "id": "3",
+      "SerialNumber": "۱۹۲۰۴۸۳۷",
+      "FullName": "رضا احمدی",
+      "service": "میزبانی وب",
+      "price": "۱,۲۰۰,۰۰۰ تومان",
+      "status": "لغو-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "4",
+      "SerialNumber": "۱۹۲۰۴۸۳۸",
+      "FullName": "سارا نوروزی",
+      "service": "اپلیکیشن موبایل",
+      "price": "۹۸۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۲۴۵,۰۰۰ تومان",
+      "totalMonths": 4
+    },
+    {
+      "id": "5",
+      "SerialNumber": "۱۹۲۰۴۸۳۹",
+      "FullName": "محمد حسینی",
+      "service": "بهینه‌سازی SEO",
+      "price": "۴۵۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "6",
+      "SerialNumber": "۱۹۲۰۴۸۴۰",
+      "FullName": "فاطمه رضایی",
+      "service": "طراحی گرافیک",
+      "price": "۲,۱۵۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۵۳۷,۵۰۰ تومان",
+      "totalMonths": 4
+    },
+    {
+      "id": "7",
+      "SerialNumber": "۱۹۲۰۴۸۴۱",
+      "FullName": "امیرحسین محمدی",
+      "service": "مشاوره فنی",
+      "price": "۷۵۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۱۸۷,۵۰۰ تومان",
+      "totalMonths": 4
+    },
+    {
+      "id": "d46a",
+      "SerialNumber": "۱۳۴۵۱۳۴۶۱۲۲۱",
+      "FullName": "امیر هوشنگ",
+      "service": "طراحی وب سایت",
+      "price": "۶۵,۳۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۵,۴۴۱,۶۶۶ تومان",
+      "totalMonths": 12
+    }
+  ],
+  "tickets": [
+    {
+      "id": 1,
+      "title": "مشکل در ورود به سیستم",
+      "description": "علی محمدی",
+      "date": "1402/02/15",
+      "time": "۱۰:۳۰ صبح",
+      "type": "ایجاد شده"
+    },
+    {
+      "id": 2,
+      "title": "خرابی پرینتر",
+      "description": "مریم کریمی",
+      "date": "1402/02/15",
+      "time": "۱۱:۴۵ صبح",
+      "type": "به‌روزرسانی شده"
+    },
+    {
+      "id": "4736",
+      "title": "مشکل نرم افزاری",
+      "description": "مشکل 1",
+      "date": "۱۴۰۴/۱۲/۰۲",
+      "time": "۱۴:۴۸",
+      "type": "ایجاد شده",
+      "priority": "medium"
+    },
+    {
+      "id": "e578",
+      "title": "پشتیبان گیری",
+      "description": "تست 3",
+      "date": "۱۴۰۴/۱۲/۰۲",
+      "time": "۱۴:۵۶",
+      "type": "ایجاد شده",
+      "priority": "medium"
+    }
+  ],
+  "financialStats": {
+    "day": {
+      "labels": [
+        "شنبه",
+        "یکشنبه",
+        "دوشنبه",
+        "سه‌شنبه",
+        "چهارشنبه",
+        "پنجشنبه",
+        "جمعه"
+      ],
+      "requests": [
+        400000,
+        300000,
+        550000,
+        250000,
+        350000,
+        450000,
+        600000
+      ],
+      "payments": [
+        250000,
+        200000,
+        300000,
+        150000,
+        250000,
+        350000,
+        400000
+      ],
+      "totalRequests": 1250000,
+      "totalPayments": 850000
+    },
+    "week": {
+      "labels": [
+        "هفته ۱",
+        "هفته ۲",
+        "هفته ۳",
+        "هفته ۴"
+      ],
+      "requests": [
+        1200000,
+        800000,
+        950000,
+        1100000
+      ],
+      "payments": [
+        900000,
+        600000,
+        750000,
+        850000
+      ],
+      "totalRequests": 4500000,
+      "totalPayments": 3200000
+    },
+    "month": {
+      "labels": [
+        "فروردین",
+        "اردیبهشت",
+        "خرداد",
+        "تیر",
+        "مرداد",
+        "شهریور"
+      ],
+      "requests": [
+        4500000,
+        3800000,
+        5200000,
+        4100000,
+        4800000,
+        5500000
+      ],
+      "payments": [
+        3500000,
+        2800000,
+        4200000,
+        3100000,
+        3800000,
+        4500000
+      ],
+      "totalRequests": 18500000,
+      "totalPayments": 12500000
+    }
+  }
+}

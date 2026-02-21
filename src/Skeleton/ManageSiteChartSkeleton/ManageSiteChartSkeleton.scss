@@ -1,0 +1,41 @@
+/* ==================== SKELETON ANIMATIONS ==================== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-loading {
+  .skeleton-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+  }
+
+  .skeleton-title { width: 120px; height: 28px; }
+  .skeleton-button { width: 80px; height: 38px; border-radius: 8px; }
+
+  .skeleton-legend {
+    border: 1px solid var(--color-border-light) !important;
+    background: white !important;
+    .skeleton-circle { width: 16px; height: 16px; border-radius: 4px; }
+    .skeleton-text-short { width: 100px; height: 14px; }
+  }
+
+  .skeleton-y-label { width: 60px; height: 12px; margin-bottom: 5px; }
+  .skeleton-bar-label { width: 40px; height: 14px; margin-bottom: 10px; }
+
+  .skeleton-bar-item {
+    width: 35px;
+    border-radius: 6px 6px 0 0;
+    &.req-bar { height: 150px; opacity: 0.6; }
+    &.pay-bar { height: 100px; opacity: 0.4; }
+  }
+
+  .skeleton-x-label { width: 100px; height: 14px; margin: 0 auto; }
+}
+
+/* Ensure bars align at bottom during loading */
+.skeleton-loading .bars-wrapper {
+  align-items: flex-end;
+}

@@ -1,0 +1,297 @@
+// components/SinglePaymentButton/SinglePaymentButton.scss
+
+/* ==================== FONT IMPORTS ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+/* ==================== PERSIAN NUMBER FONT FEATURE ==================== */
+@font-face {
+  font-family: 'Vazirmatn Persian';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==================== BASE STYLES ==================== */
+.single-payment-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: white;
+  border: 2px solid #6366f1;
+  border-radius: 12px;
+  font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+  min-width: 140px;
+
+  /* RTL specific adjustments */
+  direction: rtl;
+  text-align: center;
+
+  /* Apply Persian numbers to any numeric content */
+  font-feature-settings: "ss02";
+  -webkit-font-feature-settings: "ss02";
+  -moz-font-feature-settings: "ss02";
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, #818cf8, #a5b4fc);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+
+  .payment-icon {
+    font-size: 1.2rem;
+    z-index: 2;
+    transition: transform 0.3s ease;
+    /* Mirror icon for RTL if needed - but payment icon should stay as is */
+  }
+
+  .payment-text {
+    z-index: 2;
+    letter-spacing: 0.5px;
+    /* Ensure proper word spacing for Persian text */
+    word-spacing: 2px;
+  }
+
+  &:hover .payment-icon {
+    transform: scale(1.1);
+  }
+
+  /* Size Variations */
+  &.small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    min-width: 100px;
+    gap: 6px;
+
+    .payment-icon {
+      font-size: 1rem;
+    }
+  }
+
+  &.medium {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  &.large {
+    padding: 14px 20px;
+    font-size: 1rem;
+    min-width: 160px;
+    gap: 12px;
+
+    .payment-icon {
+      font-size: 1.4rem;
+    }
+  }
+
+  /* Disabled State */
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.3);
+  }
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.single-payment-button:not(:active):hover {
+  animation: pulse 0.6s ease-in-out;
+}
+
+/* ==================== RIPPLE EFFECT ==================== */
+.single-payment-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.single-payment-button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(40, 40);
+    opacity: 0;
+  }
+}
+
+/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+[dir="rtl"] {
+  .single-payment-button {
+    /* Ensure proper spacing for RTL text */
+    .payment-icon {
+      margin-left: 4px;
+      margin-right: 0;
+    }
+
+    /* Adjust any RTL-specific padding if needed */
+    &.small {
+      padding: 6px 12px;
+    }
+
+    &.medium {
+      padding: 10px 16px;
+    }
+
+    &.large {
+      padding: 14px 20px;
+    }
+  }
+}
+
+/* ==================== PERSIAN TEXT OPTIMIZATIONS ==================== */
+.single-payment-button .payment-text {
+  /* Better rendering for Persian text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* Ensure proper line height for Persian text */
+  line-height: 1.5;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+  .single-payment-button {
+    min-width: 120px;
+
+    &.medium {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+    }
+
+    .payment-icon {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .single-payment-button {
+    min-width: 100px;
+
+    &.medium {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .payment-text {
+      display: inline-block;
+    }
+  }
+}
+
+/* ==================== DARK MODE SUPPORT ==================== */
+@media (prefers-color-scheme: dark) {
+  .single-payment-button {
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+    }
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  .single-payment-button {
+    box-shadow: none;
+    border: 1px solid #000;
+    color: #000;
+    background: none;
+
+    .payment-icon {
+      color: #000;
+    }
+  }
+}
+
+/* ==================== HIGH CONTRAST MODE SUPPORT ==================== */
+@media (prefers-contrast: high) {
+  .single-payment-button {
+    border: 3px solid #000;
+    background: #6366f1;
+
+    &:hover {
+      background: #4f52e0;
+    }
+  }
+}
+
+/* ==================== REDUCED MOTION SUPPORT ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .single-payment-button {
+    animation: none;
+    transition: none;
+
+    &:hover {
+      transform: none;
+      animation: none;
+    }
+
+    &::after {
+      animation: none;
+    }
+  }
+}

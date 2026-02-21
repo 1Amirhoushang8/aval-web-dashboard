@@ -1,0 +1,56 @@
+/* ==================== ACCOUNTING SKELETON STYLES ==================== */
+
+.skeleton-loading-accounting {
+  margin-top: 1rem;
+
+  // Reuse the shimmer animation logic
+  .skeleton-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer-accounting 1.5s infinite linear;
+  }
+
+  .accounting-card {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+
+    // Head cells styling to match the dashboard look
+    .MuiTableCell-head {
+      background-color: var(--color-bg);
+      color: var(--color-text-medium);
+      font-weight: 700;
+      font-family: 'Vazirmatn', sans-serif;
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    // Body cells styling
+    .MuiTableCell-body {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    // Table Row hover state removed for skeleton
+    .MuiTableRow-root:hover {
+      background-color: transparent;
+    }
+  }
+
+  // Transaction Button container
+  .mydp {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
+@keyframes shimmer-accounting {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Ensure smooth transition in the main page */
+.accounting {
+  animation: slideUp 0.6s ease-out;
+}

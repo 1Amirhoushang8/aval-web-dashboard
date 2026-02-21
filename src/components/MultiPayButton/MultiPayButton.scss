@@ -1,0 +1,396 @@
+// components/MultiPaymentButton/MultiPaymentButton.scss
+
+/* ==================== FONT IMPORTS ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+/* ==================== PERSIAN NUMBER FONT FEATURE ==================== */
+@font-face {
+  font-family: 'Vazirmatn Persian';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==================== BASE STYLES ==================== */
+.multi-payment-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: white;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  min-width: 160px;
+
+  /* RTL specific adjustments */
+  direction: rtl;
+  text-align: center;
+
+  /* Apply Persian numbers to any numeric content */
+  font-feature-settings: "ss02";
+  -webkit-font-feature-settings: "ss02";
+  -moz-font-feature-settings: "ss02";
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, #34d399, #6ee7b7);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+  }
+
+  .payment-icon {
+    font-size: 1.2rem;
+    z-index: 2;
+    transition: transform 0.3s ease;
+    /* Mirror icon for RTL if needed - but calendar icon should stay as is */
+    transform: scaleX(1); /* Keep icon orientation */
+  }
+
+  .payment-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .payment-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    /* Ensure proper word spacing for Persian text */
+    word-spacing: 2px;
+  }
+
+  .monthly-payment {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.9;
+    white-space: nowrap;
+    /* Apply Persian numbers to monthly payment */
+    font-feature-settings: "ss02";
+    -webkit-font-feature-settings: "ss02";
+    -moz-font-feature-settings: "ss02";
+  }
+
+  .total-months {
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+    /* Apply Persian numbers to total months */
+    font-feature-settings: "ss02";
+    -webkit-font-feature-settings: "ss02";
+    -moz-font-feature-settings: "ss02";
+  }
+
+  &:hover .payment-icon {
+    transform: scale(1.1);
+  }
+
+  /* Size Variations */
+  &.small {
+    padding: 6px 12px;
+    min-width: 130px;
+    gap: 6px;
+
+    .payment-icon {
+      font-size: 1rem;
+    }
+
+    .payment-text {
+      font-size: 0.8rem;
+    }
+
+    .monthly-payment {
+      font-size: 0.7rem;
+    }
+
+    .total-months {
+      font-size: 0.65rem;
+    }
+  }
+
+  &.medium {
+    padding: 10px 16px;
+  }
+
+  &.large {
+    padding: 14px 20px;
+    min-width: 180px;
+    gap: 12px;
+
+    .payment-icon {
+      font-size: 1.4rem;
+    }
+
+    .payment-text {
+      font-size: 1rem;
+    }
+
+    .monthly-payment {
+      font-size: 0.85rem;
+    }
+
+    .total-months {
+      font-size: 0.8rem;
+    }
+  }
+
+  /* Disabled State */
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.3);
+  }
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.multi-payment-button:not(:active):hover {
+  animation: pulse 0.6s ease-in-out;
+}
+
+/* ==================== RIPPLE EFFECT ==================== */
+.multi-payment-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.multi-payment-button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(40, 40);
+    opacity: 0;
+  }
+}
+
+/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+[dir="rtl"] {
+  .multi-payment-button {
+    /* Ensure proper spacing for RTL text */
+    .payment-icon {
+      margin-left: 4px;
+      margin-right: 0;
+    }
+
+    .payment-content {
+      text-align: center;
+    }
+
+    /* Adjust any RTL-specific padding if needed */
+    &.small {
+      padding: 6px 12px;
+    }
+
+    &.medium {
+      padding: 10px 16px;
+    }
+
+    &.large {
+      padding: 14px 20px;
+    }
+  }
+}
+
+/* ==================== PERSIAN TEXT OPTIMIZATIONS ==================== */
+.multi-payment-button {
+  .payment-text,
+  .monthly-payment,
+  .total-months {
+    /* Better rendering for Persian text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* Ensure proper line height for Persian text */
+    line-height: 1.5;
+  }
+
+  /* Specific styles for Persian text with numbers */
+  .monthly-payment,
+  .total-months {
+    /* Ensure numbers are properly formatted in Persian */
+    direction: rtl;
+  }
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+  .multi-payment-button {
+    min-width: 140px;
+
+    &.medium {
+      padding: 8px 14px;
+    }
+
+    .payment-icon {
+      font-size: 1rem;
+    }
+
+    .payment-text {
+      font-size: 0.85rem;
+    }
+
+    .monthly-payment {
+      font-size: 0.7rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .multi-payment-button {
+    min-width: 120px;
+
+    &.medium {
+      padding: 6px 12px;
+    }
+
+    .payment-content {
+      align-items: center;
+    }
+
+    .payment-text {
+      font-size: 0.8rem;
+    }
+
+    .monthly-payment {
+      font-size: 0.65rem;
+    }
+
+    .total-months {
+      font-size: 0.6rem;
+    }
+  }
+}
+
+/* ==================== DARK MODE SUPPORT ==================== */
+@media (prefers-color-scheme: dark) {
+  .multi-payment-button {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+    }
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  .multi-payment-button {
+    box-shadow: none;
+    border: 1px solid #000;
+    color: #000;
+    background: none;
+
+    .payment-icon {
+      color: #000;
+    }
+
+    .total-months {
+      background: none;
+      border: 1px solid #ccc;
+    }
+  }
+}
+
+/* ==================== HIGH CONTRAST MODE SUPPORT ==================== */
+@media (prefers-contrast: high) {
+  .multi-payment-button {
+    border: 3px solid #000;
+    background: #10b981;
+
+    &:hover {
+      background: #0e9f6e;
+    }
+
+    .total-months {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid #fff;
+    }
+  }
+}
+
+/* ==================== REDUCED MOTION SUPPORT ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .multi-payment-button {
+    animation: none;
+    transition: none;
+
+    &:hover {
+      transform: none;
+      animation: none;
+    }
+
+    &::after {
+      animation: none;
+    }
+  }
+}

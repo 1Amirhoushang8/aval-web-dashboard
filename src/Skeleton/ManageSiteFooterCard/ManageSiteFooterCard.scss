@@ -1,0 +1,50 @@
+/* ==================== SKELETON ANIMATIONS & STYLES ==================== */
+@keyframes shimmer-summary {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-loading-summary {
+  .skeleton-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer-summary 1.5s infinite linear;
+    border-radius: 6px;
+  }
+
+  /* Filter Section */
+  .skeleton-filter-label { width: 80px; height: 16px; }
+  .skeleton-filter-btn { width: 70px; height: 35px; border-radius: var(--radius-md); }
+
+  /* Cards */
+  .skeleton-card {
+    border-right: 4px solid #eee !important; // Neutral border for skeleton
+    pointer-events: none;
+
+    &::before { display: none; } // Disable the hover effect during loading
+  }
+
+  .skeleton-icon-box {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+
+  .skeleton-text-title { width: 40%; height: 14px; margin-bottom: 8px; }
+  .skeleton-text-value { width: 70%; height: 28px; margin-bottom: 8px; }
+  .skeleton-text-period { width: 30%; height: 12px; }
+}
+
+/* Responsive adjustments for skeleton cards */
+@media (max-width: 600px) {
+  .skeleton-loading-summary {
+    .skeleton-icon-box {
+      width: 50px;
+      height: 50px;
+    }
+    .skeleton-text-value {
+      height: 22px;
+    }
+  }
+}

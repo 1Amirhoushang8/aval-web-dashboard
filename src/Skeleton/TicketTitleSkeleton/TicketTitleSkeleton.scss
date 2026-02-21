@@ -1,0 +1,51 @@
+/* ==================== TICKET TITLE SKELETON STYLES ==================== */
+
+.skeleton-loading-title {
+  pointer-events: none;
+
+  .skeleton-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer-title 1.5s infinite linear;
+    border-radius: 6px;
+  }
+
+  .skeleton-label {
+    width: 100px;
+    height: 18px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    height: 48px; // Matches standard input height
+    border: 1px solid var(--color-border-light, #eee);
+    background: #fff;
+    border-radius: 8px;
+
+    .skeleton-input-text {
+      width: 60%;
+      height: 14px;
+    }
+
+    .dropdown-controls {
+      display: flex;
+      align-items: center;
+
+      .skeleton-arrow {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+@keyframes shimmer-title {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

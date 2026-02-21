@@ -1,0 +1,112 @@
+.sidebar_wrapper {
+  position: fixed;
+  height: 94%;
+  right: 20px;
+  top: 3%;
+  width: 80px;
+  background: linear-gradient(to bottom, #5868DE, #5198FE);
+  border-radius: 20px;
+  padding: 15px;
+  transition: all 0.3s ease;
+  z-index: 999;
+
+  ul {
+    width: 100%;
+
+    li {
+      margin: 10px auto;
+      display: flex;
+      gap: 3rem;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #fff;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .icon {
+    font-size: 22px;
+    min-width: 24px;
+    text-align: center;
+    color: white;
+  }
+
+  .title {
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s;
+    color: white;
+  }
+
+  &:hover {
+    width: 230px;
+
+    .title {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+/* ---------- Mobile Header ---------- */
+.mobile_header {
+  display: none;
+  height: 60px;
+  background: linear-gradient(to bottom, #5868DE, #5198FE);
+  color: white;
+  padding: 0 15px;
+  align-items: center;
+  justify-content: space-between;
+
+  .toggle {
+    font-size: 24px;
+    cursor: pointer;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+  .mobile_header {
+    display: flex;
+  }
+
+  .sidebar_wrapper {
+    height: 89dvh;
+    top: auto;
+    bottom: 1%;
+    transform: translateX(200px); // hide by default
+    width: 230px;
+    position: fixed;
+    right: 0;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+  }
+
+  .res_visible_sidebar {
+    transform: translateX(0); // show sidebar when toggled
+  }
+
+  /* Keep title visible on mobile */
+  .sidebar_wrapper .title {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Disable hover expand effect on mobile */
+  .sidebar_wrapper:hover {
+    width: 230px;
+  }
+}
