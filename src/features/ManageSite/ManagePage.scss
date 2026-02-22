@@ -14,9 +14,11 @@
   --color-warning-light: #fbbf24;
   --color-danger: #ef4444;
   --color-danger-light: #f87171;
+  --color-danger-bg: #fee2e2;
   --color-text-dark: #111827;
   --color-text-medium: #374151;
   --color-text-light: #6b7280;
+  --color-text-lighter: #9ca3af;
   --color-border: #e5e7eb;
   --color-border-light: #f3f4f6;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -169,13 +171,19 @@ body {
     padding: 1.2rem 1.5rem;
     background: #fcfdfe;
     border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     .list-title {
       display: flex;
       align-items: center;
       gap: 0.8rem;
 
-      .title-text { font-weight: 700; color: var(--color-text-dark); }
+      .title-text {
+        font-weight: 700;
+        color: var(--color-text-dark);
+      }
       .ticket-count {
         font-size: 0.8rem;
         background: var(--color-bg);
@@ -184,14 +192,39 @@ body {
         color: var(--color-primary);
       }
     }
+
+    .retry-button-small {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+      border: 1px solid var(--color-danger-light);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+
+      &:hover:not(:disabled) {
+        background: var(--color-danger);
+        color: white;
+        border-color: var(--color-danger);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .retry-icon {
+        font-size: 16px;
+      }
+    }
   }
 
   .ticket-list {
-    /* Updated Grid:
-       Title: 1.5fr
-       Description: 2.8fr (LARGEST WIDTH)
-       Time: 100px (Fixed)
-    */
     .list-header-row, .ticket-item {
       display: grid;
       grid-template-columns: 1.5fr 2.8fr 100px;
@@ -244,6 +277,108 @@ body {
   }
 }
 
+/* ==================== EMPTY STATE ==================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .empty-message {
+    color: var(--color-text-medium);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-hint {
+    color: var(--color-text-lighter);
+    font-size: 0.85rem;
+  }
+}
+
+/* ==================== ERROR STATE ==================== */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: #fff5f5;
+
+  .error-icon {
+    font-size: 3rem;
+    color: var(--color-danger);
+    margin-bottom: 1rem;
+  }
+
+  .error-message {
+    color: var(--color-danger);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-hint {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .retry-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 2rem;
+    background: var(--color-danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+
+    &:hover:not(:disabled) {
+      background: #c53030;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .retry-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+/* ==================== SPINNING ANIMATION ==================== */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -277,5 +412,11 @@ body {
   .ticket-list .list-header-row, .ticket-list .ticket-item {
     grid-template-columns: 1.2fr 1.8fr 80px;
     gap: 0.8rem;
+  }
+
+  .ticket-list-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start !important;
   }
 }

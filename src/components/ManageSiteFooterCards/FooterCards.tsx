@@ -7,7 +7,7 @@ export default function FooterCards() {
     const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month'>('day');
 
     // 1. Fetching data from the same source as the chart
-    const { data: allStats, isLoading, isError } = useQuery({
+    const { data: allStats, isError } = useQuery({
         queryKey: ["financialStats"], // Same key as Chart.tsx for caching
         queryFn: async () => {
             const response = await apiClient.get("/financialStats");
@@ -35,7 +35,7 @@ export default function FooterCards() {
     const currentData = allStats ? allStats[timeFilter] : null;
     const balance = currentData ? currentData.totalRequests - currentData.totalPayments : 0;
 
-    if (isLoading) return <div className="footer-loading">در حال دریافت خلاصه...</div>;
+
     if (isError || !currentData) return null;
 
     return (

@@ -4,13 +4,37 @@ import ManageSiteChartSkeleton from "../../Skeleton/ManageSiteChartSkeleton/Mana
 import FooterCards from "../../components/ManageSiteFooterCards/FooterCards.tsx";
 import FooterCardsSkeleton from "../../Skeleton/ManageSiteFooterCard/ManageSiteFooterCard.tsx";
 import TodayTickets from "../../components/TodayTickets/TodayTickets.tsx";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+
 
 export default function ManageSitePage() {
     const [showTicketList, setShowTicketList] = useState(false);
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: "success" | "error" | "info" | "warning";
+    }>({
+        open: false,
+        message: "",
+        severity: "error",
+    });
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
+
+    const showError = (message: string) => {
+        setSnackbar({
+            open: true,
+            message,
+            severity: "error",
+        });
+    };
 
     // --- Helper: Get Today's Persian Date (YYYY/MM/DD) ---
     const getTodayPersianDate = () => {
@@ -22,16 +46,33 @@ export default function ManageSitePage() {
     };
 
     // --- Fetching Real Data from JSON API ---
-    const { data: tickets = [], isLoading } = useQuery<StoredTicket[]>({
+    const {
+        data: tickets = [],
+        isLoading,
+        isError,
+    } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
-            const response = await apiClient.get("/tickets");
-            return response.data;
-        }
+            try {
+                const response = await apiClient.get("/tickets");
+                return response.data;
+            } catch (err) {
+                throw new Error("مشکل در اتصال به سرور");
+            }
+        },
+        retry: 2,
+        retryDelay: 1000,
     });
 
+    // Show error message if query fails
+    useEffect(() => {
+        if (isError) {
+            const errorMessage = "خطا در دریافت اطلاعات از سرور. لطفاً اتصال اینترنت خود را بررسی کنید.";
+            showError(errorMessage);
+        }
+    }, [isError]);
+
     // --- Filtering Logic: Reset every 24 hours ---
-    // This memoized value ensures the list only contains tickets from the current date
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
         return tickets.filter(ticket => ticket.date === today);
@@ -44,6 +85,8 @@ export default function ManageSitePage() {
     };
 
     const toggleTicketList = () => setShowTicketList(prev => !prev);
+
+
 
     return (
         <div className={`mainchart ${isLoading ? 'is-loading' : ''}`} dir="rtl" style={{ fontFamily: "Vazirmatn, Vazir, system-ui, sans-serif" }}>
@@ -113,8 +156,9 @@ export default function ManageSitePage() {
                                 </div>
                             ))
                         ) : (
-                            <div className="no-data-message">
-                                تیکتی برای امروز ثبت نشده است.
+                            <div className="empty-state">
+                                <div className="empty-icon">📭</div>
+                                <p className="empty-message">تیکتی برای امروز ثبت نشده است.</p>
                             </div>
                         )}
                     </div>
@@ -133,6 +177,41 @@ export default function ManageSitePage() {
                     <FooterCards />
                 </>
             )}
+
+            {/* Improved Error Snackbar with better Farsi message */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={5000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{
+                        width: '100%',
+                        fontFamily: 'Vazirmatn, sans-serif',
+                        direction: 'rtl',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        borderRadius: '12px',
+                        padding: '8px 16px',
+                        '& .MuiAlert-message': {
+                            padding: '8px 0',
+                            fontSize: '0.95rem',
+                            fontWeight: 500
+                        },
+                        '& .MuiAlert-icon': {
+                            fontSize: '24px',
+                            opacity: 0.9
+                        }
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>⚠️</span>
+                        <span>خطا در دریافت اطلاعات. لطفاً دوباره تلاش کنید.</span>
+                    </div>
+                </Alert>
+            </Snackbar>
         </div>
     );
 }

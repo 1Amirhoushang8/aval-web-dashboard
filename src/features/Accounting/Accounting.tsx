@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo,} from "react";
 import React from 'react';
 import SinglePaymentButton from "../../components/SinglePayButton/SinglePayButton.tsx";
 import MultiPaymentButton from "../../components/MultiPayButton/MultiPayButton.tsx";
-import DeleteButton from "../../components/DeleteButton/DeleteButton.tsx";
 import AccountingSkeleton from "../../Skeleton/AccountingSkeleton/AccountingSkeleton.tsx";
 import {
     Table,
@@ -28,8 +27,11 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Snackbar,
+    Alert,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import PaymentIcon from "@mui/icons-material/Payment";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import "./Accounting.scss";
@@ -37,94 +39,134 @@ import "./Accounting.scss";
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface.ts";
 import { userService } from "../../API/UserService.ts";
 
+// -------------------- Utility Functions --------------------
+// Convert Persian/Arabic digits to English digits
+const convertPersianToEnglishDigits = (text: string): string => {
+    if (!text) return '';
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    let result = text;
+    for (let i = 0; i < 10; i++) {
+        result = result.replace(new RegExp(persianDigits[i], 'g'), englishDigits[i]);
+        result = result.replace(new RegExp(arabicDigits[i], 'g'), englishDigits[i]);
+    }
+    return result;
+};
+
+// Normalize Persian text for search: convert Arabic letters to Persian, digits to English, trim, lowercase
+const normalizePersianText = (text: string): string => {
+    if (!text) return '';
+    // Convert Arabic 'ي' to Persian 'ی' and Arabic 'ك' to Persian 'ک'
+    let normalized = text.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
+    // Convert digits to English
+    normalized = convertPersianToEnglishDigits(normalized);
+    // Trim and lowercase (for English parts)
+    return normalized.trim().toLowerCase();
+};
+
+// Convert English numbers to Persian (for display)
+const toPersianNumber = (num: number | string): string => {
+    if (num === null || num === undefined) return '';
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
+};
+
+// Extract only digits from a string (after converting Persian digits to English)
+const extractPriceNumber = (priceString: string): string => {
+    if (!priceString) return "0";
+    const englishString = convertPersianToEnglishDigits(priceString);
+    return englishString.replace(/\D/g, '') || "0";
+};
+
+// Format price with commas and تومان (returns Persian digits)
+const formatPriceWithToman = (priceInput: string): string => {
+    if (!priceInput || priceInput.trim() === '') return "۰ تومان";
+    const numberPart = extractPriceNumber(priceInput);
+    if (numberPart === '0' || numberPart === '') return "۰ تومان";
+    const number = parseInt(numberPart, 10);
+    if (isNaN(number)) return "۰ تومان";
+    const formattedNumber = number.toLocaleString('en-US');
+    return toPersianNumber(formattedNumber) + " تومان";
+};
+
+// Calculate monthly payment (returns Persian formatted string)
+const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): string => {
+    const cleanTotal = extractPriceNumber(totalPrice);
+    const cleanMonths = extractPriceNumber(months);
+    const total = parseInt(cleanTotal) || 0;
+    const monthCount = parseInt(cleanMonths) || 1;
+    if (monthCount === 0 || total === 0) return "۰ تومان";
+    const monthly = Math.floor(total / monthCount);
+    return toPersianNumber(monthly.toLocaleString('en-US')) + " تومان";
+};
+
+// Clean input for processing (convert to English digits and remove non-digits)
+const cleanNumberInput = (value: string): string => {
+    if (!value) return '';
+    return convertPersianToEnglishDigits(value).replace(/\D/g, '');
+};
+
+// Format number with commas for display (returns Persian digits)
+const formatNumberWithCommas = (value: string): string => {
+    if (!value) return '';
+    const cleanValue = cleanNumberInput(value);
+    if (cleanValue === '') return '';
+    const numberValue = parseInt(cleanValue, 10);
+    if (isNaN(numberValue)) return '';
+    const formattedNumber = numberValue.toLocaleString('en-US');
+    return toPersianNumber(formattedNumber);
+};
+
+// -------------------- Main Component --------------------
 export default function AccountingPage() {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    // Fetch users from API on mount
+    // Delete confirmation dialog state
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
+    const showError = (message: string) => setError(message);
+    const handleCloseError = () => setError(null);
+
+    // Fetch users on mount
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await userService.getAll();
-                setUsers(response.data);
+                setUsers(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Failed to fetch users:", error);
-                alert("خطا در دریافت اطلاعات کاربران");
+                showError("خطا در دریافت اطلاعات کاربران");
             } finally {
                 setLoading(false);
             }
         };
-        fetchUsers();
+        fetchUsers().catch(err => console.error("Uncaught error in fetchUsers:", err));
     }, []);
 
-    // Function to convert English numbers to Persian
-    const toPersianNumber = (num: number | string): string => {
-        if (num === null || num === undefined) return '';
-        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
+    // Duplicate serial number check (serialNumber is in Persian digits as stored)
+    const isDuplicateSerialNumber = (serialNumber: string, excludeIndex?: number): boolean => {
+        return users.some((user, idx) =>
+            user.SerialNumber === serialNumber && (excludeIndex === undefined || idx !== excludeIndex)
+        );
     };
 
-    // Function to convert Persian numbers to English
-    const convertPersianToEnglish = (text: string): string => {
-        if (!text) return '';
-        const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    // -------------------- Filtering --------------------
+    const filteredUsers = useMemo(() => {
+        if (!searchTerm.trim()) return users;
+        const term = normalizePersianText(searchTerm);
+        return users.filter(user => {
+            const name = normalizePersianText(user.FullName);
+            return name.includes(term);
+        });
+    }, [users, searchTerm]);
 
-        let result = text;
-
-        // Replace Persian numbers
-        for (let i = 0; i < 10; i++) {
-            const persianRegex = new RegExp(persianNumbers[i], 'g');
-            result = result.replace(persianRegex, englishNumbers[i]);
-        }
-
-        // Replace Arabic numbers
-        for (let i = 0; i < 10; i++) {
-            const arabicRegex = new RegExp(arabicNumbers[i], 'g');
-            result = result.replace(arabicRegex, englishNumbers[i]);
-        }
-
-        return result;
-    };
-
-    // Helper to extract just the number from price string
-    const extractPriceNumber = (priceString: string): string => {
-        if (!priceString) return "0";
-        const englishString = convertPersianToEnglish(priceString);
-        const cleanString = englishString.replace(/\D/g, '');
-        return cleanString || "0";
-    };
-
-    // Calculate monthly payment from total price and months
-    const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): string => {
-        const cleanTotal = extractPriceNumber(totalPrice);
-        const cleanMonths = extractPriceNumber(months);
-
-        const total = parseInt(cleanTotal) || 0;
-        const monthCount = parseInt(cleanMonths) || 1;
-
-        if (monthCount === 0 || total === 0) return "۰ تومان";
-
-        const monthly = Math.floor(total / monthCount);
-        return toPersianNumber(monthly.toLocaleString('en-US')) + " تومان";
-    };
-
-    // Helper function to format price with تومان symbol in Persian numbers
-    const formatPriceWithToman = (priceInput: string): string => {
-        if (!priceInput || priceInput.trim() === '') return "۰ تومان";
-
-        const numberPart = extractPriceNumber(priceInput);
-
-        if (numberPart === '0' || numberPart === '') return "۰ تومان";
-
-        const number = parseInt(numberPart, 10);
-        if (isNaN(number)) return "۰ تومان";
-
-        const formattedNumber = number.toLocaleString('en-US');
-        return toPersianNumber(formattedNumber) + " تومان";
-    };
-
+    // -------------------- State for modals and menus --------------------
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [openModal, setOpenModal] = useState(false);
@@ -138,6 +180,7 @@ export default function AccountingPage() {
         totalMonths: "",
     });
 
+    // New transaction form state
     const [newTransaction, setNewTransaction] = useState({
         serialnumber: "",
         fullname: "",
@@ -149,6 +192,7 @@ export default function AccountingPage() {
         totalMonths: "",
     });
 
+    // Edit transaction form state
     const [editTransaction, setEditTransaction] = useState({
         serialnumber: "",
         fullname: "",
@@ -162,35 +206,13 @@ export default function AccountingPage() {
 
     const open = Boolean(anchorEl);
 
-    // Clean input for processing (convert Persian to English and remove non-digits)
-    const cleanNumberInput = (value: string): string => {
-        if (!value) return '';
-        let englishValue = convertPersianToEnglish(value);
-        englishValue = englishValue.replace(/\D/g, '');
-        return englishValue;
-    };
+    // Placeholders in Persian
+    const pricePlaceholder = toPersianNumber("۱,۰۰۰,۰۰۰");
+    const monthsPlaceholder = toPersianNumber("۴");
 
-    // Format number with commas for display as user types (returns Persian numbers)
-    const formatNumberWithCommas = (value: string): string => {
-        if (!value) return '';
+    // -------------------- Modal Handlers --------------------
+    const handleAddTicket = () => setOpenModal(true);
 
-        const cleanValue = cleanNumberInput(value);
-
-        if (cleanValue === '') return '';
-
-        const numberValue = parseInt(cleanValue, 10);
-        if (isNaN(numberValue)) return '';
-
-        const formattedNumber = numberValue.toLocaleString('en-US');
-        return toPersianNumber(formattedNumber);
-    };
-
-    // Open Add Modal
-    const handleAddTicket = () => {
-        setOpenModal(true);
-    };
-
-    // Open Edit Modal
     const handleEditTicket = (index: number) => {
         const user = users[index];
         setEditTransaction({
@@ -207,49 +229,58 @@ export default function AccountingPage() {
         setEditModal(true);
     };
 
-    // Open Payment Details Modal
+    const handleDeleteClick = (index: number) => {
+        setDeleteIndex(index);
+        setDeleteConfirmOpen(true);
+    };
+
+    const handleCloseDeleteConfirm = () => {
+        setDeleteConfirmOpen(false);
+        setDeleteIndex(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (deleteIndex === null) return;
+        try {
+            const user = users[deleteIndex];
+            await userService.delete(user.id);
+            setUsers(prevUsers => prevUsers.filter((_, i) => i !== deleteIndex));
+            handleCloseDeleteConfirm();
+        } catch (error) {
+            console.error("Failed to delete user:", error);
+            showError("خطا در حذف فاکتور");
+            handleCloseDeleteConfirm();
+        }
+    };
+
     const handleOpenPaymentModal = (index: number) => {
         const user = users[index];
         setActivePaymentIndex(index);
-
-        if (user.paymentType === "پرداخت-دوره-ای") {
-            setPaymentDetails({
-                totalPrice: extractPriceNumber(user.price),
-                totalMonths: user.totalMonths ? user.totalMonths.toString() : "1",
-            });
-        } else {
-            setPaymentDetails({
-                totalPrice: extractPriceNumber(user.price),
-                totalMonths: "1",
-            });
-        }
-
+        setPaymentDetails({
+            totalPrice: extractPriceNumber(user.price),
+            totalMonths: user.totalMonths ? user.totalMonths.toString() : "1",
+        });
         setPaymentModal(true);
     };
 
-    // Open Edit Payment Modal
-    const handleOpenEditPaymentModal = () => {
-        setEditPaymentModal(true);
-    };
-
-    // Close Edit Payment Modal
-    const handleCloseEditPaymentModal = () => {
-        setEditPaymentModal(false);
-    };
-
-    // Close Payment Details Modal
     const handleClosePaymentModal = () => {
         setPaymentModal(false);
         setActivePaymentIndex(null);
     };
 
-    // Save Payment Details - now with API call
+    const handleOpenEditPaymentModal = () => setEditPaymentModal(true);
+    const handleCloseEditPaymentModal = () => setEditPaymentModal(false);
+
     const handleSavePaymentDetails = async () => {
         if (activePaymentIndex === null) return;
+        const user = users[activePaymentIndex];
+        if (!user) {
+            showError("اطلاعات کاربر یافت نشد");
+            return;
+        }
 
         try {
-            const user = users[activePaymentIndex];
-            let updatedUserData: Partial<User> = {};
+            let updatedUserData: Partial<User>;
 
             if (user.paymentType === "پرداخت-دوره-ای") {
                 const totalPriceNum = extractPriceNumber(paymentDetails.totalPrice);
@@ -272,9 +303,7 @@ export default function AccountingPage() {
                 };
             }
 
-            // Call API to update
             const response = await userService.update(user.id, updatedUserData as Omit<User, "id">);
-            // Update local state with response data
             const updatedUsers = [...users];
             updatedUsers[activePaymentIndex] = response.data;
             setUsers(updatedUsers);
@@ -283,11 +312,10 @@ export default function AccountingPage() {
             handleClosePaymentModal();
         } catch (error) {
             console.error("Failed to update payment details:", error);
-            alert("خطا در به‌روزرسانی جزئیات پرداخت");
+            showError("خطا در به‌روزرسانی جزئیات پرداخت");
         }
     };
 
-    // Close Add Modal
     const handleCloseModal = () => {
         setOpenModal(false);
         setNewTransaction({
@@ -302,7 +330,6 @@ export default function AccountingPage() {
         });
     };
 
-    // Close Edit Modal
     const handleCloseEditModal = () => {
         setEditModal(false);
         setEditingIndex(null);
@@ -318,13 +345,18 @@ export default function AccountingPage() {
         });
     };
 
-    // Save New Transaction - with API call
+    // -------------------- Save Handlers --------------------
     const handleSaveTransaction = async () => {
         if (!newTransaction.serialnumber.trim() ||
             !newTransaction.fullname.trim() ||
             !newTransaction.service.trim() ||
             !newTransaction.price.trim()) {
-            alert("لطفاً تمام فیلدهای ضروری را پر کنید");
+            showError("لطفاً تمام فیلدهای ضروری را پر کنید");
+            return;
+        }
+
+        if (isDuplicateSerialNumber(newTransaction.serialnumber)) {
+            showError("شماره فاکتور تکراری است");
             return;
         }
 
@@ -337,16 +369,15 @@ export default function AccountingPage() {
             if (newTransaction.paymentType === "پرداخت-دوره-ای") {
                 const monthsNum = extractPriceNumber(newTransaction.totalMonths);
                 if (!monthsNum || parseInt(monthsNum) < 1) {
-                    alert("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
+                    showError("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                     return;
                 }
-
                 monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsNum);
                 totalMonths = parseInt(monthsNum) || 1;
             }
 
             const newUser: Omit<User, "id"> = {
-                SerialNumber: toPersianNumber(newTransaction.serialnumber),
+                SerialNumber: toPersianNumber(newTransaction.serialnumber), // store in Persian digits
                 FullName: newTransaction.fullname,
                 service: newTransaction.service,
                 price: formattedPrice,
@@ -361,18 +392,22 @@ export default function AccountingPage() {
             handleCloseModal();
         } catch (error) {
             console.error("Failed to create transaction:", error);
-            alert("خطا در ایجاد فاکتور");
+            showError("خطا در ایجاد فاکتور");
         }
     };
 
-    // Save Edited Transaction - with API call
     const handleSaveEditTransaction = async () => {
         if (!editTransaction.serialnumber.trim() ||
             !editTransaction.fullname.trim() ||
             !editTransaction.service.trim() ||
             !editTransaction.price.trim() ||
             editingIndex === null) {
-            alert("لطفاً تمام فیلدهای ضروری را پر کنید");
+            showError("لطفاً تمام فیلدهای ضروری را پر کنید");
+            return;
+        }
+
+        if (isDuplicateSerialNumber(editTransaction.serialnumber, editingIndex)) {
+            showError("شماره فاکتور تکراری است");
             return;
         }
 
@@ -385,10 +420,9 @@ export default function AccountingPage() {
             if (editTransaction.paymentType === "پرداخت-دوره-ای") {
                 const monthsNum = extractPriceNumber(editTransaction.totalMonths);
                 if (!monthsNum || parseInt(monthsNum) < 1) {
-                    alert("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
+                    showError("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                     return;
                 }
-
                 monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsNum);
                 totalMonths = parseInt(monthsNum) || 1;
             }
@@ -412,91 +446,54 @@ export default function AccountingPage() {
             handleCloseEditModal();
         } catch (error) {
             console.error("Failed to update transaction:", error);
-            alert("خطا در ویرایش فاکتور");
+            showError("خطا در ویرایش فاکتور");
         }
     };
 
-    // Handle Input Changes
+    // -------------------- Input Change Handlers --------------------
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-
         if (name === 'price' || name === 'monthlyPayment') {
-            const formattedValue = formatNumberWithCommas(value);
-            setNewTransaction(prev => ({
-                ...prev,
-                [name]: formattedValue
-            }));
+            setNewTransaction(prev => ({ ...prev, [name]: formatNumberWithCommas(value) }));
         } else if (name === 'serialnumber' || name === 'totalMonths') {
-            setNewTransaction(prev => ({
-                ...prev,
-                [name]: toPersianNumber(convertPersianToEnglish(value))
-            }));
+            setNewTransaction(prev => ({ ...prev, [name]: toPersianNumber(convertPersianToEnglishDigits(value)) }));
         } else {
-            setNewTransaction(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            setNewTransaction(prev => ({ ...prev, [name]: value }));
         }
     };
 
-    // Handle Edit Input Changes
     const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-
         if (name === 'price' || name === 'monthlyPayment') {
-            const formattedValue = formatNumberWithCommas(value);
-            setEditTransaction(prev => ({
-                ...prev,
-                [name]: formattedValue
-            }));
+            setEditTransaction(prev => ({ ...prev, [name]: formatNumberWithCommas(value) }));
         } else if (name === 'serialnumber' || name === 'totalMonths') {
-            setEditTransaction(prev => ({
-                ...prev,
-                [name]: toPersianNumber(convertPersianToEnglish(value))
-            }));
+            setEditTransaction(prev => ({ ...prev, [name]: toPersianNumber(convertPersianToEnglishDigits(value)) }));
         } else {
-            setEditTransaction(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            setEditTransaction(prev => ({ ...prev, [name]: value }));
         }
     };
 
-    // Handle Payment Details Changes
     const handlePaymentDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-
         if (name === 'totalPrice') {
-            const formattedValue = formatNumberWithCommas(value);
-            setPaymentDetails(prev => ({
-                ...prev,
-                [name]: formattedValue
-            }));
+            setPaymentDetails(prev => ({ ...prev, [name]: formatNumberWithCommas(value) }));
         } else if (name === 'totalMonths') {
-            setPaymentDetails(prev => ({
-                ...prev,
-                [name]: toPersianNumber(convertPersianToEnglish(value))
-            }));
+            setPaymentDetails(prev => ({ ...prev, [name]: toPersianNumber(convertPersianToEnglishDigits(value)) }));
         } else {
-            setPaymentDetails(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            setPaymentDetails(prev => ({ ...prev, [name]: value }));
         }
     };
 
     const handleStatusChangeForm = (e: SelectChangeEvent<User["status"]>) => {
-        setNewTransaction(prev => ({
-            ...prev,
-            status: e.target.value as User["status"]
-        }));
+        setNewTransaction(prev => ({ ...prev, status: e.target.value as User["status"] }));
     };
 
     const handleEditStatusChangeForm = (e: SelectChangeEvent<User["status"]>) => {
-        setEditTransaction(prev => ({
-            ...prev,
-            status: e.target.value as User["status"]
-        }));
+        setEditTransaction(prev => ({ ...prev, status: e.target.value as User["status"] }));
     };
 
     const handlePaymentTypeChangeForm = (e: SelectChangeEvent<User["paymentType"]>) => {
@@ -519,11 +516,8 @@ export default function AccountingPage() {
         }));
     };
 
-    // Quick Status Change Menu
-    const handleOpenMenu = (
-        event: React.MouseEvent<HTMLButtonElement>,
-        index: number
-    ) => {
+    // Quick status change menu
+    const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, index: number) => {
         setAnchorEl(event.currentTarget);
         setActiveIndex(index);
     };
@@ -535,7 +529,6 @@ export default function AccountingPage() {
 
     const handleStatusChange = async (status: User["status"]) => {
         if (activeIndex === null) return;
-
         try {
             const user = users[activeIndex];
             const updatedUser = { ...user, status };
@@ -545,28 +538,13 @@ export default function AccountingPage() {
             setUsers(updatedUsers);
         } catch (error) {
             console.error("Failed to update status:", error);
-            alert("خطا در تغییر وضعیت");
+            showError("خطا در تغییر وضعیت");
         } finally {
             handleCloseMenu();
         }
     };
 
-    const handleDeleteItem = async (index: number) => {
-        try {
-            const user = users[index];
-            await userService.delete(user.id);
-            setUsers(prevUsers => prevUsers.filter((_, i) => i !== index));
-        } catch (error) {
-            console.error("Failed to delete user:", error);
-            alert("خطا در حذف فاکتور");
-        }
-    };
-
-    // Persian placeholders
-    const pricePlaceholder = toPersianNumber("۱,۰۰۰,۰۰۰");
-    const monthsPlaceholder = toPersianNumber("۴");
-
-    // Show skeleton while loading
+    // -------------------- Render --------------------
     if (loading) {
         return <AccountingSkeleton />;
     }
@@ -574,156 +552,88 @@ export default function AccountingPage() {
     return (
         <div className="accounting" dir="rtl">
 
-            {/* Add Transaction Button */}
-            <div className="mydp">
-                <div className="dropdown">
-                    <button
-                        className="btn btn-primary"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        +
-                    </button>
-                    <ul className="dropdown-menu">
-                        <li>
-                            <a
-                                className="dropdown-item"
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleAddTicket();
-                                }}
-                            >
-                                ایجاد فاکتور جدید
-                            </a>
-                        </li>
-                    </ul>
+            {/* Header with plus button and search bar */}
+            <div className="accounting-header">
+                <div className="search-bar">
+                    <TextField
+                        variant="outlined"
+                        placeholder="جستجو بر اساس نام ..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        size="small"
+                        fullWidth
+                        sx={{
+                            '& .MuiInputBase-input': { textAlign: 'right' },
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 'var(--radius-md)',
+                                backgroundColor: 'var(--color-white)',
+                            }
+                        }}
+                    />
+                </div>
+
+                <div className="mydp">
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-primary"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            +
+                        </button>
+                        <ul className="dropdown-menu">
+                            <li>
+                                <a
+                                    className="dropdown-item"
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleAddTicket();
+                                    }}
+                                >
+                                    ایجاد فاکتور جدید
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
             {/* Add New Transaction Modal */}
-            <Modal
-                open={openModal}
-                onClose={handleCloseModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
+            <Modal open={openModal} onClose={handleCloseModal}>
                 <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 450,
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    borderRadius: 2,
-                    direction: 'rtl'
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                    width: 450, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2, direction: 'rtl'
                 }}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ mb: 3, textAlign: 'center' }}>
-                        ایجاد فاکتور جدید
-                    </Typography>
-
-                    <Box component="form" sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                        '& .MuiInputLabel-root': {
-                            right: 25,
-                            left: 'auto',
-                            transformOrigin: 'top right',
-                        },
-                        '& .MuiInputLabel-shrink': {
-                            transform: 'translate(0, -9px) scale(0.75)',
-                        },
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                textAlign: 'right',
-                            },
-                        },
-                        '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                        }
-                    }}>
-                        <TextField
-                            label="شماره فاکتور"
-                            name="serialnumber"
-                            value={newTransaction.serialnumber}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
-                            slotProps={{
-                                htmlInput: { inputMode: 'numeric' }
-                            }}
-                        />
-
-                        <TextField
-                            label="نام کامل مشتری"
-                            name="fullname"
-                            value={newTransaction.fullname}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            placeholder="نام و نام خانوادگی"
-                        />
-
-                        <TextField
-                            label="خدمت/سرویس"
-                            name="service"
-                            value={newTransaction.service}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید"
-                        />
-
-                        <TextField
-                            label="مبلغ کل (تومان)"
-                            name="price"
-                            value={newTransaction.price}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            placeholder={`مثال: ${pricePlaceholder}`}
-                            helperText="مبلغ کل را به تومان وارد کنید"
-                            sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
-                            slotProps={{
-                                htmlInput: { inputMode: 'numeric' }
-                            }}
-                        />
-
+                    <Typography variant="h6" sx={{ mb: 3, textAlign: 'center' }}>ایجاد فاکتور جدید</Typography>
+                    <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField label="شماره فاکتور" name="serialnumber" value={newTransaction.serialnumber}
+                                   onChange={handleInputChange} fullWidth required placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
+                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                        <TextField label="نام کامل مشتری" name="fullname" value={newTransaction.fullname}
+                                   onChange={handleInputChange} fullWidth required placeholder="نام و نام خانوادگی" />
+                        <TextField label="خدمت/سرویس" name="service" value={newTransaction.service}
+                                   onChange={handleInputChange} fullWidth required placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید" />
+                        <TextField label="مبلغ کل (تومان)" name="price" value={newTransaction.price}
+                                   onChange={handleInputChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
+                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
                         <FormControl fullWidth required>
                             <InputLabel id="payment-type-label">نوع پرداخت</InputLabel>
-                            <Select
-                                labelId="payment-type-label"
-                                name="paymentType"
-                                value={newTransaction.paymentType}
-                                label="نوع پرداخت"
-                                onChange={handlePaymentTypeChangeForm}
-                            >
+                            <Select labelId="payment-type-label" value={newTransaction.paymentType}
+                                    label="نوع پرداخت" onChange={handlePaymentTypeChangeForm}>
                                 <MenuItem value="پرداخت-تکی">پرداخت تکی</MenuItem>
                                 <MenuItem value="پرداخت-دوره-ای">پرداخت دوره ای</MenuItem>
                             </Select>
                         </FormControl>
-
                         {newTransaction.paymentType === "پرداخت-دوره-ای" && (
                             <>
-                                <TextField
-                                    label="تعداد ماه‌ها"
-                                    name="totalMonths"
-                                    value={newTransaction.totalMonths}
-                                    onChange={handleInputChange}
-                                    fullWidth
-                                    required
-                                    placeholder={`مثال: ${monthsPlaceholder}`}
-                                    helperText="تعداد ماه‌های پرداخت را وارد کنید"
-                                    sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
-                                    slotProps={{
-                                        htmlInput: { inputMode: 'numeric' }
-                                    }}
-                                />
+                                <TextField label="تعداد ماه‌ها" name="totalMonths" value={newTransaction.totalMonths}
+                                           onChange={handleInputChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`}
+                                           helperText="تعداد ماه‌های پرداخت را وارد کنید"
+                                           sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
+                                           slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
                                 {newTransaction.price && newTransaction.totalMonths && (
                                     <Typography variant="body2" sx={{ color: 'success.main', textAlign: 'center' }}>
                                         پرداخت ماهیانه: {calculateMonthlyPaymentPersian(newTransaction.price, newTransaction.totalMonths)}
@@ -731,616 +641,179 @@ export default function AccountingPage() {
                                 )}
                             </>
                         )}
-
                         <FormControl fullWidth required>
                             <InputLabel id="status-label">وضعیت</InputLabel>
-                            <Select
-                                labelId="status-label"
-                                name="status"
-                                value={newTransaction.status}
-                                label="وضعیت"
-                                onChange={handleStatusChangeForm}
-                            >
+                            <Select labelId="status-label" value={newTransaction.status}
+                                    label="وضعیت" onChange={handleStatusChangeForm}>
                                 <MenuItem value="درحال-انجام">درحال انجام</MenuItem>
                                 <MenuItem value="پرداخت-شده">پرداخت شده</MenuItem>
                                 <MenuItem value="لغو-شده">لغو شده</MenuItem>
                             </Select>
                         </FormControl>
-
                         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                            <Button
-                                variant="contained"
-                                onClick={handleSaveTransaction}
-                                fullWidth
-                                sx={{ backgroundColor: '#1976d2' }}
-                            >
-                                ذخیره
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                onClick={handleCloseModal}
-                                fullWidth
-                                sx={{ borderColor: '#1976d2', color: '#1976d2' }}
-                            >
-                                انصراف
-                            </Button>
+                            <Button variant="contained" onClick={handleSaveTransaction} fullWidth>ذخیره</Button>
+                            <Button variant="outlined" onClick={handleCloseModal} fullWidth>انصراف</Button>
                         </Box>
                     </Box>
                 </Box>
             </Modal>
 
             {/* Edit Transaction Modal */}
-            <Modal
-                open={editModal}
-                onClose={handleCloseEditModal}
-                aria-labelledby="edit-modal-title"
-                aria-describedby="edit-modal-description"
-            >
+            <Modal open={editModal} onClose={handleCloseEditModal}>
                 <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 450,
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    borderRadius: 2,
-                    direction: 'rtl'
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                    width: 450, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2, direction: 'rtl'
                 }}>
-                    <Typography id="edit-modal-title" variant="h6" component="h2" sx={{ mb: 3, textAlign: 'center', fontWeight: 700 }}>
-                        ویرایش فاکتور
-                    </Typography>
-
+                    <Typography variant="h6" sx={{ mb: 3, textAlign: 'center', fontWeight: 700 }}>ویرایش فاکتور</Typography>
                     <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {(() => {
-                            const rtlTextFieldSx = {
-                                '& .MuiInputLabel-root': {
-                                    right: 16,
-                                    left: 'auto',
-                                    transformOrigin: 'top right',
-                                },
-                                '& .MuiInputLabel-shrink': {
-                                    transform: 'translate(0, -9px) scale(0.75)',
-                                },
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        textAlign: 'right',
-                                    },
-                                },
-                                '& .MuiInputBase-input': {
-                                    textAlign: 'right',
-                                }
-                            };
-
-                            return (
-                                <>
-                                    <TextField
-                                        label="شماره فاکتور"
-                                        name="serialnumber"
-                                        value={editTransaction.serialnumber}
-                                        onChange={handleEditInputChange}
-                                        fullWidth
-                                        required
-                                        placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
-                                        sx={rtlTextFieldSx}
-                                        slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-                                    />
-
-                                    <TextField
-                                        label="نام کامل مشتری"
-                                        name="fullname"
-                                        value={editTransaction.fullname}
-                                        onChange={handleEditInputChange}
-                                        fullWidth
-                                        required
-                                        placeholder="نام و نام خانوادگی"
-                                        sx={rtlTextFieldSx}
-                                    />
-
-                                    <TextField
-                                        label="خدمت/سرویس"
-                                        name="service"
-                                        value={editTransaction.service}
-                                        onChange={handleEditInputChange}
-                                        fullWidth
-                                        required
-                                        placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید"
-                                        sx={rtlTextFieldSx}
-                                    />
-
-                                    <TextField
-                                        label="مبلغ کل (تومان)"
-                                        name="price"
-                                        value={editTransaction.price}
-                                        onChange={handleEditInputChange}
-                                        fullWidth
-                                        required
-                                        placeholder={`مثال: ${pricePlaceholder}`}
-                                        helperText="مبلغ کل را به تومان وارد کنید"
-                                        sx={{
-                                            ...rtlTextFieldSx,
-                                            '& .MuiFormHelperText-root': { textAlign: 'right' }
-                                        }}
-                                        slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-                                    />
-
-                                    <FormControl fullWidth required sx={rtlTextFieldSx}>
-                                        <InputLabel id="payment-type-label">نوع پرداخت</InputLabel>
-                                        <Select
-                                            labelId="payment-type-label"
-                                            name="paymentType"
-                                            value={editTransaction.paymentType}
-                                            label="نوع پرداخت"
-                                            onChange={handleEditPaymentTypeChangeForm}
-                                            sx={{ textAlign: 'right' }}
-                                        >
-                                            <MenuItem value="پرداخت-تکی">پرداخت تکی</MenuItem>
-                                            <MenuItem value="پرداخت-دوره-ای">پرداخت دوره ای</MenuItem>
-                                        </Select>
-                                    </FormControl>
-
-                                    {editTransaction.paymentType === "پرداخت-دوره-ای" && (
-                                        <>
-                                            <TextField
-                                                label="تعداد ماه‌ها"
-                                                name="totalMonths"
-                                                value={editTransaction.totalMonths}
-                                                onChange={handleEditInputChange}
-                                                fullWidth
-                                                required
-                                                placeholder={`مثال: ${monthsPlaceholder}`}
-                                                sx={rtlTextFieldSx}
-                                                slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-                                            />
-                                            {editTransaction.price && editTransaction.totalMonths && (
-                                                <Typography variant="body2" sx={{ color: 'success.main', textAlign: 'center' }}>
-                                                    پرداخت ماهیانه: {calculateMonthlyPaymentPersian(editTransaction.price, editTransaction.totalMonths)}
-                                                </Typography>
-                                            )}
-                                        </>
-                                    )}
-
-                                    <FormControl fullWidth required sx={rtlTextFieldSx}>
-                                        <InputLabel id="status-label">وضعیت</InputLabel>
-                                        <Select
-                                            labelId="status-label"
-                                            name="status"
-                                            value={editTransaction.status}
-                                            label="وضعیت"
-                                            onChange={handleEditStatusChangeForm}
-                                            sx={{ textAlign: 'right' }}
-                                        >
-                                            <MenuItem value="درحال-انجام">درحال انجام</MenuItem>
-                                            <MenuItem value="پرداخت-شده">پرداخت شده</MenuItem>
-                                            <MenuItem value="لغو-شده">لغو شده</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </>
-                            );
-                        })()}
-
+                        <TextField label="شماره فاکتور" name="serialnumber" value={editTransaction.serialnumber}
+                                   onChange={handleEditInputChange} fullWidth required placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
+                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                        <TextField label="نام کامل مشتری" name="fullname" value={editTransaction.fullname}
+                                   onChange={handleEditInputChange} fullWidth required placeholder="نام و نام خانوادگی" />
+                        <TextField label="خدمت/سرویس" name="service" value={editTransaction.service}
+                                   onChange={handleEditInputChange} fullWidth required placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید" />
+                        <TextField label="مبلغ کل (تومان)" name="price" value={editTransaction.price}
+                                   onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
+                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                        <FormControl fullWidth required>
+                            <InputLabel id="edit-payment-type-label">نوع پرداخت</InputLabel>
+                            <Select labelId="edit-payment-type-label" value={editTransaction.paymentType}
+                                    label="نوع پرداخت" onChange={handleEditPaymentTypeChangeForm}>
+                                <MenuItem value="پرداخت-تکی">پرداخت تکی</MenuItem>
+                                <MenuItem value="پرداخت-دوره-ای">پرداخت دوره ای</MenuItem>
+                            </Select>
+                        </FormControl>
+                        {editTransaction.paymentType === "پرداخت-دوره-ای" && (
+                            <>
+                                <TextField label="تعداد ماه‌ها" name="totalMonths" value={editTransaction.totalMonths}
+                                           onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`}
+                                           slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                                {editTransaction.price && editTransaction.totalMonths && (
+                                    <Typography variant="body2" sx={{ color: 'success.main', textAlign: 'center' }}>
+                                        پرداخت ماهیانه: {calculateMonthlyPaymentPersian(editTransaction.price, editTransaction.totalMonths)}
+                                    </Typography>
+                                )}
+                            </>
+                        )}
+                        <FormControl fullWidth required>
+                            <InputLabel id="edit-status-label">وضعیت</InputLabel>
+                            <Select labelId="edit-status-label" value={editTransaction.status}
+                                    label="وضعیت" onChange={handleEditStatusChangeForm}>
+                                <MenuItem value="درحال-انجام">درحال انجام</MenuItem>
+                                <MenuItem value="پرداخت-شده">پرداخت شده</MenuItem>
+                                <MenuItem value="لغو-شده">لغو شده</MenuItem>
+                            </Select>
+                        </FormControl>
                         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                            <Button
-                                variant="contained"
-                                onClick={handleSaveEditTransaction}
-                                fullWidth
-                                sx={{ backgroundColor: '#10b981', '&:hover': { backgroundColor: '#059669' } }}
-                            >
-                                ذخیره تغییرات
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                onClick={handleCloseEditModal}
-                                fullWidth
-                                sx={{ borderColor: '#ef4444', color: '#ef4444' }}
-                            >
-                                انصراف
-                            </Button>
+                            <Button variant="contained" onClick={handleSaveEditTransaction} fullWidth sx={{ backgroundColor: '#10b981' }}>ذخیره تغییرات</Button>
+                            <Button variant="outlined" onClick={handleCloseEditModal} fullWidth sx={{ borderColor: '#ef4444', color: '#ef4444' }}>انصراف</Button>
                         </Box>
                     </Box>
                 </Box>
             </Modal>
 
             {/* Payment Details Modal */}
-            <Dialog
-                open={paymentModal}
-                onClose={handleClosePaymentModal}
-                aria-labelledby="payment-details-title"
-                maxWidth="sm"
-                fullWidth
-                slotProps={{
-                    paper: {
-                        sx: {
-                            borderRadius: 'var(--radius-lg)',
-                            fontFamily: '"Vazirmatn", "Vazirmatn Persian", sans-serif !important',
-                            direction: 'rtl'
-                        }
-                    }
-                }}
-            >
-                <DialogTitle
-                    id="payment-details-title"
-                    sx={{
-                        textAlign: 'center',
-                        fontWeight: 700,
-                        color: 'var(--color-text-dark)',
-                        borderBottom: '2px solid var(--color-border)',
-                        paddingBottom: 'var(--spacing-sm)'
-                    }}
-                >
-                    جزئیات پرداخت
-                </DialogTitle>
-
-                <DialogContent
-                    sx={{
-                        textAlign: 'right',
-                        padding: 'var(--spacing-md) var(--spacing-lg)',
-                        direction: 'rtl'
-                    }}
-                >
-                    {activePaymentIndex !== null && (
+            <Dialog open={paymentModal} onClose={handleClosePaymentModal} maxWidth="sm" fullWidth
+                    slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>جزئیات پرداخت</DialogTitle>
+                <DialogContent>
+                    {activePaymentIndex !== null && users[activePaymentIndex] && (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
                             <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
-                                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                                    {users[activePaymentIndex].FullName}
-                                </Typography>
-                                <Typography variant="body1" color="text.secondary">
-                                    {users[activePaymentIndex].service}
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>{users[activePaymentIndex].FullName}</Typography>
+                                <Typography color="text.secondary">{users[activePaymentIndex].service}</Typography>
+                            </Box>
+                            <Box><Typography fontWeight="bold">مبلغ کل:</Typography><Typography variant="h6" color="primary">{users[activePaymentIndex].price}</Typography></Box>
+                            <Box><Typography fontWeight="bold">نوع پرداخت:</Typography>
+                                <Typography className={`payment-type ${users[activePaymentIndex].paymentType}`} sx={{ display: 'inline-block', p: '4px 12px', borderRadius: '20px', fontWeight: 'bold', mt: 1 }}>
+                                    {users[activePaymentIndex].paymentType === "پرداخت-تکی" ? "پرداخت تکی" : "پرداخت دوره ای"}
                                 </Typography>
                             </Box>
-
-                            <Box sx={{ textAlign: 'right' }}>
-                                <Typography variant="body1" fontWeight="bold">
-                                    مبلغ کل:
-                                </Typography>
-                                <Typography variant="h6" color="primary">
-                                    {users[activePaymentIndex].price}
-                                </Typography>
-                            </Box>
-
-                            <Box sx={{ textAlign: 'right' }}>
-                                <Typography variant="body1" fontWeight="bold">
-                                    نوع پرداخت:
-                                </Typography>
-                                <Typography
-                                    className={`payment-type ${users[activePaymentIndex].paymentType}`}
-                                    sx={{
-                                        display: 'inline-block',
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        fontWeight: 'bold',
-                                        mt: 1
-                                    }}
-                                >
-                                    {users[activePaymentIndex].paymentType === "پرداخت-تکی"
-                                        ? "پرداخت تکی"
-                                        : "پرداخت دوره ای"}
-                                </Typography>
-                            </Box>
-
                             {users[activePaymentIndex].paymentType === "پرداخت-تکی" && (
-                                <Box sx={{
-                                    p: 3,
-                                    bgcolor: '#e3f2fd',
-                                    borderRadius: 2,
-                                    textAlign: 'center',
-                                    border: '1px solid #bbdefb',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: 2
-                                }}>
-                                    <Box sx={{
-                                        width: 56,
-                                        height: 56,
-                                        borderRadius: '50%',
-                                        backgroundColor: '#1976d2',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
+                                <Box sx={{ p: 3, bgcolor: '#e3f2fd', borderRadius: 2, textAlign: 'center', border: '1px solid #bbdefb' }}>
+                                    <Box sx={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#1976d2', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
                                         <PaymentIcon sx={{ fontSize: 32, color: 'white' }} />
                                     </Box>
-                                    <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-                                        پرداخت یکجا
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        این فاکتور به صورت یکجا پرداخت می‌شود
-                                    </Typography>
+                                    <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>پرداخت یکجا</Typography>
+                                    <Typography variant="body2" color="text.secondary">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
                                 </Box>
                             )}
-
                             {users[activePaymentIndex].paymentType === "پرداخت-دوره-ای" && (
-                                <Box sx={{
-                                    p: 3,
-                                    bgcolor: '#e8f5e9',
-                                    borderRadius: 2,
-                                    textAlign: 'center',
-                                    border: '1px solid #c8e6c9',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: 2
-                                }}>
-                                    <Box sx={{
-                                        width: 56,
-                                        height: 56,
-                                        borderRadius: '50%',
-                                        backgroundColor: '#10b981',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
+                                <Box sx={{ p: 3, bgcolor: '#e8f5e9', borderRadius: 2, textAlign: 'center', border: '1px solid #c8e6c9' }}>
+                                    <Box sx={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
                                         <CalendarTodayIcon sx={{ fontSize: 32, color: 'white' }} />
                                     </Box>
-                                    <Typography variant="h6" sx={{ color: '#059669', fontWeight: 'bold' }}>
-                                        پرداخت دوره ای
-                                    </Typography>
-                                    <Box sx={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: 1.5,
-                                        width: '100%',
-                                        maxWidth: '320px'
-                                    }}>
-                                        <Box sx={{
-                                            p: 1.5,
-                                            bgcolor: 'white',
-                                            borderRadius: 1,
-                                            border: '1px solid #e0e0e0',
-                                            textAlign: 'right'
-                                        }}>
-                                            <Typography fontWeight="bold">
-                                                <Box component="span">تعداد اقساط:</Box>
-                                                <Box component="span" sx={{ mr: 1 }}>
-                                                    {toPersianNumber(users[activePaymentIndex].totalMonths || 0)} ماه
-                                                </Box>
-                                            </Typography>
+                                    <Typography variant="h6" sx={{ color: '#059669', fontWeight: 'bold' }}>پرداخت دوره ای</Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: '100%', maxWidth: '320px', mx: 'auto', mt: 2 }}>
+                                        <Box sx={{ p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', textAlign: 'right' }}>
+                                            <Typography fontWeight="bold">تعداد اقساط: <Box component="span" sx={{ mr: 1 }}>{toPersianNumber(users[activePaymentIndex].totalMonths || 0)} ماه</Box></Typography>
                                         </Box>
-                                        <Box sx={{
-                                            p: 1.5,
-                                            bgcolor: 'white',
-                                            borderRadius: 1,
-                                            border: '1px solid #e0e0e0',
-                                            textAlign: 'right'
-                                        }}>
-                                            <Typography fontWeight="bold" color="success.main">
-                                                <Box component="span">مبلغ هر قسط:</Box>
-                                                <Box component="span" sx={{ mr: 1 }}>
-                                                    {users[activePaymentIndex].monthlyPayment || '۰ تومان'}
-                                                </Box>
-                                            </Typography>
+                                        <Box sx={{ p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #e0e0e0', textAlign: 'right' }}>
+                                            <Typography fontWeight="bold" color="success.main">مبلغ هر قسط: <Box component="span" sx={{ mr: 1 }}>{users[activePaymentIndex].monthlyPayment || '۰ تومان'}</Box></Typography>
                                         </Box>
-                                        <Box sx={{
-                                            p: 1.5,
-                                            bgcolor: '#f1f8e9',
-                                            borderRadius: 1,
-                                            border: '1px solid #aed581',
-                                            textAlign: 'right'
-                                        }}>
-                                            <Typography fontWeight="bold" color="success.dark">
-                                                <Box component="span">مبلغ کل:</Box>
-                                                <Box component="span" sx={{ mr: 1 }}>
-                                                    {users[activePaymentIndex].price}
-                                                </Box>
-                                            </Typography>
+                                        <Box sx={{ p: 1.5, bgcolor: '#f1f8e9', borderRadius: 1, border: '1px solid #aed581', textAlign: 'right' }}>
+                                            <Typography fontWeight="bold" color="success.dark">مبلغ کل: <Box component="span" sx={{ mr: 1 }}>{users[activePaymentIndex].price}</Box></Typography>
                                         </Box>
                                     </Box>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                        این فاکتور به صورت اقساطی پرداخت می‌شود
-                                    </Typography>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleOpenEditPaymentModal}
-                                        sx={{
-                                            mt: 2,
-                                            borderColor: '#10b981',
-                                            color: '#10b981',
-                                            '&:hover': {
-                                                borderColor: '#059669',
-                                                backgroundColor: 'rgba(16, 185, 129, 0.1)'
-                                            }
-                                        }}
-                                    >
-                                        ویرایش جزئیات پرداخت
-                                    </Button>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>این فاکتور به صورت اقساطی پرداخت می‌شود</Typography>
+                                    <Button variant="outlined" onClick={handleOpenEditPaymentModal} sx={{ mt: 2, borderColor: '#10b981', color: '#10b981' }}>ویرایش جزئیات پرداخت</Button>
                                 </Box>
                             )}
                         </Box>
                     )}
                 </DialogContent>
-
                 <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-                    <Button
-                        onClick={handleClosePaymentModal}
-                        variant="outlined"
-                        sx={{
-                            borderColor: '#1976d2',
-                            color: '#1976d2'
-                        }}
-                    >
-                        بستن
-                    </Button>
+                    <Button onClick={handleClosePaymentModal} variant="outlined">بستن</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Edit Payment Details Modal */}
-            <Dialog
-                open={editPaymentModal}
-                onClose={handleCloseEditPaymentModal}
-                aria-labelledby="edit-payment-details-title"
-                maxWidth="sm"
-                fullWidth
-                slotProps={{
-                    paper: {
-                        sx: {
-                            borderRadius: 'var(--radius-lg)',
-                            fontFamily: '"Vazirmatn", "Vazirmatn Persian", sans-serif !important',
-                            direction: 'rtl'
-                        }
-                    }
-                }}
-            >
-                <DialogTitle
-                    id="edit-payment-details-title"
-                    sx={{
-                        textAlign: 'center',
-                        fontWeight: 700,
-                        color: 'var(--color-text-dark)',
-                        borderBottom: '2px solid var(--color-border)',
-                        paddingBottom: 'var(--spacing-sm)'
-                    }}
-                >
-                    ویرایش جزئیات پرداخت
-                </DialogTitle>
-
-                <DialogContent
-                    sx={{
-                        textAlign: 'right',
-                        padding: 'var(--spacing-md) var(--spacing-lg)',
-                    }}
-                >
+            <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
+                    slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
+                <DialogContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ textAlign: 'center' }}
-                        >
-                            اطلاعات مربوط به پرداخت را ویرایش کنید
-                        </Typography>
-
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            <TextField
-                                variant="outlined"
-                                label="مبلغ کل (تومان)"
-                                name="totalPrice"
-                                value={paymentDetails.totalPrice}
-                                onChange={handlePaymentDetailsChange}
-                                fullWidth
-                                required
-                                placeholder={`مثال: ${pricePlaceholder}`}
-                                helperText="مبلغ کل را به تومان وارد کنید"
-                                sx={{
-                                    '& .MuiInputBase-input': {
-                                        textAlign: 'right',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        right: 25,
-                                        left: 'auto',
-                                        transformOrigin: 'top right',
-                                    },
-                                    '& .MuiInputLabel-shrink': {
-                                        transform: 'translate(0, -9px) scale(0.75)',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            textAlign: 'right',
-                                        },
-                                    },
-                                    '& .MuiFormHelperText-root': {
-                                        textAlign: 'right',
-                                    },
-                                }}
-                            />
-
-                            {activePaymentIndex !== null &&
-                                users[activePaymentIndex].paymentType === "پرداخت-دوره-ای" && (
-                                    <TextField
-                                        variant="outlined"
-                                        label="تعداد ماه‌ها"
-                                        name="totalMonths"
-                                        value={paymentDetails.totalMonths}
-                                        onChange={handlePaymentDetailsChange}
-                                        fullWidth
-                                        required
-                                        placeholder={`مثال: ${monthsPlaceholder}`}
-                                        sx={{
-                                            '& .MuiInputBase-input': {
-                                                textAlign: 'right',
-                                            },
-                                            '& .MuiInputLabel-root': {
-                                                right: 25,
-                                                left: 'auto',
-                                                transformOrigin: 'top right',
-                                            },
-                                            '& .MuiInputLabel-shrink': {
-                                                transform: 'translate(0, -9px) scale(0.75)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    textAlign: 'right',
-                                                },
-                                            },
-                                        }}
-                                    />
-                                )}
-
-                            {activePaymentIndex !== null &&
-                                users[activePaymentIndex].paymentType === "پرداخت-دوره-ای" &&
-                                paymentDetails.totalPrice &&
-                                paymentDetails.totalMonths && (
-                                    <Box
-                                        sx={{
-                                            p: 2,
-                                            bgcolor: '#e8f5e9',
-                                            borderRadius: 2,
-                                            border: '1px solid #c8e6c9',
-                                            textAlign: 'center'
-                                        }}
-                                    >
-                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                            <strong>مبلغ هر قسط:</strong>
-                                        </Typography>
-                                        <Typography variant="h6" color="success.main">
-                                            {calculateMonthlyPaymentPersian(
-                                                paymentDetails.totalPrice,
-                                                paymentDetails.totalMonths
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                )}
-
-                            {activePaymentIndex !== null &&
-                                users[activePaymentIndex].paymentType === "پرداخت-تکی" && (
-                                    <Box
-                                        sx={{
-                                            p: 2,
-                                            bgcolor: '#e3f2fd',
-                                            borderRadius: 2,
-                                            border: '1px solid #bbdefb',
-                                            textAlign: 'center'
-                                        }}
-                                    >
-                                        <Typography variant="body2">
-                                            این فاکتور به صورت یکجا پرداخت می‌شود
-                                        </Typography>
-                                    </Box>
-                                )}
-                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>اطلاعات مربوط به پرداخت را ویرایش کنید</Typography>
+                        <TextField variant="outlined" label="مبلغ کل (تومان)" name="totalPrice" value={paymentDetails.totalPrice}
+                                   onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }} />
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" && (
+                            <TextField variant="outlined" label="تعداد ماه‌ها" name="totalMonths" value={paymentDetails.totalMonths}
+                                       onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`} />
+                        )}
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" &&
+                            paymentDetails.totalPrice && paymentDetails.totalMonths && (
+                                <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9', textAlign: 'center' }}>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>مبلغ هر قسط:</strong></Typography>
+                                    <Typography variant="h6" color="success.main">{calculateMonthlyPaymentPersian(paymentDetails.totalPrice, paymentDetails.totalMonths)}</Typography>
+                                </Box>
+                            )}
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-تکی" && (
+                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb', textAlign: 'center' }}>
+                                <Typography variant="body2">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
+                            </Box>
+                        )}
                     </Box>
                 </DialogContent>
-
                 <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-                    <Button
-                        onClick={handleCloseEditPaymentModal}
-                        variant="outlined"
-                        sx={{
-                            borderColor: '#1976d2',
-                            color: '#1976d2'
-                        }}
-                    >
-                        انصراف
-                    </Button>
-                    <Button
-                        onClick={handleSavePaymentDetails}
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#1976d2'
-                        }}
-                    >
-                        ذخیره تغییرات
-                    </Button>
+                    <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
+                    <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm} maxWidth="xs" fullWidth
+                    slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl', p: 2 } } }}>
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700, color: '#ef4444', borderBottom: '2px solid #fee2e2' }}>تایید حذف</DialogTitle>
+                <DialogContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="body1" sx={{ mb: 2 }}>آیا از حذف این فاکتور اطمینان دارید؟</Typography>
+                    <Typography variant="body2" color="text.secondary">این عمل قابل بازگشت نیست.</Typography>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+                    <Button onClick={handleCloseDeleteConfirm} variant="outlined" sx={{ borderColor: '#6b7280', color: '#6b7280' }}>انصراف</Button>
+                    <Button onClick={handleConfirmDelete} variant="contained" sx={{ backgroundColor: '#ef4444' }}>حذف</Button>
                 </DialogActions>
             </Dialog>
 
@@ -1359,104 +832,55 @@ export default function AccountingPage() {
                             <TableCell>حذف</TableCell>
                         </TableRow>
                     </TableHead>
-
                     <TableBody>
-                        {users.map((user, index) => (
-                            <TableRow key={user.id}>
-                                <TableCell>{user.SerialNumber}</TableCell>
-                                <TableCell>{user.FullName}</TableCell>
-                                <TableCell>
-                                    <span className="service-cell">
-                                        {user.service}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <span className="price-cell">
-                                        {user.price}
-                                    </span>
-                                </TableCell>
-
-                                <TableCell>
-                                    {user.paymentType === "پرداخت-تکی" ? (
-                                        <SinglePaymentButton
-                                            onClick={() => handleOpenPaymentModal(index)}
-                                            size="medium"
-                                            tooltipTitle="مشاهده جزئیات پرداخت یکجا"
-                                        />
-                                    ) : (
-                                        <MultiPaymentButton
-                                            onClick={() => handleOpenPaymentModal(index)}
-                                            monthlyPayment={user.monthlyPayment}
-                                            totalMonths={user.totalMonths}
-                                            size="medium"
-                                            tooltipTitle="مشاهده جزئیات پرداخت دوره ای"
-                                        />
-                                    )}
-                                </TableCell>
-
-                                <TableCell>
-                                    <span className={`status ${user.status}`}>
-                                        {user.status}
-                                    </span>
-                                </TableCell>
-
-                                <TableCell>
-                                    <div className="action-buttons">
-                                        <Tooltip title="ویرایش فاکتور" arrow>
-                                            <IconButton
-                                                aria-label="edit"
-                                                onClick={() => handleEditTicket(index)}
-                                                sx={{
-                                                    color: '#3b82f6',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                                    }
-                                                }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
+                        {filteredUsers.map((user) => {
+                            const originalIndex = users.findIndex(u => u.id === user.id);
+                            if (originalIndex === -1) return null;
+                            return (
+                                <TableRow key={user.id}>
+                                    <TableCell>{user.SerialNumber}</TableCell>
+                                    <TableCell>{user.FullName}</TableCell>
+                                    <TableCell><span className="service-cell">{user.service}</span></TableCell>
+                                    <TableCell><span className="price-cell">{user.price}</span></TableCell>
+                                    <TableCell>
+                                        {user.paymentType === "پرداخت-تکی" ? (
+                                            <SinglePaymentButton onClick={() => handleOpenPaymentModal(originalIndex)} size="medium" tooltipTitle="مشاهده جزئیات پرداخت یکجا" />
+                                        ) : (
+                                            <MultiPaymentButton onClick={() => handleOpenPaymentModal(originalIndex)} monthlyPayment={user.monthlyPayment} totalMonths={user.totalMonths} size="medium" tooltipTitle="مشاهده جزئیات پرداخت دوره ای" />
+                                        )}
+                                    </TableCell>
+                                    <TableCell><span className={`status ${user.status}`}>{user.status}</span></TableCell>
+                                    <TableCell>
+                                        <div className="action-buttons">
+                                            <Tooltip title="ویرایش فاکتور" arrow>
+                                                <IconButton aria-label="edit" onClick={() => handleEditTicket(originalIndex)} sx={{ color: '#3b82f6' }}><EditIcon /></IconButton>
+                                            </Tooltip>
+                                            <Button className="quick-change-btn" onClick={(e) => handleOpenMenu(e, originalIndex)}>تغییر وضعیت</Button>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Tooltip title="حذف فاکتور" arrow>
+                                            <IconButton aria-label="delete" onClick={() => handleDeleteClick(originalIndex)} sx={{ color: '#ef4444' }}><DeleteIcon /></IconButton>
                                         </Tooltip>
-                                        <Button
-                                            className="quick-change-btn"
-                                            onClick={(e) => handleOpenMenu(e, index)}
-                                        >
-                                            تغییر وضعیت
-                                        </Button>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell>
-                                    <DeleteButton
-                                        onClick={() => handleDeleteItem(index)}
-                                        size="medium"
-                                        tooltipTitle="حذف فاکتور"
-                                        confirmMessage="آیا از حذف این فاکتور اطمینان دارید؟"
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
 
             {/* Quick Status Change Menu */}
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleCloseMenu}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-                <MenuItem onClick={() => handleStatusChange("درحال-انجام")}>
-                    درحال انجام
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange("پرداخت-شده")}>
-                    پرداخت شده
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange("لغو-شده")}>
-                    لغو شده
-                </MenuItem>
+            <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu} anchorOrigin={{ vertical: "bottom", horizontal: "right" }} transformOrigin={{ vertical: "top", horizontal: "right" }}>
+                <MenuItem onClick={() => handleStatusChange("درحال-انجام")}>درحال انجام</MenuItem>
+                <MenuItem onClick={() => handleStatusChange("پرداخت-شده")}>پرداخت شده</MenuItem>
+                <MenuItem onClick={() => handleStatusChange("لغو-شده")}>لغو شده</MenuItem>
             </Menu>
+
+            {/* Error Snackbar */}
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>{error}</Alert>
+            </Snackbar>
         </div>
     );
 }

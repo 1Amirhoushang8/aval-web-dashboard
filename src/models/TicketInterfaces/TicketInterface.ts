@@ -2,7 +2,6 @@ export interface StoredTicket {
     id: string;
     title: string;
     description: string;
-    type?: string;
     date: string;
     time: string;
     file?: {

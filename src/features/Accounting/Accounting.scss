@@ -96,6 +96,76 @@
   }
 }
 
+
+/* ==================== HEADER WITH SEARCH AND PLUS BUTTON ==================== */
+.accounting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  margin-right: 4rem;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+
+  .search-bar {
+    flex: 1;
+    max-width: 400px;
+
+    .MuiTextField-root {
+      width: 100%;
+    }
+  }
+
+  .mydp {
+    margin-bottom: 0;
+    width: auto;
+
+    .btn-primary {
+      width: 56px;
+      height: 56px;
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .accounting-header {
+    width: 90%;
+    margin-right: 2rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .accounting-header {
+    width: 95%;
+    margin-right: 0;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+
+    .search-bar {
+      max-width: 100%;
+      order: 2;
+    }
+
+    .mydp {
+      order: 1;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .accounting-header {
+    .mydp .btn-primary {
+      width: 48px;
+      height: 48px;
+      font-size: 1.3rem;
+    }
+  }
+}
+
+
+
+
 /* ==================== ADD BUTTON SECTION ==================== */
 .mydp {
   width: 100%;

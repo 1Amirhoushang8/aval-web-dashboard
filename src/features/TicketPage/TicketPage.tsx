@@ -4,6 +4,9 @@ import TicketTitle from "../../components/TicketTitles/TicketTitle.tsx";
 import TicketDescription from "../../components/TicketDescription/TicketDescription.tsx";
 import TicketFileUpload from "../../components/TicketFileUpload/TicketFileUpload.tsx";
 import { ticketService } from "../../API/TicketService.ts";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress"; // Added for better UX
 
 export default function ManageTicketPage() {
     const [title, setTitle] = useState("");
@@ -14,6 +17,29 @@ export default function ManageTicketPage() {
     const [fileError, setFileError] = useState<string | null>(null);
     const [uploadKey, setUploadKey] = useState(0);
 
+    // Snackbar states
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: "success" | "error" | "info";
+    }>({
+        open: false,
+        message: "",
+        severity: "success",
+    });
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
+
+    const showSuccess = (message: string) => {
+        setSnackbar({ open: true, message, severity: "success" });
+    };
+
+    const showError = (message: string) => {
+        setSnackbar({ open: true, message, severity: "error" });
+    };
+
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     const ALLOWED_FILE_TYPES = [
@@ -22,11 +48,7 @@ export default function ManageTicketPage() {
         'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/x-7z-compressed', 'application/x-tar', 'application/gzip'
     ];
 
-    const ALLOWED_EXTENSIONS = [
-        'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp',
-        'pdf',
-        'zip', 'rar', '7z', 'tar', 'gz'
-    ];
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'pdf', 'zip', 'rar', '7z', 'tar', 'gz'];
 
     const commonProblems = [
         "مشکل در ورود به سیستم", "خرابی سخت افزار", "مشکل نرم افزاری", "اتصال به اینترنت",
@@ -35,24 +57,10 @@ export default function ManageTicketPage() {
         "مشکل ایمیل", "پشتیبان گیری", "سایر مشکلات"
     ];
 
-    // Helper to get current Persian date and time
     const getPersianDateTime = () => {
         const now = new Date();
-
-        // Format Date: 1404/12/02
-        const dateStr = now.toLocaleDateString('fa-IR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).replace(/\//g, '/');
-
-        // Format Time: 11:16
-        const timeStr = now.toLocaleTimeString('fa-IR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-
+        const dateStr = now.toLocaleDateString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const timeStr = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false });
         return { dateStr, timeStr };
     };
 
@@ -75,10 +83,8 @@ export default function ManageTicketPage() {
     };
 
     const handleSave = async () => {
-        setFileError(null);
-
         if (!title.trim() || !description.trim()) {
-            alert("لطفاً عنوان و توضیحات را وارد کنید");
+            showError("لطفاً عنوان و توضیحات را وارد کنید");
             return;
         }
 
@@ -87,14 +93,11 @@ export default function ManageTicketPage() {
         try {
             const { dateStr, timeStr } = getPersianDateTime();
 
-            // Prepare data for API
             const ticketData = {
                 title: title.trim(),
                 description: description.trim(),
-                date: dateStr,        // Automatically added
-                time: timeStr,        // Automatically added
-                type: "ایجاد شده",    // Set default activity type
-                priority: "medium",   // Set default priority for the dashboard
+                date: dateStr,
+                time: timeStr,
                 ...(file && previewUrl && {
                     file: {
                         name: file.name,
@@ -105,15 +108,12 @@ export default function ManageTicketPage() {
                 })
             };
 
-            // Send to API
             await ticketService.create(ticketData);
-
-            // Success – clear form and notify user
             clearForm();
-            alert("تیکت با موفقیت ارسال شد ✅");
+            showSuccess("تیکت با موفقیت ارسال شد ✅");
         } catch (error) {
             console.error("Failed to create ticket:", error);
-            alert("خطا در ارسال تیکت. لطفاً دوباره تلاش کنید.");
+            showError("خطا در ارسال تیکت. لطفاً دوباره تلاش کنید.");
         } finally {
             setIsSaving(false);
         }
@@ -121,7 +121,17 @@ export default function ManageTicketPage() {
 
     return (
         <div className="ticket-page" dir="rtl">
-            <div className="ticket-card">
+            {/* Loading Overlay */}
+            {isSaving && (
+                <div className="loading-overlay">
+                    <div className="loading-content">
+                        <CircularProgress color="inherit" />
+                        <p>لطفاً کمی صبر کنید...</p>
+                    </div>
+                </div>
+            )}
+
+            <div className={`ticket-card ${isSaving ? 'blur' : ''}`}>
                 <TicketTitle
                     value={title}
                     onChange={setTitle}
@@ -151,15 +161,24 @@ export default function ManageTicketPage() {
                     onClick={handleSave}
                     disabled={isSaving || !!fileError}
                 >
-                    {isSaving ? (
-                        <div className="loader-container">
-                            <span>در حال ارسال...</span>
-                        </div>
-                    ) : (
-                        'ارسال تیکت'
-                    )}
+                    {isSaving ? 'در حال ارسال...' : 'ارسال تیکت'}
                 </button>
             </div>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%', fontFamily: 'Vazirmatn, sans-serif' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 }

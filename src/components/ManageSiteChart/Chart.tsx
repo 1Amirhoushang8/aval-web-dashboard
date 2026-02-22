@@ -18,7 +18,7 @@ export default function ManageSiteChart() {
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
     // Fetch the data from JSON Server
-    const { data: allStats, isLoading, isError } = useQuery({
+    const { data: allStats, isError, isLoading } = useQuery({
         queryKey: ["financialStats"],
         queryFn: async () => {
             const response = await apiClient.get("/financialStats");
@@ -40,8 +40,32 @@ export default function ManageSiteChart() {
     // Extract the specific period data from the API response
     const currentData: ChartData | null = allStats ? allStats[timeFilter] : null;
 
-    if (isLoading) return <div className="chart-loading">در حال بارگذاری نمودار...</div>;
-    if (isError || !currentData) return <div className="chart-error">خطا در دریافت اطلاعات</div>;
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="chart-loading">
+                <div className="loading-spinner"></div>
+                <p>در حال بارگذاری اطلاعات...</p>
+            </div>
+        );
+    }
+
+    // Error state
+    if (isError || !currentData) {
+        return (
+            <div className="chart-error">
+                <div className="error-icon">!</div>
+                <h3>خطا در دریافت اطلاعات</h3>
+                <p>متأسفانه در دریافت اطلاعات مالی مشکلی پیش آمده است.</p>
+                <button
+                    className="retry-button"
+                    onClick={() => window.location.reload()}
+                >
+                    تلاش مجدد
+                </button>
+            </div>
+        );
+    }
 
     const maxValue = Math.max(...currentData.requests, ...currentData.payments, 1);
     const chartHeight = 300;

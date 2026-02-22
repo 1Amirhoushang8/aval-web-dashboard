@@ -1,28 +1,6 @@
 {
   "users": [
     {
-      "id": "1",
-      "SerialNumber": "۱۲۴۹۲۴۲۴۶",
-      "FullName": "علی محمدی",
-      "service": "طراحی وب سایت",
-      "price": "۶,۵۳۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "2",
-      "SerialNumber": "۱۹۲۰۴۸۳۶",
-      "FullName": "مریم کریمی",
-      "service": "پشتیبانی سالانه",
-      "price": "۵۵,۰۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۵,۵۰۰,۰۰۰ تومان",
-      "totalMonths": 10
-    },
-    {
       "id": "3",
       "SerialNumber": "۱۹۲۰۴۸۳۷",
       "FullName": "رضا احمدی",
@@ -78,20 +56,207 @@
       "totalMonths": 4
     },
     {
-      "id": "d46a",
+      "id": "07e2",
       "SerialNumber": "۱۳۴۵۱۳۴۶۱۲۲۱",
       "FullName": "امیر هوشنگ",
-      "service": "طراحی وب سایت",
+      "service": "پشتیبانی سالانه",
       "price": "۶۵,۳۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "8",
+      "SerialNumber": "۱۹۲۰۴۸۴۲",
+      "FullName": "نیلوفر کیانی",
+      "service": "امنیت شبکه",
+      "price": "۳,۵۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "9",
+      "SerialNumber": "۱۹۲۰۴۸۴۳",
+      "FullName": "بابک زنجانی",
+      "service": "پنل پیامک",
+      "price": "۱۵۰,۰۰۰ تومان",
+      "status": "لغو-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "10",
+      "SerialNumber": "۱۹۲۰۴۸۴۴",
+      "FullName": "مریم سعیدی",
+      "service": "تولید محتوا",
+      "price": "۲,۴۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
       "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۵,۴۴۱,۶۶۶ تومان",
-      "totalMonths": 12
+      "monthlyPayment": "۴۰۰,۰۰۰ تومان",
+      "totalMonths": 6
+    },
+    {
+      "id": "11",
+      "SerialNumber": "۱۹۲۰۴۸۴۵",
+      "FullName": "احسان غفاری",
+      "service": "آنالیز داده",
+      "price": "۴,۸۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۱,۶۰۰,۰۰۰ تومان",
+      "totalMonths": 3
+    },
+    {
+      "id": "12",
+      "SerialNumber": "۱۹۲۰۴۸۴۶",
+      "FullName": "هانیه مرادی",
+      "service": "اینستاگرام مارکتینگ",
+      "price": "۱,۹۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "13",
+      "SerialNumber": "۱۹۲۰۴۸۴۷",
+      "FullName": "پویا صبوری",
+      "service": "طراحی UI/UX",
+      "price": "۸,۲۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۲,۰۵۰,۰۰۰ تومان",
+      "totalMonths": 4
+    },
+    {
+      "id": "14",
+      "SerialNumber": "۱۹۲۰۴۸۴۸",
+      "FullName": "نازنین بیاتی",
+      "service": "عکاسی صنعتی",
+      "price": "۳,۷۰۰,۰۰۰ تومان",
+      "status": "لغو-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "15",
+      "SerialNumber": "۱۹۲۰۴۸۴۹",
+      "FullName": "سینا کریمی",
+      "service": "سرور مجازی VDS",
+      "price": "۶۵۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "16",
+      "SerialNumber": "۱۹۲۰۴۸۵۰",
+      "FullName": "ژاله صادقی",
+      "service": "برندینگ",
+      "price": "۱۵,۰۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۳,۰۰۰,۰۰۰ تومان",
+      "totalMonths": 5
+    },
+    {
+      "id": "17",
+      "SerialNumber": "۱۹۲۰۴۸۵۱",
+      "FullName": "کامران تفتی",
+      "service": "مدیریت کمپین AD",
+      "price": "۲,۸۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "18",
+      "SerialNumber": "۱۹۲۰۴۸۵۲",
+      "FullName": "مهتاب کرامتی",
+      "service": "ترجمه تخصصی",
+      "price": "۹۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "19",
+      "SerialNumber": "۱۹۲۰۴۸۵۳",
+      "FullName": "آرش استیلاف",
+      "service": "توسعه وردپرس",
+      "price": "۵,۴۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۹۰۰,۰۰۰ تومان",
+      "totalMonths": 6
+    },
+    {
+      "id": "20",
+      "SerialNumber": "۱۹۲۰۴۸۵۴",
+      "FullName": "بهار افشاری",
+      "service": "موشن گرافیک",
+      "price": "۷,۰۰۰,۰۰۰ تومان",
+      "status": "لغو-شده",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "21",
+      "SerialNumber": "۱۹۲۰۴۸۵۵",
+      "FullName": "سپهر خلسه",
+      "service": "تبلیغات کلیکی",
+      "price": "۱,۱۰۰,۰۰۰ تومان",
+      "status": "پرداخت-شده",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۵۵۰,۰۰۰ تومان",
+      "totalMonths": 2
+    },
+    {
+      "id": "22",
+      "SerialNumber": "۱۹۲۰۴۸۵۶",
+      "FullName": "رویا نونهالی",
+      "service": "کوچینگ کسب و کار",
+      "price": "۱۲,۵۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "9327",
+      "SerialNumber": "۱۱۳۴۵۱۳۴۵",
+      "FullName": "صفری",
+      "service": "پشتیبانی سالانه",
+      "price": "۸۰,۰۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-تکی",
+      "monthlyPayment": null,
+      "totalMonths": null
+    },
+    {
+      "id": "49a7",
+      "SerialNumber": "۱۲۳۴۲۳۴۴۲۳۴",
+      "FullName": "مریم کریمی",
+      "service": "پشتیبانی سالانه",
+      "price": "۷۰,۰۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۷,۰۰۰,۰۰۰ تومان",
+      "totalMonths": 10
     }
   ],
   "tickets": [
     {
-      "id": 1,
+      "id": "1",
       "title": "مشکل در ورود به سیستم",
       "description": "علی محمدی",
       "date": "1402/02/15",
@@ -99,7 +264,7 @@
       "type": "ایجاد شده"
     },
     {
-      "id": 2,
+      "id": "2",
       "title": "خرابی پرینتر",
       "description": "مریم کریمی",
       "date": "1402/02/15",
@@ -123,6 +288,34 @@
       "time": "۱۴:۵۶",
       "type": "ایجاد شده",
       "priority": "medium"
+    },
+    {
+      "id": "90d4",
+      "title": "تست 1",
+      "description": "تست شماره 1",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۰۹:۳۴"
+    },
+    {
+      "id": "655d",
+      "title": "خرابی سخت افزار",
+      "description": "تست شماره 2",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۱۰:۰۱"
+    },
+    {
+      "id": "8ab1",
+      "title": "تست 4",
+      "description": "تست شماره 4",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۱۰:۴۴"
+    },
+    {
+      "id": "af4b",
+      "title": "مشکل در ورود به سیستم",
+      "description": "تست شماره 5",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۱۳:۰۲"
     }
   ],
   "financialStats": {

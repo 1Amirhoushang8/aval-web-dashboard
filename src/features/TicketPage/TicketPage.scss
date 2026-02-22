@@ -818,3 +818,38 @@
     gap: 10px;
   }
 }
+
+.ticket-page {
+  position: relative;
+  min-height: 100vh;
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+
+    .loading-content {
+      text-align: center;
+      color: #1976d2; // Primary blue
+
+      p {
+        margin-top: 15px;
+        font-weight: bold;
+        font-family: 'Vazirmatn', sans-serif;
+      }
+    }
+  }
+
+  .ticket-card.blur {
+    filter: blur(2px);
+    pointer-events: none;
+  }
+}
