@@ -55,16 +55,13 @@ export default function AdminTicketPage() {
             const fetchedUsers: User[] = usersRes.data;
             setUsers(fetchedUsers);
 
-            // FIX: Map users by ID (converting to string to ensure a match)
             const userMap = new Map<string, string>();
             fetchedUsers.forEach((u) => {
-                userMap.set(String(u.id), u.FullName || "نامشخص");
+                userMap.set(String(u.id), u.username || u.FullName || "نامشخص");
             });
 
             const ticketsData = ticketsRes.data.map((t: StoredTicket) => {
-                // Find the username using the map
                 const username = userMap.get(String(t.userId));
-
                 let localStatus: "pending" | "answered" | "in-progress" = "pending";
                 if (t.adminResponse) localStatus = "answered";
 
@@ -77,7 +74,6 @@ export default function AdminTicketPage() {
 
             setTickets(ticketsData.reverse());
         } catch (error) {
-            // ESLint fix: Variable 'error' is now used
             console.error("Critical error fetching dashboard data:", error);
             setSnackbar({ open: true, message: "خطا در دریافت اطلاعات", severity: "error" });
         } finally {
@@ -98,18 +94,17 @@ export default function AdminTicketPage() {
             const currentTicket = tickets.find(t => t.id === id);
             if (!currentTicket) return;
 
+            // Destructuring to remove UI-only fields (Replaces @ts-ignore)
+            const { userFullName, localStatus, ...apiPayload } = currentTicket;
+
             const updatedTicket = {
-                ...currentTicket,
+                ...apiPayload,
                 adminResponse: responseText,
                 status: "answered"
             };
 
-            // @ts-ignore - Removing UI-only helper fields before sending to API
-            delete updatedTicket.userFullName;
-            // @ts-ignore
-            delete updatedTicket.localStatus;
-
-            await ticketService.update(Number(id), updatedTicket as Omit<StoredTicket, "id">);
+            // Use string ID for update
+            await ticketService.update(id as any, updatedTicket as Omit<StoredTicket, "id">);
 
             setTickets(prev => prev.map(t => t.id === id ? { ...t, adminResponse: responseText, localStatus: "answered" } : t));
             setResponses(prev => {
@@ -129,14 +124,16 @@ export default function AdminTicketPage() {
     const handleConfirmDelete = async () => {
         if (!deleteId) return;
         try {
-            await ticketService.delete(Number(deleteId));
+            // FIX: Removed Number(). Using ID directly as string to match db.json
+            await ticketService.delete(deleteId as any);
             setTickets(prev => prev.filter(t => t.id !== deleteId));
             setSnackbar({ open: true, message: "تیکت حذف شد", severity: "success" });
         } catch (error) {
             console.error("Error during ticket deletion:", error);
-            setSnackbar({ open: true, message: "خطا در حذف تیکت", severity: "error" });
+            setSnackbar({ open: true, message: "خطا در حذف تیکت. سرور اجازه حذف نمی‌دهد.", severity: "error" });
         } finally {
             setDeleteConfirmOpen(false);
+            setDeleteId(null);
         }
     };
 
@@ -144,13 +141,17 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-            const updated = { ...ticket, adminResponse: status === "answered" ? (ticket.adminResponse || "تایید شد") : (status === "pending" ? null : ticket.adminResponse) };
+            // Destructuring to remove UI-only fields
+            const { userFullName, localStatus, ...apiData } = ticket;
 
-            // @ts-ignore
-            const { userFullName, localStatus, ...apiData } = updated;
-            await ticketService.update(Number(ticket.id), apiData as Omit<StoredTicket, "id">);
+            const updatedPayload = {
+                ...apiData,
+                adminResponse: status === "answered" ? (ticket.adminResponse || "تایید شد") : (status === "pending" ? null : ticket.adminResponse)
+            };
 
-            setTickets(prev => prev.map((t, i) => i === activeIndex ? { ...t, localStatus: status, adminResponse: updated.adminResponse } : t));
+            await ticketService.update(ticket.id as any, updatedPayload as Omit<StoredTicket, "id">);
+
+            setTickets(prev => prev.map((t, i) => i === activeIndex ? { ...t, localStatus: status, adminResponse: updatedPayload.adminResponse } : t));
             setSnackbar({ open: true, message: "وضعیت بروز شد", severity: "success" });
         } catch (error) {
             console.error("Status update error:", error);
