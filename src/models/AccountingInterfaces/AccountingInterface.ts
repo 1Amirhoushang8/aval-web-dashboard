@@ -1,5 +1,6 @@
 export type User = {
     id: number;
+    username: string;
     FullName: string;
     SerialNumber: string ;
     price: string;

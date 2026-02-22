@@ -1,398 +1,335 @@
 {
-  "roles": {
-    "ADMIN": {
-      "access": [
-        "financial_page",
-        "products_page",
-        "all_tickets_view",
-        "respond_to_tickets"
-      ],
-      "description": "دسترسی کامل به مدیریت و بخش مالی"
-    },
-    "USER": {
-      "access": [
-        "send_ticket",
-        "view_own_tickets"
-      ],
-      "description": "دسترسی محدود به ارسال و مشاهده تیکت‌های خود"
-    }
-  },
   "users": [
     {
-      "id": "4",
-      "SerialNumber": "۱۹۲۰۴۸۳۸",
-      "FullName": "سارا نوروزی",
-      "roleKey": "USER",
-      "service": "اپلیکیشن موبایل",
-      "price": "۹۸۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۲۴۵,۰۰۰ تومان",
-      "totalMonths": 4
-    },
-    {
-      "id": "5",
-      "SerialNumber": "۱۹۲۰۴۸۳۹",
-      "FullName": "محمد حسینی",
-      "roleKey": "USER",
-      "service": "بهینه‌سازی SEO",
-      "price": "۴۵۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "6",
-      "SerialNumber": "۱۹۲۰۴۸۴۰",
-      "FullName": "فاطمه رضایی",
-      "roleKey": "USER",
-      "service": "طراحی گرافیک",
-      "price": "۲,۱۵۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۵۳۷,۵۰۰ تومان",
-      "totalMonths": 4
-    },
-    {
-      "id": "7",
-      "SerialNumber": "۱۹۲۰۴۸۴۱",
-      "FullName": "امیرحسین محمدی",
-      "roleKey": "USER",
-      "service": "مشاوره فنی",
-      "price": "۷۵۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۱۸۷,۵۰۰ تومان",
-      "totalMonths": 4
-    },
-    {
-      "id": "07e2",
-      "SerialNumber": "۱۳۴۵۱۳۴۶۱۲۲۱",
-      "FullName": "امیر هوشنگ",
-      "roleKey": "USER",
-      "service": "پشتیبانی سالانه",
-      "price": "۶۵,۳۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "8",
-      "SerialNumber": "۱۹۲۰۴۸۴۲",
-      "FullName": "نیلوفر کیانی",
-      "roleKey": "USER",
-      "service": "امنیت شبکه",
-      "price": "۳,۵۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "9",
-      "SerialNumber": "۱۹۲۰۴۸۴۳",
-      "FullName": "بابک زنجانی",
-      "roleKey": "USER",
-      "service": "پنل پیامک",
-      "price": "۱۵۰,۰۰۰ تومان",
-      "status": "لغو-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "10",
-      "SerialNumber": "۱۹۲۰۴۸۴۴",
-      "FullName": "مریم سعیدی",
-      "roleKey": "USER",
-      "service": "تولید محتوا",
-      "price": "۲,۴۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۴۰۰,۰۰۰ تومان",
-      "totalMonths": 6
+      "id": "1",
+      "username": "admin",
+      "password": "123",
+      "FullName": "مدیریت سیستم",
+      "roleKey": "ADMIN"
     },
     {
       "id": "11",
-      "SerialNumber": "۱۹۲۰۴۸۴۵",
-      "FullName": "احسان غفاری",
+      "username": "sara",
+      "password": "123",
+      "FullName": "سارا نوروزی",
       "roleKey": "USER",
-      "service": "آنالیز داده",
-      "price": "۴,۸۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۱,۶۰۰,۰۰۰ تومان",
-      "totalMonths": 3
+      "service": "اپلیکیشن موبایل",
+      "SerialNumber": "۱۹۲۰۴۸۳۸",
+      "status": "پرداخت-شده"
     },
     {
       "id": "12",
-      "SerialNumber": "۱۹۲۰۴۸۴۶",
-      "FullName": "هانیه مرادی",
+      "username": "hassan",
+      "password": "123",
+      "FullName": "محمد حسینی",
       "roleKey": "USER",
-      "service": "اینستاگرام مارکتینگ",
-      "price": "۱,۹۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+      "service": "بهینه‌سازی SEO",
+      "SerialNumber": "۱۹۲۰۴۸۳۹",
+      "status": "درحال-انجام"
     },
     {
       "id": "13",
-      "SerialNumber": "۱۹۲۰۴۸۴۷",
-      "FullName": "پویا صبوری",
+      "username": "fatemeh",
+      "password": "123",
+      "FullName": "فاطمه رضایی",
       "roleKey": "USER",
-      "service": "طراحی UI/UX",
-      "price": "۸,۲۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۲,۰۵۰,۰۰۰ تومان",
-      "totalMonths": 4
+      "service": "طراحی گرافیک",
+      "SerialNumber": "۱۹۲۰۴۸۴۰",
+      "status": "پرداخت-شده"
     },
     {
       "id": "14",
-      "SerialNumber": "۱۹۲۰۴۸۴۸",
-      "FullName": "نازنین بیاتی",
+      "username": "amir_h",
+      "password": "123",
+      "FullName": "امیرحسین محمدی",
       "roleKey": "USER",
-      "service": "عکاسی صنعتی",
-      "price": "۳,۷۰۰,۰۰۰ تومان",
-      "status": "لغو-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+      "service": "مشاوره فنی",
+      "SerialNumber": "۱۹۲۰۴۸۴۱",
+      "status": "درحال-انجام"
     },
     {
       "id": "15",
-      "SerialNumber": "۱۹۲۰۴۸۴۹",
-      "FullName": "سینا کریمی",
+      "username": "niloofar",
+      "password": "123",
+      "FullName": "نیلوفر کیانی",
       "roleKey": "USER",
-      "service": "سرور مجازی VDS",
-      "price": "۶۵۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+      "service": "امنیت شبکه",
+      "SerialNumber": "۱۹۲۰۴۸۴۲",
+      "status": "پرداخت-شده"
     },
     {
       "id": "16",
-      "SerialNumber": "۱۹۲۰۴۸۵۰",
-      "FullName": "ژاله صادقی",
+      "username": "babak",
+      "password": "123",
+      "FullName": "بابک زنجانی",
       "roleKey": "USER",
-      "service": "برندینگ",
-      "price": "۱۵,۰۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۳,۰۰۰,۰۰۰ تومان",
-      "totalMonths": 5
+      "service": "پنل پیامک",
+      "SerialNumber": "۱۹۲۰۴۸۴۳",
+      "status": "لغو-شده"
     },
     {
       "id": "17",
-      "SerialNumber": "۱۹۲۰۴۸۵۱",
-      "FullName": "کامران تفتی",
+      "username": "maryam",
+      "password": "123",
+      "FullName": "مریم سعیدی",
       "roleKey": "USER",
-      "service": "مدیریت کمپین AD",
-      "price": "۲,۸۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+      "service": "تولید محتوا",
+      "SerialNumber": "۱۹۲۰۴۸۴۴",
+      "status": "پرداخت-شده"
     },
     {
       "id": "18",
-      "SerialNumber": "۱۹۲۰۴۸۵۲",
-      "FullName": "مهتاب کرامتی",
+      "username": "ehsan",
+      "password": "123",
+      "FullName": "احسان غفاری",
       "roleKey": "USER",
-      "service": "ترجمه تخصصی",
-      "price": "۹۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+      "service": "آنالیز داده",
+      "SerialNumber": "۱۹۲۰۴۸۴۵",
+      "status": "درحال-انجام"
     },
     {
       "id": "19",
-      "SerialNumber": "۱۹۲۰۴۸۵۳",
-      "FullName": "آرش استیلاف",
+      "username": "hanieh",
+      "password": "123",
+      "FullName": "هانیه مرادی",
       "roleKey": "USER",
-      "service": "توسعه وردپرس",
-      "price": "۵,۴۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۹۰۰,۰۰۰ تومان",
-      "totalMonths": 6
+      "service": "اینستاگرام مارکتینگ",
+      "SerialNumber": "۱۹۲۰۴۸۴۶",
+      "status": "پرداخت-شده"
     },
     {
       "id": "20",
-      "SerialNumber": "۱۹۲۰۴۸۵۴",
-      "FullName": "بهار افشاری",
+      "username": "pouya",
+      "password": "123",
+      "FullName": "پویا صبوری",
       "roleKey": "USER",
-      "service": "موشن گرافیک",
-      "price": "۷,۰۰۰,۰۰۰ تومان",
-      "status": "لغو-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "21",
-      "SerialNumber": "۱۹۲۰۴۸۵۵",
-      "FullName": "سپهر خلسه",
-      "roleKey": "USER",
-      "service": "تبلیغات کلیکی",
-      "price": "۱,۱۰۰,۰۰۰ تومان",
-      "status": "پرداخت-شده",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۵۵۰,۰۰۰ تومان",
-      "totalMonths": 2
-    },
-    {
-      "id": "22",
-      "SerialNumber": "۱۹۲۰۴۸۵۶",
-      "FullName": "رویا نونهالی",
-      "roleKey": "USER",
-      "service": "کوچینگ کسب و کار",
-      "price": "۱۲,۵۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "9327",
-      "SerialNumber": "۱۱۳۴۵۱۳۴۵",
-      "FullName": "صفری",
-      "roleKey": "USER",
-      "service": "پشتیبانی سالانه",
-      "price": "۸۰,۰۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
-    },
-    {
-      "id": "49a7",
-      "SerialNumber": "۱۲۳۴۲۳۴۴۲۳۴",
-      "FullName": "مریم کریمی",
-      "roleKey": "USER",
-      "service": "پشتیبانی سالانه",
-      "price": "۷۰,۰۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۷,۰۰۰,۰۰۰ تومان",
-      "totalMonths": 10
+      "service": "طراحی UI/UX",
+      "SerialNumber": "۱۹۲۰۴۸۴۷",
+      "status": "درحال-انجام"
     }
   ],
   "tickets": [
     {
-      "id": "1",
-      "userId": 2,
-      "title": "مشکل در ورود به سیستم",
-      "description": "من نمی‌توانم به پنل خود دسترسی پیدا کنم.",
-      "date": "1402/02/15",
-      "time": "۱۰:۳۰ صبح",
-      "status": "answered",
-      "adminResponse": "مشکل شما برطرف شد."
+      "title": "مشکل در ورود",
+      "description": "نمی‌توانم وارد سیستم شوم.",
+      "date": "1402/12/01",
+      "time": "10:00",
+      "adminResponse": null,
+      "id": "101"
     },
     {
-      "id": "4736",
-      "userId": 5,
-      "title": "مشکل نرم افزاری",
-      "description": "سیستم هنگ می‌کند.",
-      "date": "۱۴۰۴/۱۲/۰۲",
-      "time": "۱۴:۴۸",
-      "status": "answered",
-      "adminResponse": "تست"
-    },
-    {
-      "title": "خطا در پرداخت",
-      "description": "تراکنش انجام شد اما اشتراک فعال نشد.",
-      "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۰۹:۱۵",
-      "adminResponse": "پاسخ داده شد",
-      "id": "4737"
-    },
-    {
-      "id": "4738",
-      "userId": 8,
-      "title": "درخواست فاکتور رسمی",
-      "description": "لطفاً فاکتور خرید دوره زمستان را ارسال کنید.",
-      "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۱۱:۲۰",
-      "status": "answered",
-      "adminResponse": "فاکتور به ایمیل شما ارسال گردید.",
-      "file": {
-        "name": "invoice_782.pdf",
-        "type": "application/pdf",
-        "size": 102400,
-        "url": "https://api.example.com/files/inv_782.pdf"
-      }
-    },
-    {
-      "id": "4739",
-      "userId": 3,
-      "title": "تغییر شماره همراه",
-      "description": "قصد دارم شماره ثبت نامی خود را تغییر دهم.",
-      "date": "۱۴۰۴/۱۲/۰۴",
-      "time": "۱۶:۰۵",
-      "status": "in-progress",
-      "adminResponse": "در حال بررسی توسط واحد پشتیبانی."
-    },
-    {
-      "id": "4740",
-      "userId": 21,
-      "title": "کندی سرعت پنل",
-      "description": "لود شدن صفحات بیش از ۱۰ ثانیه طول می‌کشد.",
-      "date": "۱۴۰۴/۱۲/۰۴",
-      "time": "۱۸:۳۰",
+      "id": "102",
+      "userId": "11",
+      "title": "سوال درباره اپلیکیشن",
+      "description": "آیا نسخه iOS هم دارید؟",
+      "date": "1402/12/02",
+      "time": "11:30",
       "status": "pending",
       "adminResponse": null
     },
     {
-      "id": "4741",
-      "userId": 15,
-      "title": "سوال در مورد API",
-      "description": "مستندات بخش وب‌هوک ناقص است.",
-      "date": "۱۴۰۴/۱۲/۰۵",
-      "time": "۰۸:۰۰",
-      "status": "answered",
-      "adminResponse": "لینک جدید مستندات برای شما ایمیل شد."
+      "title": "افت سئو",
+      "description": "بازدید سایت کم شده است.",
+      "date": "1402/12/01",
+      "time": "09:15",
+      "adminResponse": "گزارش سئو ایمیل شد.",
+      "id": "103"
     },
     {
-      "id": "4742",
-      "userId": 9,
-      "title": "بازیابی رمز عبور",
-      "description": "ایمیل بازیابی برای من ارسال نمی‌شود.",
-      "date": "۱۴۰۴/۱۲/۰۵",
-      "time": "۱۰:۱۰",
-      "status": "answered",
-      "adminResponse": "پوشه Spam خود را چک کنید."
-    },
-    {
-      "id": "4743",
-      "userId": 33,
-      "title": "ارسال اسکرین‌شات خطا",
-      "description": "تصویر خطای مشاهده شده ضمیمه شد.",
-      "date": "۱۴۰۴/۱۲/۰۶",
-      "time": "۱۲:۴۵",
+      "id": "104",
+      "userId": "12",
+      "title": "کلمات کلیدی جدید",
+      "description": "لطفا روی کلمه 'خرید آنلاین' کار کنید.",
+      "date": "1402/12/03",
+      "time": "14:20",
       "status": "pending",
-      "adminResponse": null,
-      "file": {
-        "name": "error_log.png",
-        "type": "image/png",
-        "size": 45000,
-        "url": "https://api.example.com/files/err_4743.png"
-      }
+      "adminResponse": null
     },
     {
-      "id": "4744",
-      "userId": 4,
-      "title": "پیشنهاد بهبود رابط کاربری",
-      "description": "اگر دکمه خروج در دسترس‌تر باشد بهتر است.",
-      "date": "۱۴۰۴/۱۲/۰۶",
-      "time": "۱۴:۲۰",
+      "id": "105",
+      "userId": "12",
+      "title": "تغییر دامنه",
+      "description": "قصد تغییر آدرس سایت را دارم.",
+      "date": "1402/12/04",
+      "time": "16:00",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "106",
+      "userId": "13",
+      "title": "تغییر لوگو",
+      "description": "لطفا رنگ لوگو را روشن تر کنید.",
+      "date": "1402/12/02",
+      "time": "12:00",
       "status": "answered",
-      "adminResponse": "ممنون از پیشنهاد شما."
+      "adminResponse": "طرح جدید در پنل آپلود شد."
+    },
+    {
+      "id": "107",
+      "userId": "13",
+      "title": "طراحی بنر",
+      "description": "یک بنر برای جشنواره نوروزی نیاز داریم.",
+      "date": "1402/12/05",
+      "time": "10:45",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "108",
+      "userId": "14",
+      "title": "مشاوره سرور",
+      "description": "بهترین سرور برای سایت فروشگاهی چیست؟",
+      "date": "1402/12/01",
+      "time": "08:30",
+      "status": "answered",
+      "adminResponse": "سرور مجازی لینوکس با 8 گیگ رم پیشنهاد می‌شود."
+    },
+    {
+      "id": "109",
+      "userId": "14",
+      "title": "کانفیگ دیتابیس",
+      "description": "ارور 500 دریافت می‌کنم.",
+      "date": "1402/12/03",
+      "time": "15:10",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "110",
+      "userId": "15",
+      "title": "گزارش نفوذ",
+      "description": "چند تلاش ناموفق برای ورود داشتم.",
+      "date": "1402/12/02",
+      "time": "18:00",
+      "status": "answered",
+      "adminResponse": "آی‌پی‌های مشکوک مسدود شدند."
+    },
+    {
+      "id": "111",
+      "userId": "15",
+      "title": "تایید دو مرحله ای",
+      "description": "آیا امکان فعالسازی پیامک وجود دارد؟",
+      "date": "1402/12/04",
+      "time": "09:00",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "112",
+      "userId": "16",
+      "title": "عدم ارسال پیامک",
+      "description": "پیامک های تاییدیه ارسال نمیشوند.",
+      "date": "1402/12/01",
+      "time": "13:45",
+      "status": "answered",
+      "adminResponse": "خطوط مخابرات موقتا قطع بود، مشکل رفع شد."
+    },
+    {
+      "id": "113",
+      "userId": "16",
+      "title": "تمدید پنل",
+      "description": "درخواست لغو تمدید خودکار.",
+      "date": "1402/12/03",
+      "time": "11:20",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "114",
+      "userId": "17",
+      "title": "تقویم محتوایی",
+      "description": "لطفا تقویم ماه آینده را بفرستید.",
+      "date": "1402/12/02",
+      "time": "10:15",
+      "status": "answered",
+      "adminResponse": "از بخش فایل ها دانلود کنید."
+    },
+    {
+      "id": "115",
+      "userId": "17",
+      "title": "ویرایش مقاله",
+      "description": "مقاله آخر نیاز به اصلاح دارد.",
+      "date": "1402/12/05",
+      "time": "14:30",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "116",
+      "userId": "18",
+      "title": "گزارش گوگل آنالیتیکس",
+      "description": "دسترسی به آنالیتیکس قطع شده.",
+      "date": "1402/12/01",
+      "time": "16:45",
+      "status": "answered",
+      "adminResponse": "دسترسی مجدد به ایمیل شما ارسال شد."
+    },
+    {
+      "id": "117",
+      "userId": "18",
+      "title": "تحلیل رقبا",
+      "description": "درخواست تحلیل ۳ رقیب اصلی.",
+      "date": "1402/12/04",
+      "time": "12:10",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "118",
+      "userId": "19",
+      "title": "کاهش لایک ها",
+      "description": "پست های اخیر بازدید کمی داشتند.",
+      "date": "1402/12/02",
+      "time": "19:20",
+      "status": "answered",
+      "adminResponse": "الگوریتم تغییر کرده، استراتژی جدید اعمال میشود."
+    },
+    {
+      "id": "119",
+      "userId": "19",
+      "title": "ایده ریلز",
+      "description": "چند ایده برای ویدیو نیاز دارم.",
+      "date": "1402/12/03",
+      "time": "10:05",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "120",
+      "userId": "20",
+      "title": "مشکل ریسپانسیو",
+      "description": "سایت در موبایل افقی اسکرول میخورد.",
+      "date": "1402/12/01",
+      "time": "08:50",
+      "status": "answered",
+      "adminResponse": "باگ CSS برطرف شد."
+    },
+    {
+      "id": "121",
+      "userId": "20",
+      "title": "تغییر فونت",
+      "description": "فونت دکمه ها را به وزیرمتن تغییر دهید.",
+      "date": "1402/12/04",
+      "time": "15:40",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "7854",
+      "title": "تیکت سارا",
+      "description": "تست برای تیکت سارا",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۱۷:۱۶",
+      "userId": ""
+    },
+    {
+      "id": "b915",
+      "title": "تست عنوان",
+      "description": "تست تست تست",
+      "date": "۱۴۰۴/۱۲/۰۳",
+      "time": "۱۷:۱۹",
+      "userId": ""
     }
   ],
   "financialStats": {
@@ -423,9 +360,44 @@
         250000,
         350000,
         400000
+      ]
+    },
+    "week": {
+      "labels": [
+        "هفته ۱",
+        "هفته ۲",
+        "هفته ۳",
+        "هفته ۴"
       ],
-      "totalRequests": 1250000,
-      "totalPayments": 850000
+      "requests": [
+        2000000,
+        1500000,
+        2200000,
+        1800000
+      ],
+      "payments": [
+        1200000,
+        1000000,
+        1500000,
+        1100000
+      ]
+    },
+    "month": {
+      "labels": [
+        "فروردین",
+        "اردیبهشت",
+        "خرداد"
+      ],
+      "requests": [
+        8000000,
+        7500000,
+        9000000
+      ],
+      "payments": [
+        5000000,
+        4800000,
+        6000000
+      ]
     }
   }
 }

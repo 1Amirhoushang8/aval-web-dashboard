@@ -3,7 +3,7 @@ import "./TodayTickets.scss";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
 
 interface TodayTicketsProps {
-    tickets: StoredTicket[];
+    tickets: StoredTicket[]; // This should be the filtered "today" list from ManageSitePage
     loading?: boolean;
     toPersianNumber?: (num: number | string) => string;
     open: boolean;
@@ -11,7 +11,7 @@ interface TodayTicketsProps {
 }
 
 export default function TodayTickets({
-                                         tickets,
+                                         tickets = [],
                                          loading = false,
                                          toPersianNumber,
                                          open,
@@ -19,13 +19,17 @@ export default function TodayTickets({
                                      }: TodayTicketsProps) {
     const navigate = useNavigate();
 
-    // Default Persian number converter
+    // Default Persian number converter (fallback)
     const persian = toPersianNumber || ((num) => {
+        if (num === undefined || num === null) return "۰";
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
     });
 
-    // Navigation function
+    // Count how many of today's tickets are still "pending"
+    const pendingCount = tickets.filter(t => t.status === "pending").length;
+
+    // Navigation function to see all tickets
     const handleNavigate = () => {
         navigate("/AdminTicketPage");
     };
@@ -40,24 +44,32 @@ export default function TodayTickets({
     }
 
     return (
-        <div className="kpi-card today-tickets-card">
+        <div className={`kpi-card today-tickets-card ${pendingCount > 0 ? 'has-pending' : ''}`}>
             <div className="kpi-header">
                 <span className="kpi-title">تیکت‌های امروز</span>
                 <button
                     className={`view-button ${open ? 'active' : ''}`}
-                    onClick={onToggle}
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent navigation when clicking toggle
+                        onToggle();
+                    }}
                 >
-                    {open ? 'بستن' : 'مشاهده'}
+                    {open ? 'بستن لیست' : 'مشاهده جزئیات'}
                 </button>
             </div>
-            {/* Added cursor pointer and onClick to the data area */}
+
             <div
                 className="tickets-count"
                 onClick={handleNavigate}
                 style={{ cursor: 'pointer' }}
+                title="مشاهده تمام تیکت‌ها"
             >
-                <span className="kpi-value">{persian(tickets.length)}</span>
-                <span className="kpi-subtitle">تیکت</span>
+                <div className="main-value-row">
+                    <span className="kpi-value">{persian(tickets.length)}</span>
+                    <span className="kpi-subtitle">تیکت ثبت شده</span>
+                </div>
+
+
             </div>
         </div>
     );

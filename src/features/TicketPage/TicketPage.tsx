@@ -98,7 +98,7 @@ export default function ManageTicketPage() {
                 description: description.trim(),
                 date: dateStr,
                 time: timeStr,
-                userId: ,
+                userId:"",
                 ...(file && previewUrl && {
                     file: {
                         name: file.name,

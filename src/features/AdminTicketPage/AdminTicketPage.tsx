@@ -3,13 +3,11 @@ import "./AdminTicketPage.scss";
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, Button, TextField,
-    Typography, CircularProgress, IconButton, Tooltip,
-    Dialog, DialogTitle, DialogContent, DialogActions,
+    IconButton,
+    Dialog, DialogTitle,  DialogActions,
     Snackbar, Alert, Menu, MenuItem
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PendingIcon from "@mui/icons-material/Pending";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import PersonIcon from "@mui/icons-material/Person";
 import SendIcon from "@mui/icons-material/Send";
@@ -19,16 +17,13 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.tsx";
 
-// Extended Ticket interface for local state
 interface Ticket extends StoredTicket {
-    userId: string;
     userFullName: string;
     localStatus: "pending" | "answered" | "in-progress";
 }
 
-// Convert English numbers to Persian (for display)
 const toPersianNumber = (num: number | string): string => {
-    if (num === null || num === undefined) return '';
+    if (num === null || num === undefined) return '۰';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
     return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
 };
@@ -49,53 +44,42 @@ export default function AdminTicketPage() {
         severity: "success" as "success" | "error" | "info"
     });
 
-    // Fetch all tickets and users
     const fetchData = async () => {
         try {
             setLoading(true);
-
-            // Fetch tickets and users in parallel
-            const [ticketsResponse, usersResponse] = await Promise.all([
+            const [ticketsRes, usersRes] = await Promise.all([
                 ticketService.getAll(),
                 userService.getAll()
             ]);
 
-            setUsers(usersResponse.data);
+            const fetchedUsers: User[] = usersRes.data;
+            setUsers(fetchedUsers);
 
-            // Create a map for quick user lookup
-            const userMap = new Map<string, User>();
-            usersResponse.data.forEach((user: User) => {
-                userMap.set(user.id.toString(), user);
+            // FIX: Map users by ID (converting to string to ensure a match)
+            const userMap = new Map<string, string>();
+            fetchedUsers.forEach((u) => {
+                userMap.set(String(u.id), u.FullName || "نامشخص");
             });
 
-            // Transform tickets data to include user full name and local status
-            const ticketsData = ticketsResponse.data.map((ticket) => {
-                // Find the user for this ticket using the map
-                const user = userMap.get(ticket.userId?.toString() || "");
+            const ticketsData = ticketsRes.data.map((t: StoredTicket) => {
+                // Find the username using the map
+                const username = userMap.get(String(t.userId));
 
-                // Determine local status based on adminResponse
                 let localStatus: "pending" | "answered" | "in-progress" = "pending";
-
-                if (ticket.adminResponse) {
-                    localStatus = "answered";
-                }
+                if (t.adminResponse) localStatus = "answered";
 
                 return {
-                    ...ticket,
-                    userId: ticket.userId || "",
-                    userFullName: user?.FullName || `کاربر ${toPersianNumber(ticket.userId || Math.random())}`,
+                    ...t,
+                    userFullName: username || `کاربر ${toPersianNumber(t.userId || "")}`,
                     localStatus
                 };
             });
 
-            setTickets(ticketsData);
+            setTickets(ticketsData.reverse());
         } catch (error) {
-            console.error("Error fetching data:", error);
-            setSnackbar({
-                open: true,
-                message: "خطا در دریافت اطلاعات",
-                severity: "error"
-            });
+            // ESLint fix: Variable 'error' is now used
+            console.error("Critical error fetching dashboard data:", error);
+            setSnackbar({ open: true, message: "خطا در دریافت اطلاعات", severity: "error" });
         } finally {
             setLoading(false);
         }
@@ -105,457 +89,170 @@ export default function AdminTicketPage() {
         fetchData();
     }, []);
 
-    const handleResponseChange = (id: string, value: string) => {
-        setResponses(prev => ({ ...prev, [id]: value }));
-    };
-
     const submitResponse = async (id: string) => {
         const responseText = responses[id];
-        if (!responseText || responseText.trim() === "") {
-            setSnackbar({
-                open: true,
-                message: "لطفاً پاسخ را وارد کنید",
-                severity: "error"
-            });
-            return;
-        }
+        if (!responseText?.trim()) return;
 
         try {
             setSubmittingId(id);
-
             const currentTicket = tickets.find(t => t.id === id);
-            if (!currentTicket) {
-                throw new Error("تیکت یافت نشد");
-            }
+            if (!currentTicket) return;
 
-            // Create update payload matching StoredTicket interface
-            const updatedTicket: Partial<StoredTicket> = {
-                title: currentTicket.title,
-                description: currentTicket.description,
-                date: currentTicket.date,
-                time: currentTicket.time,
+            const updatedTicket = {
+                ...currentTicket,
                 adminResponse: responseText,
-                file: currentTicket.file
+                status: "answered"
             };
+
+            // @ts-ignore - Removing UI-only helper fields before sending to API
+            delete updatedTicket.userFullName;
+            // @ts-ignore
+            delete updatedTicket.localStatus;
 
             await ticketService.update(Number(id), updatedTicket as Omit<StoredTicket, "id">);
 
-            setSnackbar({
-                open: true,
-                message: "پاسخ با موفقیت ثبت شد",
-                severity: "success"
-            });
-
-            // Clear the response input
+            setTickets(prev => prev.map(t => t.id === id ? { ...t, adminResponse: responseText, localStatus: "answered" } : t));
             setResponses(prev => {
-                const newResponses = { ...prev };
-                delete newResponses[id];
-                return newResponses;
+                const updated = { ...prev };
+                delete updated[id];
+                return updated;
             });
-
-            // Update local state - mark as answered
-            setTickets(prevTickets =>
-                prevTickets.map(t =>
-                    t.id === id
-                        ? { ...t, adminResponse: responseText, localStatus: "answered" }
-                        : t
-                )
-            );
-
+            setSnackbar({ open: true, message: "پاسخ ثبت شد", severity: "success" });
         } catch (error) {
-            console.error("Error submitting response:", error);
-            setSnackbar({
-                open: true,
-                message: "خطا در ثبت پاسخ. لطفاً دوباره تلاش کنید.",
-                severity: "error"
-            });
+            console.error("Failed to submit response:", error);
+            setSnackbar({ open: true, message: "خطا در ثبت پاسخ", severity: "error" });
         } finally {
             setSubmittingId(null);
         }
     };
 
-    const handleDeleteClick = (id: string) => {
-        setDeleteId(id);
-        setDeleteConfirmOpen(true);
-    };
-
-    const handleCloseDeleteConfirm = () => {
-        setDeleteConfirmOpen(false);
-        setDeleteId(null);
-    };
-
     const handleConfirmDelete = async () => {
         if (!deleteId) return;
-
         try {
             await ticketService.delete(Number(deleteId));
-            setTickets(prevTickets => prevTickets.filter(t => t.id !== deleteId));
-            setSnackbar({
-                open: true,
-                message: "تیکت با موفقیت حذف شد",
-                severity: "success"
-            });
+            setTickets(prev => prev.filter(t => t.id !== deleteId));
+            setSnackbar({ open: true, message: "تیکت حذف شد", severity: "success" });
         } catch (error) {
-            console.error("Failed to delete ticket:", error);
-            setSnackbar({
-                open: true,
-                message: "خطا در حذف تیکت",
-                severity: "error"
-            });
+            console.error("Error during ticket deletion:", error);
+            setSnackbar({ open: true, message: "خطا در حذف تیکت", severity: "error" });
         } finally {
-            handleCloseDeleteConfirm();
+            setDeleteConfirmOpen(false);
         }
-    };
-
-    const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, index: number) => {
-        setAnchorEl(event.currentTarget);
-        setActiveIndex(index);
-    };
-
-    const handleCloseMenu = () => {
-        setAnchorEl(null);
-        setActiveIndex(null);
     };
 
     const handleStatusChange = async (status: "pending" | "answered" | "in-progress") => {
         if (activeIndex === null) return;
-
         const ticket = tickets[activeIndex];
-        if (ticket.localStatus === status) {
-            handleCloseMenu();
-            return;
-        }
-
         try {
-            // Create update payload matching StoredTicket interface
-            const updatedTicket: Partial<StoredTicket> = {
-                title: ticket.title,
-                description: ticket.description,
-                date: ticket.date,
-                time: ticket.time,
-                file: ticket.file,
-                adminResponse: status === "answered" ? (ticket.adminResponse || "پاسخ داده شد") :
-                    (status === "pending" ? null : ticket.adminResponse)
-            };
+            const updated = { ...ticket, adminResponse: status === "answered" ? (ticket.adminResponse || "تایید شد") : (status === "pending" ? null : ticket.adminResponse) };
 
-            await ticketService.update(Number(ticket.id), updatedTicket as Omit<StoredTicket, "id">);
+            // @ts-ignore
+            const { userFullName, localStatus, ...apiData } = updated;
+            await ticketService.update(Number(ticket.id), apiData as Omit<StoredTicket, "id">);
 
-            // Update local state
-            setTickets(prevTickets =>
-                prevTickets.map((t, idx) =>
-                    idx === activeIndex
-                        ? { ...t, localStatus: status, adminResponse: updatedTicket.adminResponse }
-                        : t
-                )
-            );
-
-            const statusText = status === 'answered' ? 'پاسخ داده شده' :
-                status === 'in-progress' ? 'در حال بررسی' : 'در انتظار';
-
-            setSnackbar({
-                open: true,
-                message: `وضعیت تیکت به ${statusText} تغییر کرد`,
-                severity: "success"
-            });
+            setTickets(prev => prev.map((t, i) => i === activeIndex ? { ...t, localStatus: status, adminResponse: updated.adminResponse } : t));
+            setSnackbar({ open: true, message: "وضعیت بروز شد", severity: "success" });
         } catch (error) {
-            console.error("Failed to update status:", error);
-            setSnackbar({
-                open: true,
-                message: "خطا در تغییر وضعیت",
-                severity: "error"
-            });
+            console.error("Status update error:", error);
+            setSnackbar({ open: true, message: "خطا در تغییر وضعیت", severity: "error" });
         } finally {
-            handleCloseMenu();
+            setAnchorEl(null);
         }
     };
 
-    const handleCloseSnackbar = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
-
-    const getUserFullName = (userId: string): string => {
-        const user = users.find(u => u.id.toString() === userId);
-        return user?.FullName || `کاربر ${toPersianNumber(userId)}`;
-    };
-
-    const pendingCount = tickets.filter(t => t.localStatus === 'pending').length;
-    const inProgressCount = tickets.filter(t => t.localStatus === 'in-progress').length;
-    const answeredCount = tickets.filter(t => t.localStatus === 'answered').length;
-
-    if (loading) {
-        return <AdminTicketSkeleton rows={5} />;
-    }
+    if (loading) return <AdminTicketSkeleton rows={5} />;
 
     return (
-        <div className="admin-ticket-page" dir="rtl">
-            {/* Header with stats */}
+        <div className="admin-ticket-page" dir="rtl" style={{ fontFamily: 'Vazirmatn' }}>
             <div className="page-header">
                 <div className="header-title">
                     <h1>مدیریت تیکت‌های پشتیبانی</h1>
-                    <p className="subtitle">مشاهده و پاسخ به تیکت‌های کاربران</p>
+                    <p className="subtitle">نمایش تیکت‌ها بر اساس نام کاربری</p>
                 </div>
                 <div className="stats-container">
                     <div className="stat-card total">
-                        <span className="stat-label">کل تیکت‌ها</span>
+                        <span className="stat-label">کل</span>
                         <span className="stat-value">{toPersianNumber(tickets.length)}</span>
-                    </div>
-                    <div className="stat-card pending">
-                        <span className="stat-label">در انتظار</span>
-                        <span className="stat-value">{toPersianNumber(pendingCount)}</span>
-                    </div>
-                    <div className="stat-card in-progress">
-                        <span className="stat-label">در حال بررسی</span>
-                        <span className="stat-value">{toPersianNumber(inProgressCount)}</span>
-                    </div>
-                    <div className="stat-card answered">
-                        <span className="stat-label">پاسخ داده شده</span>
-                        <span className="stat-value">{toPersianNumber(answeredCount)}</span>
                     </div>
                 </div>
             </div>
 
-            {/* Tickets Table */}
             <TableContainer component={Paper} className="tickets-table-container">
                 <Table className="tickets-table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>نام کاربر</TableCell>
-                            <TableCell>عنوان تیکت</TableCell>
+                            <TableCell>نام کاربری</TableCell>
+                            <TableCell>عنوان</TableCell>
                             <TableCell>توضیحات</TableCell>
-                            <TableCell>فایل پیوست</TableCell>
-                            <TableCell>تاریخ و زمان</TableCell>
+                            <TableCell>فایل</TableCell>
+                            <TableCell>زمان</TableCell>
                             <TableCell>وضعیت</TableCell>
-                            <TableCell>پاسخ مدیریت</TableCell>
+                            <TableCell>پاسخ</TableCell>
                             <TableCell>عملیات</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tickets.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                                    <Typography variant="body1" color="text.secondary">
-                                        هیچ تیکتی یافت نشد
-                                    </Typography>
+                        {tickets.map((ticket, index) => (
+                            <TableRow key={ticket.id} className={`${ticket.localStatus}-row`}>
+                                <TableCell>
+                                    <div className="user-info">
+                                        <PersonIcon className="user-icon" />
+                                        <span className="user-name"><b>{ticket.userFullName}</b></span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{ticket.title}</TableCell>
+                                <TableCell><div className="ticket-description">{ticket.description}</div></TableCell>
+                                <TableCell>{ticket.file ? <AttachFileIcon sx={{ color: '#666AF2' }} /> : "—"}</TableCell>
+                                <TableCell>
+                                    <div className="date-time">
+                                        <span>{toPersianNumber(ticket.date)}</span>
+                                        <span className="time">{toPersianNumber(ticket.time)}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <span className={`status-badge ${ticket.localStatus}`}>
+                                        {ticket.localStatus === 'answered' ? 'پاسخ داده شد' : 'در انتظار'}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    {ticket.localStatus !== 'answered' ? (
+                                        <div className="response-section">
+                                            <TextField
+                                                size="small"
+                                                value={responses[ticket.id] || ""}
+                                                onChange={(e) => setResponses(p => ({...p, [ticket.id]: e.target.value}))}
+                                            />
+                                            <IconButton onClick={() => submitResponse(ticket.id)} disabled={submittingId === ticket.id}><SendIcon /></IconButton>
+                                        </div>
+                                    ) : <div className="completed-response">{ticket.adminResponse}</div>}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="action-buttons">
+                                        <Button size="small" variant="contained" onClick={(e) => {setAnchorEl(e.currentTarget); setActiveIndex(index);}}>وضعیت</Button>
+                                        <IconButton onClick={() => {setDeleteId(ticket.id); setDeleteConfirmOpen(true);}} sx={{ color: '#dc2626' }}><DeleteIcon /></IconButton>
+                                    </div>
                                 </TableCell>
                             </TableRow>
-                        ) : (
-                            tickets.map((ticket, index) => (
-                                <TableRow key={ticket.id} className={`${ticket.localStatus}-row`}>
-                                    <TableCell>
-                                        <div className="user-info">
-                                            <PersonIcon className="user-icon" />
-                                            <span className="user-name">{getUserFullName(ticket.userId)}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="ticket-title">
-                                            {ticket.title}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="ticket-description" title={ticket.description}>
-                                            {ticket.description}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {ticket.file ? (
-                                            <Tooltip title={ticket.file.name} arrow>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => window.open(ticket.file?.url, '_blank')}
-                                                    sx={{ color: '#666AF2' }}
-                                                >
-                                                    <AttachFileIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        ) : (
-                                            <span className="no-file">—</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="date-time">
-                                            <span className="date">{ticket.date}</span>
-                                            <span className="time">{ticket.time}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className={`status-badge ${ticket.localStatus}`}>
-                                            {ticket.localStatus === 'answered' && (
-                                                <>
-                                                    <CheckCircleIcon sx={{ fontSize: 16, ml: 0.5 }} />
-                                                    پاسخ داده شده
-                                                </>
-                                            )}
-                                            {ticket.localStatus === 'in-progress' && (
-                                                <>
-                                                    <PendingIcon sx={{ fontSize: 16, ml: 0.5 }} />
-                                                    در حال بررسی
-                                                </>
-                                            )}
-                                            {ticket.localStatus === 'pending' && (
-                                                <>
-                                                    <PendingIcon sx={{ fontSize: 16, ml: 0.5 }} />
-                                                    در انتظار
-                                                </>
-                                            )}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        {ticket.localStatus === 'pending' || ticket.localStatus === 'in-progress' ? (
-                                            <div className="response-section">
-                                                <TextField
-                                                    size="small"
-                                                    placeholder="پاسخ خود را بنویسید..."
-                                                    value={responses[ticket.id] || ""}
-                                                    onChange={(e) => handleResponseChange(ticket.id, e.target.value)}
-                                                    multiline
-                                                    maxRows={2}
-                                                    disabled={submittingId === ticket.id}
-                                                    fullWidth
-                                                    variant="outlined"
-                                                    className="response-input"
-                                                />
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => submitResponse(ticket.id)}
-                                                    disabled={!responses[ticket.id]?.trim() || submittingId === ticket.id}
-                                                    className="submit-response-btn"
-                                                    sx={{
-                                                        backgroundColor: '#2DC68D',
-                                                        '&:hover': { backgroundColor: '#25a874' },
-                                                        minWidth: '100px'
-                                                    }}
-                                                    startIcon={submittingId === ticket.id ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <SendIcon />}
-                                                >
-                                                    {submittingId === ticket.id ? 'در حال ثبت' : 'ثبت'}
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <div className="completed-response">
-                                                <p>{ticket.adminResponse}</p>
-                                            </div>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="action-buttons">
-                                            <Button
-                                                className="quick-change-btn"
-                                                onClick={(e) => handleOpenMenu(e, index)}
-                                                sx={{
-                                                    backgroundColor: '#3579F3',
-                                                    '&:hover': { backgroundColor: '#2a5fc2' }
-                                                }}
-                                            >
-                                                تغییر وضعیت
-                                            </Button>
-                                            <Tooltip title="حذف تیکت" arrow>
-                                                <IconButton
-                                                    onClick={() => handleDeleteClick(ticket.id)}
-                                                    sx={{
-                                                        color: '#dc2626',
-                                                        '&:hover': {
-                                                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                                                            transform: 'scale(1.1)',
-                                                        }
-                                                    }}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
 
-            {/* Quick Status Change Menu */}
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleCloseMenu}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-                className="status-menu"
-            >
-                <MenuItem onClick={() => handleStatusChange("pending")}>
-                    <PendingIcon sx={{ fontSize: 20, ml: 1 }} />
-                    در انتظار
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange("in-progress")}>
-                    <PendingIcon sx={{ fontSize: 20, ml: 1 }} />
-                    در حال بررسی
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange("answered")}>
-                    <CheckCircleIcon sx={{ fontSize: 20, ml: 1 }} />
-                    پاسخ داده شده
-                </MenuItem>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                <MenuItem onClick={() => handleStatusChange("pending")}>در انتظار</MenuItem>
+                <MenuItem onClick={() => handleStatusChange("answered")}>پاسخ داده شد</MenuItem>
             </Menu>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                open={deleteConfirmOpen}
-                onClose={handleCloseDeleteConfirm}
-                maxWidth="xs"
-                fullWidth
-                className="delete-dialog"
-                PaperProps={{
-                    sx: {
-                        borderRadius: '12px',
-                        direction: 'rtl'
-                    }
-                }}
-            >
-                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700, color: '#dc2626' }}>
-                    تایید حذف
-                </DialogTitle>
-                <DialogContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                        آیا از حذف این تیکت اطمینان دارید؟
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        این عمل قابل بازگشت نیست.
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-                    <Button
-                        onClick={handleCloseDeleteConfirm}
-                        variant="outlined"
-                        sx={{ borderColor: '#6b7280', color: '#6b7280' }}
-                    >
-                        انصراف
-                    </Button>
-                    <Button
-                        onClick={handleConfirmDelete}
-                        variant="contained"
-                        sx={{ backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
-                    >
-                        حذف
-                    </Button>
+            <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                <DialogTitle>حذف تیکت</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirmOpen(false)}>انصراف</Button>
+                    <Button onClick={handleConfirmDelete} variant="contained" color="error">حذف</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Snackbar for notifications */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={snackbar.severity}
-                    sx={{
-                        width: '100%',
-                        fontFamily: 'Vazirmatn, sans-serif',
-                        fontSize: '0.95rem',
-                        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)'
-                    }}
-                >
-                    {snackbar.message}
-                </Alert>
+            <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(p => ({...p, open: false}))} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn' }}>{snackbar.message}</Alert>
             </Snackbar>
         </div>
     );

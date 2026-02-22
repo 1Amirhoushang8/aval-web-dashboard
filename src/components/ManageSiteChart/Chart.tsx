@@ -3,13 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import "./Chart.scss";
 
-// Type definitions for safety
 interface ChartData {
     labels: string[];
     requests: number[];
     payments: number[];
-    totalRequests: number;
-    totalPayments: number;
+    totalRequests?: number;
+    totalPayments?: number;
 }
 
 type TimeFilter = 'day' | 'week' | 'month';
@@ -17,7 +16,6 @@ type TimeFilter = 'day' | 'week' | 'month';
 export default function ManageSiteChart() {
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
-    // Fetch the data from JSON Server
     const { data: allStats, isError, isLoading } = useQuery({
         queryKey: ["financialStats"],
         queryFn: async () => {
@@ -37,10 +35,16 @@ export default function ManageSiteChart() {
         return toPersianNumber(formattedAmount) + ' تومان';
     };
 
-    // Extract the specific period data from the API response
-    const currentData: ChartData | null = allStats ? allStats[timeFilter] : null;
+    // Safely extract current data
+    const rawData: ChartData | null = allStats ? allStats[timeFilter] : null;
 
-    // Loading state
+    // Calculate totals automatically if they aren't in the JSON
+    const currentData = rawData ? {
+        ...rawData,
+        totalRequests: rawData.totalRequests || rawData.requests.reduce((a, b) => a + b, 0),
+        totalPayments: rawData.totalPayments || rawData.payments.reduce((a, b) => a + b, 0)
+    } : null;
+
     if (isLoading) {
         return (
             <div className="chart-loading">
@@ -50,26 +54,22 @@ export default function ManageSiteChart() {
         );
     }
 
-    // Error state
+    // This triggers if the button you clicked doesn't have data in db.json
     if (isError || !currentData) {
         return (
             <div className="chart-error">
                 <div className="error-icon">!</div>
-                <h3>خطا در دریافت اطلاعات</h3>
-                <p>متأسفانه در دریافت اطلاعات مالی مشکلی پیش آمده است.</p>
-                <button
-                    className="retry-button"
-                    onClick={() => window.location.reload()}
-                >
-                    تلاش مجدد
-                </button>
+                <h3>داده‌ای یافت نشد</h3>
+                <p>اطلاعات مربوط به بازه {timeFilter === 'day' ? 'روزانه' : timeFilter === 'week' ? 'هفتگی' : 'ماهانه'} در دیتابیس موجود نیست.</p>
+                <div className="time-filter-buttons" style={{marginTop: '10px'}}>
+                    <button className="time-filter-btn active" onClick={() => setTimeFilter('day')}>بازگشت به روزانه</button>
+                </div>
             </div>
         );
     }
 
     const maxValue = Math.max(...currentData.requests, ...currentData.payments, 1);
     const chartHeight = 300;
-
     const getBarHeight = (value: number) => (value / maxValue) * chartHeight;
 
     return (
@@ -106,7 +106,6 @@ export default function ManageSiteChart() {
 
             <div className="big-chart-container">
                 <div className="vertical-bar-chart">
-                    {/* Y-Axis Labels based on dynamic Max Value */}
                     <div className="chart-y-axis">
                         {[1, 0.75, 0.5, 0.25, 0].map((ratio, i) => (
                             <div key={i} className="y-axis-label">
@@ -141,10 +140,6 @@ export default function ManageSiteChart() {
                                 </div>
                             </div>
                         ))}
-                    </div>
-
-                    <div className="chart-x-axis">
-                        <span>مقدار (تومان)</span>
                     </div>
                 </div>
             </div>

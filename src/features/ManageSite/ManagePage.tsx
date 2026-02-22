@@ -13,7 +13,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 export default function ManageSitePage() {
-    const navigate = useNavigate(); // Added for navigation
+    const navigate = useNavigate();
     const [showTicketList, setShowTicketList] = useState(false);
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
@@ -37,57 +37,57 @@ export default function ManageSitePage() {
         });
     };
 
-    // --- Helper: Get Today's Persian Date (YYYY/MM/DD) ---
+    // --- Helper: Get Today's Date in Persian Digits (e.g. ۱۴۰۲/۱۲/۰۱) ---
+    // This MUST match the digits used in your db.json
     const getTodayPersianDate = () => {
-        return new Date().toLocaleDateString('fa-IR', {
+        return new Intl.DateTimeFormat('fa-IR', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit'
-        }).replace(/\//g, '/');
+        }).format(new Date());
     };
 
-    // --- Fetching Real Data from JSON API ---
-    const {
-        data: tickets = [],
-        isLoading,
-        isError,
-    } = useQuery<StoredTicket[]>({
+    // --- Fetching Data ---
+    const { data: tickets = [], isLoading: ticketsLoading, isError: ticketsError } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
-            try {
-                const response = await apiClient.get("/tickets");
-                return response.data;
-            } catch (err) {
-                throw new Error("مشکل در اتصال به سرور");
-            }
-        },
-        retry: 2,
-        retryDelay: 1000,
+            const response = await apiClient.get("/tickets");
+            return response.data;
+        }
     });
 
-    // Show error message if query fails
-    useEffect(() => {
-        if (isError) {
-            const errorMessage = "خطا در دریافت اطلاعات از سرور. لطفاً اتصال اینترنت خود را بررسی کنید.";
-            showError(errorMessage);
+    const { data: users = [], isLoading: usersLoading } = useQuery({
+        queryKey: ["users"],
+        queryFn: async () => {
+            const response = await apiClient.get("/users");
+            return response.data;
         }
-    }, [isError]);
+    });
 
-    // --- Filtering Logic: Reset every 24 hours ---
+    const isLoading = ticketsLoading || usersLoading;
+
+    // --- Filtering Logic ---
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
+        // Filters tickets where the date string matches exactly
         return tickets.filter(ticket => ticket.date === today);
     }, [tickets]);
 
+    // Error Handling
+    useEffect(() => {
+        if (ticketsError) {
+            showError("خطا در دریافت اطلاعات از سرور.");
+        }
+    }, [ticketsError]);
+
     const toPersianNumber = (num: number | string): string => {
-        if (!num && num !== 0) return "";
+        if (!num && num !== 0) return "۰";
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
     };
 
     const toggleTicketList = () => setShowTicketList(prev => !prev);
 
-    // Navigation function
     const handleTicketClick = (ticketId: string) => {
         navigate("/AdminTicketPage", { state: { ticketId } });
     };
@@ -114,8 +114,8 @@ export default function ManageSitePage() {
                         </>
                     ) : (
                         <>
-                            <span className="kpi-title">کاربران فعال</span>
-                            <span className="kpi-value">{toPersianNumber(1245)}</span>
+                            <span className="kpi-title">تعداد کاربران</span>
+                            <span className="kpi-value">{toPersianNumber(users.length)}</span>
                         </>
                     )}
                 </div>
@@ -129,7 +129,7 @@ export default function ManageSitePage() {
                 />
             </div>
 
-            {/* Ticket List - Keep your original style */}
+            {/* Ticket List Drawer */}
             {!isLoading && showTicketList && (
                 <div className="ticket-list-container">
                     <div className="ticket-list-header">
@@ -150,8 +150,8 @@ export default function ManageSitePage() {
                                 <div
                                     key={ticket.id || index}
                                     className="ticket-item"
-                                    onClick={() => handleTicketClick(ticket.id)} // Navigation added here
-                                    style={{ cursor: "pointer" }} // Visual hint added here
+                                    onClick={() => handleTicketClick(ticket.id)}
+                                    style={{ cursor: "pointer" }}
                                 >
                                     <div className="item-cell title-cell">
                                         <span className="ticket-title">{ticket.title}</span>
@@ -167,14 +167,14 @@ export default function ManageSitePage() {
                         ) : (
                             <div className="empty-state">
                                 <div className="empty-icon">📭</div>
-                                <p className="empty-message">تیکتی برای امروز ثبت نشده است.</p>
+                                <p className="empty-message">تیکتی برای امروز ({toPersianNumber(getTodayPersianDate())}) ثبت نشده است.</p>
                             </div>
                         )}
                     </div>
                 </div>
             )}
 
-            {/* Main Feature Sections */}
+            {/* Charts and Summaries */}
             {isLoading ? (
                 <>
                     <ManageSiteChartSkeleton />
@@ -200,24 +200,10 @@ export default function ManageSitePage() {
                         width: '100%',
                         fontFamily: 'Vazirmatn, sans-serif',
                         direction: 'rtl',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                         borderRadius: '12px',
-                        padding: '8px 16px',
-                        '& .MuiAlert-message': {
-                            padding: '8px 0',
-                            fontSize: '0.95rem',
-                            fontWeight: 500
-                        },
-                        '& .MuiAlert-icon': {
-                            fontSize: '24px',
-                            opacity: 0.9
-                        }
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>⚠️</span>
-                        <span>{snackbar.message}</span>
-                    </div>
+                    {snackbar.message}
                 </Alert>
             </Snackbar>
         </div>

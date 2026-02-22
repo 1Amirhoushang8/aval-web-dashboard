@@ -5,6 +5,7 @@ export interface StoredTicket {
     description: string;
     date: string;
     time: string;
+    status: string;
     adminResponse?: string | null;
     file?:  {
         name: string;
