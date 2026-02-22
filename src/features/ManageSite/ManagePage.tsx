@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "./ManagePage.scss";
 import ManageSiteChart from "../../components/ManageSiteChart/Chart.tsx";
 import ManageSiteChartSkeleton from "../../Skeleton/ManageSiteChartSkeleton/ManageSiteChartSkeleton.tsx";
@@ -11,8 +12,8 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-
 export default function ManageSitePage() {
+    const navigate = useNavigate(); // Added for navigation
     const [showTicketList, setShowTicketList] = useState(false);
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
@@ -86,7 +87,10 @@ export default function ManageSitePage() {
 
     const toggleTicketList = () => setShowTicketList(prev => !prev);
 
-
+    // Navigation function
+    const handleTicketClick = (ticketId: string) => {
+        navigate("/AdminTicketPage", { state: { ticketId } });
+    };
 
     return (
         <div className={`mainchart ${isLoading ? 'is-loading' : ''}`} dir="rtl" style={{ fontFamily: "Vazirmatn, Vazir, system-ui, sans-serif" }}>
@@ -125,7 +129,7 @@ export default function ManageSitePage() {
                 />
             </div>
 
-            {/* Ticket List - Filters automatically every 24 hours */}
+            {/* Ticket List - Keep your original style */}
             {!isLoading && showTicketList && (
                 <div className="ticket-list-container">
                     <div className="ticket-list-header">
@@ -143,7 +147,12 @@ export default function ManageSitePage() {
 
                         {todayTickets.length > 0 ? (
                             todayTickets.map((ticket, index) => (
-                                <div key={ticket.id || index} className="ticket-item">
+                                <div
+                                    key={ticket.id || index}
+                                    className="ticket-item"
+                                    onClick={() => handleTicketClick(ticket.id)} // Navigation added here
+                                    style={{ cursor: "pointer" }} // Visual hint added here
+                                >
                                     <div className="item-cell title-cell">
                                         <span className="ticket-title">{ticket.title}</span>
                                     </div>
@@ -178,7 +187,6 @@ export default function ManageSitePage() {
                 </>
             )}
 
-            {/* Improved Error Snackbar with better Farsi message */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={5000}
@@ -208,7 +216,7 @@ export default function ManageSitePage() {
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span>⚠️</span>
-                        <span>خطا در دریافت اطلاعات. لطفاً دوباره تلاش کنید.</span>
+                        <span>{snackbar.message}</span>
                     </div>
                 </Alert>
             </Snackbar>

@@ -1,15 +1,17 @@
 export interface StoredTicket {
     id: string;
+    userId: string;
     title: string;
     description: string;
     date: string;
     time: string;
-    file?: {
+    adminResponse?: string | null;
+    file?:  {
         name: string;
         type: string;
         size: number;
         url: string;
-    };
+    } | null;
 }
 
 

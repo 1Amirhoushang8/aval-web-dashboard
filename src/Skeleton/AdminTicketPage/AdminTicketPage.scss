@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+
+/* ==================== VARIABLES ==================== */
+:root {
+  --color-primary: #3579F3;
+  --color-bg: #f6f7fb;
+  --color-white: #ffffff;
+  --color-border: #e5e7eb;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+/* ==================== SKELETON ANIMATION ==================== */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* ==================== BASE STYLES ==================== */
+.admin-ticket-skeleton {
+  direction: rtl;
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg);
+  width: 95%;
+  margin-right: 4rem;
+  min-height: 100vh;
+  font-family: "Vazirmatn", sans-serif !important;
+}
+
+/* ==================== HEADER SKELETON ==================== */
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+
+  .skeleton-header-title {
+    flex: 1;
+
+    .skeleton-title {
+      width: 300px;
+      height: 36px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite linear;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+    }
+
+    .skeleton-subtitle {
+      width: 200px;
+      height: 20px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite linear;
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  .skeleton-stats {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+
+    .skeleton-stat-card {
+      width: 100px;
+      height: 90px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite linear;
+      border-radius: var(--radius-md);
+    }
+  }
+}
+
+/* ==================== TABLE SKELETON ==================== */
+.skeleton-table-container {
+  border-radius: var(--radius-lg) !important;
+  background-color: var(--color-white) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden;
+  width: 100%;
+
+  .skeleton-table {
+    border-collapse: separate;
+    border-spacing: 0 var(--spacing-sm);
+    min-width: 1200px;
+
+    .MuiTableHead-root {
+      th {
+        padding: var(--spacing-md) var(--spacing-sm);
+        border-bottom: 2px solid var(--color-border);
+        background-color: var(--color-white);
+      }
+    }
+
+    .MuiTableBody-root {
+      tr {
+        background-color: var(--color-white);
+
+        td {
+          padding: var(--spacing-md) var(--spacing-sm);
+          border: none;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+
+/* ==================== SKELETON ELEMENTS ==================== */
+.skeleton-cell {
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-title-short {
+  width: 120px;
+}
+
+.skeleton-description {
+  width: 180px;
+  height: 40px;
+}
+
+.skeleton-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .skeleton-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 50%;
+  }
+
+  .skeleton-text {
+    width: 100px;
+  }
+}
+
+.skeleton-file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .skeleton-icon-small {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 50%;
+  }
+
+  .skeleton-file-text {
+    width: 80px;
+  }
+}
+
+.skeleton-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  .skeleton-date-text {
+    width: 70px;
+  }
+
+  .skeleton-time-text {
+    width: 50px;
+  }
+}
+
+.skeleton-badge {
+  width: 90px;
+  height: 28px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 999px;
+}
+
+.skeleton-response {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .skeleton-response-text {
+    width: 150px;
+    height: 16px;
+  }
+
+  .skeleton-button-small {
+    width: 80px;
+    height: 32px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.skeleton-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .skeleton-button {
+    width: 80px;
+    height: 32px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: var(--radius-sm);
+  }
+
+  .skeleton-icon-button {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 50%;
+  }
+}
+
+/* ==================== RESPONSIVE SKELETON ==================== */
+@media (max-width: 1200px) {
+  .admin-ticket-skeleton {
+    padding: var(--spacing-lg);
+    margin-right: 2rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .admin-ticket-skeleton {
+    padding: var(--spacing-md);
+    margin-right: 0;
+
+    .skeleton-header {
+      flex-wrap: wrap;
+
+      .skeleton-header-title {
+        width: 100%;
+      }
+
+      .skeleton-stats {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-ticket-skeleton {
+    padding: var(--spacing-sm);
+
+    .skeleton-header {
+      .skeleton-stats {
+        flex-direction: column;
+
+        .skeleton-stat-card {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

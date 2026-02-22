@@ -9,6 +9,8 @@
   --color-warning: #92400e;
   --color-error: #991b1b;
   --color-error-light: #ef4444;
+  --color-error-bright: #dc2626;
+  --color-error-dark: #b91c1c;
   --color-bg: #f6f7fb;
   --color-white: #ffffff;
   --color-text-dark: #111827;
@@ -499,14 +501,47 @@
   }
 }
 
-/* ==================== DELETE BUTTON ==================== */
+/* ==================== DELETE BUTTON - ENHANCED RED ==================== */
 .MuiIconButton-root[aria-label="delete"] {
-  color: var(--color-error-light) !important;
-  transition: all 0.3s ease !important;
+  color: var(--color-error-bright) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    z-index: 0;
+  }
 
   &:hover {
-    background-color: rgba(239, 68, 68, 0.1) !important;
-    transform: scale(1.1);
+    color: var(--color-error-dark) !important;
+    background-color: rgba(220, 38, 38, 0.12) !important;
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 4px 8px rgba(220, 38, 38, 0.3));
+
+    &::before {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(-5deg);
+  }
+
+  svg {
+    position: relative;
+    z-index: 1;
+    transition: all 0.2s ease;
   }
 }
 

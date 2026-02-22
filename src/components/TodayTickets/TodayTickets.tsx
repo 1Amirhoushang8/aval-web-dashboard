@@ -1,11 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import "./TodayTickets.scss";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
 
 interface TodayTicketsProps {
-    tickets: StoredTicket[];          // now accepts StoredTicket[]
+    tickets: StoredTicket[];
     loading?: boolean;
     toPersianNumber?: (num: number | string) => string;
-    open: boolean;                    // still needed for button state
+    open: boolean;
     onToggle: () => void;
 }
 
@@ -16,11 +17,18 @@ export default function TodayTickets({
                                          open,
                                          onToggle
                                      }: TodayTicketsProps) {
-    // Default Persian number converter if not provided
+    const navigate = useNavigate();
+
+    // Default Persian number converter
     const persian = toPersianNumber || ((num) => {
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
     });
+
+    // Navigation function
+    const handleNavigate = () => {
+        navigate("/AdminTicketPage");
+    };
 
     if (loading) {
         return (
@@ -42,7 +50,12 @@ export default function TodayTickets({
                     {open ? 'بستن' : 'مشاهده'}
                 </button>
             </div>
-            <div className="tickets-count">
+            {/* Added cursor pointer and onClick to the data area */}
+            <div
+                className="tickets-count"
+                onClick={handleNavigate}
+                style={{ cursor: 'pointer' }}
+            >
                 <span className="kpi-value">{persian(tickets.length)}</span>
                 <span className="kpi-subtitle">تیکت</span>
             </div>

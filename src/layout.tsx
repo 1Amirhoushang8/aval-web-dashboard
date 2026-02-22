@@ -26,7 +26,7 @@ export default function Layout() {
                     {
                         id: 3,
                         title: "تیکت‌ها",
-                        link: "/TicketPage",
+                        link: "/AdminTicketPage",
                         icon: <i className="bi bi-envelope" />,
                     },
                 ]}

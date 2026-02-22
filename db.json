@@ -1,20 +1,28 @@
 {
-  "users": [
-    {
-      "id": "3",
-      "SerialNumber": "۱۹۲۰۴۸۳۷",
-      "FullName": "رضا احمدی",
-      "service": "میزبانی وب",
-      "price": "۱,۲۰۰,۰۰۰ تومان",
-      "status": "لغو-شده",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
+  "roles": {
+    "ADMIN": {
+      "access": [
+        "financial_page",
+        "products_page",
+        "all_tickets_view",
+        "respond_to_tickets"
+      ],
+      "description": "دسترسی کامل به مدیریت و بخش مالی"
     },
+    "USER": {
+      "access": [
+        "send_ticket",
+        "view_own_tickets"
+      ],
+      "description": "دسترسی محدود به ارسال و مشاهده تیکت‌های خود"
+    }
+  },
+  "users": [
     {
       "id": "4",
       "SerialNumber": "۱۹۲۰۴۸۳۸",
       "FullName": "سارا نوروزی",
+      "roleKey": "USER",
       "service": "اپلیکیشن موبایل",
       "price": "۹۸۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -26,6 +34,7 @@
       "id": "5",
       "SerialNumber": "۱۹۲۰۴۸۳۹",
       "FullName": "محمد حسینی",
+      "roleKey": "USER",
       "service": "بهینه‌سازی SEO",
       "price": "۴۵۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -37,6 +46,7 @@
       "id": "6",
       "SerialNumber": "۱۹۲۰۴۸۴۰",
       "FullName": "فاطمه رضایی",
+      "roleKey": "USER",
       "service": "طراحی گرافیک",
       "price": "۲,۱۵۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -48,6 +58,7 @@
       "id": "7",
       "SerialNumber": "۱۹۲۰۴۸۴۱",
       "FullName": "امیرحسین محمدی",
+      "roleKey": "USER",
       "service": "مشاوره فنی",
       "price": "۷۵۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -59,6 +70,7 @@
       "id": "07e2",
       "SerialNumber": "۱۳۴۵۱۳۴۶۱۲۲۱",
       "FullName": "امیر هوشنگ",
+      "roleKey": "USER",
       "service": "پشتیبانی سالانه",
       "price": "۶۵,۳۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -70,6 +82,7 @@
       "id": "8",
       "SerialNumber": "۱۹۲۰۴۸۴۲",
       "FullName": "نیلوفر کیانی",
+      "roleKey": "USER",
       "service": "امنیت شبکه",
       "price": "۳,۵۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -81,6 +94,7 @@
       "id": "9",
       "SerialNumber": "۱۹۲۰۴۸۴۳",
       "FullName": "بابک زنجانی",
+      "roleKey": "USER",
       "service": "پنل پیامک",
       "price": "۱۵۰,۰۰۰ تومان",
       "status": "لغو-شده",
@@ -92,6 +106,7 @@
       "id": "10",
       "SerialNumber": "۱۹۲۰۴۸۴۴",
       "FullName": "مریم سعیدی",
+      "roleKey": "USER",
       "service": "تولید محتوا",
       "price": "۲,۴۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -103,6 +118,7 @@
       "id": "11",
       "SerialNumber": "۱۹۲۰۴۸۴۵",
       "FullName": "احسان غفاری",
+      "roleKey": "USER",
       "service": "آنالیز داده",
       "price": "۴,۸۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -114,6 +130,7 @@
       "id": "12",
       "SerialNumber": "۱۹۲۰۴۸۴۶",
       "FullName": "هانیه مرادی",
+      "roleKey": "USER",
       "service": "اینستاگرام مارکتینگ",
       "price": "۱,۹۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -125,6 +142,7 @@
       "id": "13",
       "SerialNumber": "۱۹۲۰۴۸۴۷",
       "FullName": "پویا صبوری",
+      "roleKey": "USER",
       "service": "طراحی UI/UX",
       "price": "۸,۲۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -136,6 +154,7 @@
       "id": "14",
       "SerialNumber": "۱۹۲۰۴۸۴۸",
       "FullName": "نازنین بیاتی",
+      "roleKey": "USER",
       "service": "عکاسی صنعتی",
       "price": "۳,۷۰۰,۰۰۰ تومان",
       "status": "لغو-شده",
@@ -147,6 +166,7 @@
       "id": "15",
       "SerialNumber": "۱۹۲۰۴۸۴۹",
       "FullName": "سینا کریمی",
+      "roleKey": "USER",
       "service": "سرور مجازی VDS",
       "price": "۶۵۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -158,6 +178,7 @@
       "id": "16",
       "SerialNumber": "۱۹۲۰۴۸۵۰",
       "FullName": "ژاله صادقی",
+      "roleKey": "USER",
       "service": "برندینگ",
       "price": "۱۵,۰۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -169,6 +190,7 @@
       "id": "17",
       "SerialNumber": "۱۹۲۰۴۸۵۱",
       "FullName": "کامران تفتی",
+      "roleKey": "USER",
       "service": "مدیریت کمپین AD",
       "price": "۲,۸۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -180,6 +202,7 @@
       "id": "18",
       "SerialNumber": "۱۹۲۰۴۸۵۲",
       "FullName": "مهتاب کرامتی",
+      "roleKey": "USER",
       "service": "ترجمه تخصصی",
       "price": "۹۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -191,6 +214,7 @@
       "id": "19",
       "SerialNumber": "۱۹۲۰۴۸۵۳",
       "FullName": "آرش استیلاف",
+      "roleKey": "USER",
       "service": "توسعه وردپرس",
       "price": "۵,۴۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -202,6 +226,7 @@
       "id": "20",
       "SerialNumber": "۱۹۲۰۴۸۵۴",
       "FullName": "بهار افشاری",
+      "roleKey": "USER",
       "service": "موشن گرافیک",
       "price": "۷,۰۰۰,۰۰۰ تومان",
       "status": "لغو-شده",
@@ -213,6 +238,7 @@
       "id": "21",
       "SerialNumber": "۱۹۲۰۴۸۵۵",
       "FullName": "سپهر خلسه",
+      "roleKey": "USER",
       "service": "تبلیغات کلیکی",
       "price": "۱,۱۰۰,۰۰۰ تومان",
       "status": "پرداخت-شده",
@@ -224,6 +250,7 @@
       "id": "22",
       "SerialNumber": "۱۹۲۰۴۸۵۶",
       "FullName": "رویا نونهالی",
+      "roleKey": "USER",
       "service": "کوچینگ کسب و کار",
       "price": "۱۲,۵۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -235,6 +262,7 @@
       "id": "9327",
       "SerialNumber": "۱۱۳۴۵۱۳۴۵",
       "FullName": "صفری",
+      "roleKey": "USER",
       "service": "پشتیبانی سالانه",
       "price": "۸۰,۰۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -246,6 +274,7 @@
       "id": "49a7",
       "SerialNumber": "۱۲۳۴۲۳۴۴۲۳۴",
       "FullName": "مریم کریمی",
+      "roleKey": "USER",
       "service": "پشتیبانی سالانه",
       "price": "۷۰,۰۰۰,۰۰۰ تومان",
       "status": "درحال-انجام",
@@ -257,65 +286,113 @@
   "tickets": [
     {
       "id": "1",
+      "userId": 2,
       "title": "مشکل در ورود به سیستم",
-      "description": "علی محمدی",
+      "description": "من نمی‌توانم به پنل خود دسترسی پیدا کنم.",
       "date": "1402/02/15",
       "time": "۱۰:۳۰ صبح",
-      "type": "ایجاد شده"
-    },
-    {
-      "id": "2",
-      "title": "خرابی پرینتر",
-      "description": "مریم کریمی",
-      "date": "1402/02/15",
-      "time": "۱۱:۴۵ صبح",
-      "type": "به‌روزرسانی شده"
+      "status": "answered",
+      "adminResponse": "مشکل شما برطرف شد."
     },
     {
       "id": "4736",
+      "userId": 5,
       "title": "مشکل نرم افزاری",
-      "description": "مشکل 1",
+      "description": "سیستم هنگ می‌کند.",
       "date": "۱۴۰۴/۱۲/۰۲",
       "time": "۱۴:۴۸",
-      "type": "ایجاد شده",
-      "priority": "medium"
+      "status": "answered",
+      "adminResponse": "تست"
     },
     {
-      "id": "e578",
-      "title": "پشتیبان گیری",
-      "description": "تست 3",
-      "date": "۱۴۰۴/۱۲/۰۲",
-      "time": "۱۴:۵۶",
-      "type": "ایجاد شده",
-      "priority": "medium"
-    },
-    {
-      "id": "90d4",
-      "title": "تست 1",
-      "description": "تست شماره 1",
+      "title": "خطا در پرداخت",
+      "description": "تراکنش انجام شد اما اشتراک فعال نشد.",
       "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۰۹:۳۴"
+      "time": "۰۹:۱۵",
+      "adminResponse": "پاسخ داده شد",
+      "id": "4737"
     },
     {
-      "id": "655d",
-      "title": "خرابی سخت افزار",
-      "description": "تست شماره 2",
+      "id": "4738",
+      "userId": 8,
+      "title": "درخواست فاکتور رسمی",
+      "description": "لطفاً فاکتور خرید دوره زمستان را ارسال کنید.",
       "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۱۰:۰۱"
+      "time": "۱۱:۲۰",
+      "status": "answered",
+      "adminResponse": "فاکتور به ایمیل شما ارسال گردید.",
+      "file": {
+        "name": "invoice_782.pdf",
+        "type": "application/pdf",
+        "size": 102400,
+        "url": "https://api.example.com/files/inv_782.pdf"
+      }
     },
     {
-      "id": "8ab1",
-      "title": "تست 4",
-      "description": "تست شماره 4",
-      "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۱۰:۴۴"
+      "id": "4739",
+      "userId": 3,
+      "title": "تغییر شماره همراه",
+      "description": "قصد دارم شماره ثبت نامی خود را تغییر دهم.",
+      "date": "۱۴۰۴/۱۲/۰۴",
+      "time": "۱۶:۰۵",
+      "status": "in-progress",
+      "adminResponse": "در حال بررسی توسط واحد پشتیبانی."
     },
     {
-      "id": "af4b",
-      "title": "مشکل در ورود به سیستم",
-      "description": "تست شماره 5",
-      "date": "۱۴۰۴/۱۲/۰۳",
-      "time": "۱۳:۰۲"
+      "id": "4740",
+      "userId": 21,
+      "title": "کندی سرعت پنل",
+      "description": "لود شدن صفحات بیش از ۱۰ ثانیه طول می‌کشد.",
+      "date": "۱۴۰۴/۱۲/۰۴",
+      "time": "۱۸:۳۰",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "4741",
+      "userId": 15,
+      "title": "سوال در مورد API",
+      "description": "مستندات بخش وب‌هوک ناقص است.",
+      "date": "۱۴۰۴/۱۲/۰۵",
+      "time": "۰۸:۰۰",
+      "status": "answered",
+      "adminResponse": "لینک جدید مستندات برای شما ایمیل شد."
+    },
+    {
+      "id": "4742",
+      "userId": 9,
+      "title": "بازیابی رمز عبور",
+      "description": "ایمیل بازیابی برای من ارسال نمی‌شود.",
+      "date": "۱۴۰۴/۱۲/۰۵",
+      "time": "۱۰:۱۰",
+      "status": "answered",
+      "adminResponse": "پوشه Spam خود را چک کنید."
+    },
+    {
+      "id": "4743",
+      "userId": 33,
+      "title": "ارسال اسکرین‌شات خطا",
+      "description": "تصویر خطای مشاهده شده ضمیمه شد.",
+      "date": "۱۴۰۴/۱۲/۰۶",
+      "time": "۱۲:۴۵",
+      "status": "pending",
+      "adminResponse": null,
+      "file": {
+        "name": "error_log.png",
+        "type": "image/png",
+        "size": 45000,
+        "url": "https://api.example.com/files/err_4743.png"
+      }
+    },
+    {
+      "id": "4744",
+      "userId": 4,
+      "title": "پیشنهاد بهبود رابط کاربری",
+      "description": "اگر دکمه خروج در دسترس‌تر باشد بهتر است.",
+      "date": "۱۴۰۴/۱۲/۰۶",
+      "time": "۱۴:۲۰",
+      "status": "answered",
+      "adminResponse": "ممنون از پیشنهاد شما."
     }
   ],
   "financialStats": {
@@ -349,56 +426,6 @@
       ],
       "totalRequests": 1250000,
       "totalPayments": 850000
-    },
-    "week": {
-      "labels": [
-        "هفته ۱",
-        "هفته ۲",
-        "هفته ۳",
-        "هفته ۴"
-      ],
-      "requests": [
-        1200000,
-        800000,
-        950000,
-        1100000
-      ],
-      "payments": [
-        900000,
-        600000,
-        750000,
-        850000
-      ],
-      "totalRequests": 4500000,
-      "totalPayments": 3200000
-    },
-    "month": {
-      "labels": [
-        "فروردین",
-        "اردیبهشت",
-        "خرداد",
-        "تیر",
-        "مرداد",
-        "شهریور"
-      ],
-      "requests": [
-        4500000,
-        3800000,
-        5200000,
-        4100000,
-        4800000,
-        5500000
-      ],
-      "payments": [
-        3500000,
-        2800000,
-        4200000,
-        3100000,
-        3800000,
-        4500000
-      ],
-      "totalRequests": 18500000,
-      "totalPayments": 12500000
     }
   }
 }

@@ -860,7 +860,21 @@ export default function AccountingPage() {
                                     </TableCell>
                                     <TableCell>
                                         <Tooltip title="حذف فاکتور" arrow>
-                                            <IconButton aria-label="delete" onClick={() => handleDeleteClick(originalIndex)} sx={{ color: '#ef4444' }}><DeleteIcon /></IconButton>
+                                            <IconButton
+                                                aria-label="delete"
+                                                onClick={() => handleDeleteClick(originalIndex)}
+                                                sx={{
+                                                    color: '#dc2626',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                                        color: '#b91c1c',
+                                                        transform: 'scale(1.1)',
+                                                    },
+                                                    transition: 'all 0.2s ease-in-out'
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
                                         </Tooltip>
                                     </TableCell>
                                 </TableRow>

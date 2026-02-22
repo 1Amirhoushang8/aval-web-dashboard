@@ -3,7 +3,8 @@ import Layout from "./layout.tsx";
 import LoginPage from "./features/loginpage/LoginPage.tsx";
 import AccountingPage from "./features/Accounting/Accounting.tsx";
 import ManageSitePage from "./features/ManageSite/ManagePage.tsx";
-import ManageTicketPage from "./features/TicketPage/TicketPage.tsx";
+// import ManageTicketPage from "./features/TicketPage/TicketPage.tsx";
+import AdminTicketPage from "./features/AdminTicketPage/AdminTicketPage.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -30,15 +31,25 @@ export default function Router() {
                             </PageWrapper>
                         }
                     />
-                    <Route
-                        path="/TicketPage"
-                        element={
-                            <PageWrapper>
-                                <ManageTicketPage />
-                            </PageWrapper>
-                        }
-                    />
-                </Route>
+                {/*    <Route*/}
+                {/*        path="/TicketPage"*/}
+                {/*        element={*/}
+                {/*            <PageWrapper>*/}
+                {/*                <ManageTicketPage />*/}
+                {/*            </PageWrapper>*/}
+                {/*        }*/}
+                {/*    />*/}
+                {/*</Route>*/}
+
+                <Route
+                    path="/AdminTicketPage"
+                    element={
+                        <PageWrapper>
+                            <AdminTicketPage />
+                        </PageWrapper>
+                    }
+                />
+            </Route>
 
                 <Route
                     path="/"

@@ -1,0 +1,711 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+/* ==================== VARIABLES ==================== */
+:root {
+  --color-primary: #3579F3;
+  --color-primary-dark: #2a5fc2;
+  --color-success: #2DC68D;
+  --color-success-dark: #25a874;
+  --color-purple: #666AF2;
+  --color-purple-dark: #5255c2;
+  --color-error: #dc2626;
+  --color-error-dark: #b91c1c;
+  --color-warning: #f59e0b;
+  --color-bg: #f6f7fb;
+  --color-white: #ffffff;
+  --color-text-dark: #111827;
+  --color-text-medium: #1f2937;
+  --color-text-light: #6b7280;
+  --color-border: #e5e7eb;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+/* ==================== BASE STYLES ==================== */
+.admin-ticket-page {
+  direction: rtl;
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg);
+  width: 95%;
+  margin-right: 4rem;
+  min-height: 100vh;
+  font-family: "Vazirmatn", sans-serif !important;
+}
+
+/* Force font on ALL child elements */
+.admin-ticket-page,
+.admin-ticket-page * {
+  font-family: "Vazirmatn", sans-serif !important;
+}
+
+/* Table elements */
+.admin-ticket-page .MuiTable-root,
+.admin-ticket-page .MuiTableCell-head,
+.admin-ticket-page .MuiTableCell-body,
+.admin-ticket-page .MuiTableHead-root,
+.admin-ticket-page .MuiTableBody-root,
+.admin-ticket-page .MuiButton-root,
+.admin-ticket-page .quick-change-btn,
+.admin-ticket-page .submit-response-btn,
+.admin-ticket-page .MuiTypography-root,
+.admin-ticket-page .MuiFormControl-root,
+.admin-ticket-page .MuiInputLabel-root,
+.admin-ticket-page .MuiOutlinedInput-root,
+.admin-ticket-page .MuiMenuItem-root,
+.admin-ticket-page .MuiMenu-paper,
+.admin-ticket-page .status-badge {
+  font-family: "Vazirmatn", sans-serif !important;
+}
+
+/* ==================== PAGE HEADER ==================== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+
+  .header-title {
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--color-text-dark);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--color-text-light);
+      margin: 0;
+    }
+  }
+
+  .stats-container {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+
+    .stat-card {
+      background: var(--color-white);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-md);
+      text-align: center;
+      min-width: 100px;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      &.total {
+        border-color: var(--color-primary);
+        .stat-value { color: var(--color-primary); }
+      }
+
+      &.pending {
+        border-color: var(--color-warning);
+        .stat-value { color: var(--color-warning); }
+      }
+
+      &.in-progress {
+        border-color: var(--color-purple);
+        .stat-value { color: var(--color-purple); }
+      }
+
+      &.answered {
+        border-color: var(--color-success);
+        .stat-value { color: var(--color-success); }
+      }
+
+      .stat-label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--color-text-light);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-value {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+    }
+  }
+}
+
+/* ==================== TABLE CONTAINER ==================== */
+.tickets-table-container {
+  border-radius: var(--radius-lg) !important;
+  background-color: var(--color-white) !important;
+  box-shadow: var(--shadow-lg) !important;
+  overflow: hidden;
+  width: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+/* ==================== TABLE STYLES ==================== */
+.tickets-table {
+  border-collapse: separate;
+  border-spacing: 0 var(--spacing-sm);
+  min-width: 1200px;
+
+  /* Table Header */
+  .MuiTableHead-root {
+    th {
+      font-size: 1rem !important;
+      font-weight: 800 !important;
+      color: var(--color-text-medium);
+      text-align: right;
+      padding: var(--spacing-md) var(--spacing-sm);
+      border-bottom: 2px solid var(--color-border);
+      background-color: var(--color-white);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 1px;
+        background: linear-gradient(to left, transparent, var(--color-border), transparent);
+      }
+    }
+  }
+
+  /* Table Body */
+  .MuiTableBody-root {
+    tr {
+      transition: all 0.3s ease;
+      background-color: var(--color-white);
+      border-radius: var(--radius-md);
+
+      &:hover {
+        background-color: rgba(53, 121, 243, 0.03);
+        transform: translateX(-2px);
+      }
+
+      &.pending-row {
+        background-color: rgba(245, 158, 11, 0.02);
+      }
+
+      &.in-progress-row {
+        background-color: rgba(102, 106, 242, 0.02);
+      }
+
+      &.answered-row {
+        background-color: rgba(45, 198, 141, 0.02);
+      }
+
+      td {
+        font-size: 0.95rem;
+        color: var(--color-text-dark);
+        padding: var(--spacing-md) var(--spacing-sm);
+        border: none;
+        text-align: right;
+        vertical-align: middle;
+        position: relative;
+
+        &:first-child {
+          border-radius: var(--radius-md) 0 0 var(--radius-md);
+          padding-right: var(--spacing-lg);
+          min-width: 150px;
+        }
+
+        &:last-child {
+          border-radius: 0 var(--radius-md) var(--radius-md) 0;
+          padding-left: var(--spacing-lg);
+        }
+      }
+    }
+  }
+}
+
+/* ==================== TABLE CELL COMPONENTS ==================== */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .user-icon {
+    color: var(--color-primary);
+    font-size: 1.2rem;
+    background: rgba(53, 121, 243, 0.1);
+    padding: 4px;
+    border-radius: 50%;
+  }
+
+  .user-name {
+    font-weight: 500;
+    color: var(--color-text-dark);
+    font-size: 0.95rem;
+  }
+}
+
+.ticket-title {
+  font-weight: 600;
+  color: var(--color-text-dark);
+  font-size: 0.95rem;
+}
+
+.ticket-description {
+  color: var(--color-text-medium);
+  font-size: 0.9rem;
+  max-width: 200px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+}
+
+.no-file {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.date-time {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  .date {
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: 0.9rem;
+  }
+
+  .time {
+    color: var(--color-text-light);
+    font-size: 0.8rem;
+  }
+}
+
+/* ==================== STATUS BADGE ==================== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 100px;
+  transition: all 0.3s ease;
+
+  &.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+  }
+
+  &.in-progress {
+    background: rgba(102, 106, 242, 0.1);
+    color: #666AF2;
+    border: 1px solid #666AF2;
+  }
+
+  &.answered {
+    background: rgba(45, 198, 141, 0.1);
+    color: #2DC68D;
+    border: 1px solid #2DC68D;
+  }
+
+  svg {
+    margin-left: 0.5rem;
+    font-size: 16px;
+  }
+}
+
+/* ==================== RESPONSE SECTION ==================== */
+.response-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 250px;
+
+  .response-input {
+    width: 100%;
+
+    .MuiOutlinedInput-root {
+      border-radius: var(--radius-sm);
+      background-color: var(--color-white);
+
+      &:hover .MuiOutlinedInput-notchedOutline {
+        border-color: var(--color-primary);
+      }
+
+      &.Mui-focused .MuiOutlinedInput-notchedOutline {
+        border-color: var(--color-primary);
+        border-width: 2px;
+      }
+    }
+
+    .MuiInputBase-input {
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+    }
+  }
+
+  .submit-response-btn {
+    color: var(--color-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    text-transform: none;
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(45, 198, 141, 0.3);
+    }
+
+    &:disabled {
+      background-color: #9ca3af !important;
+      cursor: not-allowed;
+    }
+
+    .MuiCircularProgress-root {
+      color: white !important;
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.completed-response {
+  background: rgba(45, 198, 141, 0.05);
+  padding: 0.8rem;
+  border-right: 4px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  text-align: right;
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-medium);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  .quick-change-btn {
+    color: var(--color-white) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    padding: 6px 12px !important;
+    border-radius: var(--radius-sm) !important;
+    text-transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s ease !important;
+    min-width: 90px;
+
+    &:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(53, 121, 243, 0.3) !important;
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+  }
+
+  .MuiIconButton-root {
+    transition: all 0.3s ease !important;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+/* ==================== STATUS MENU ==================== */
+.status-menu {
+  .MuiPaper-root {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    direction: rtl;
+    margin-top: 4px;
+  }
+
+  .MuiMenuItem-root {
+    font-size: 0.9rem;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.2s ease;
+    gap: 8px;
+
+    &:hover {
+      background-color: rgba(53, 121, 243, 0.08);
+    }
+
+    svg {
+      font-size: 20px;
+    }
+  }
+}
+
+/* ==================== DELETE DIALOG ==================== */
+.delete-dialog {
+  .MuiPaper-root {
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .MuiDialogTitle-root {
+    font-weight: 700 !important;
+    border-bottom: 2px solid #fee2e2;
+  }
+
+  .MuiDialogActions-root {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+/* ==================== LOADING CONTAINER ==================== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.MuiTableBody-root tr {
+  animation: slideIn 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.MuiTableBody-root tr:nth-child(1) { animation-delay: 0.03s; }
+.MuiTableBody-root tr:nth-child(2) { animation-delay: 0.06s; }
+.MuiTableBody-root tr:nth-child(3) { animation-delay: 0.09s; }
+.MuiTableBody-root tr:nth-child(4) { animation-delay: 0.12s; }
+.MuiTableBody-root tr:nth-child(5) { animation-delay: 0.15s; }
+.MuiTableBody-root tr:nth-child(6) { animation-delay: 0.18s; }
+.MuiTableBody-root tr:nth-child(7) { animation-delay: 0.21s; }
+.MuiTableBody-root tr:nth-child(8) { animation-delay: 0.24s; }
+.MuiTableBody-root tr:nth-child(9) { animation-delay: 0.27s; }
+.MuiTableBody-root tr:nth-child(10) { animation-delay: 0.30s; }
+.MuiTableBody-root tr:nth-child(11) { animation-delay: 0.33s; }
+.MuiTableBody-root tr:nth-child(12) { animation-delay: 0.36s; }
+.MuiTableBody-root tr:nth-child(13) { animation-delay: 0.39s; }
+.MuiTableBody-root tr:nth-child(14) { animation-delay: 0.42s; }
+.MuiTableBody-root tr:nth-child(15) { animation-delay: 0.45s; }
+.MuiTableBody-root tr:nth-child(16) { animation-delay: 0.48s; }
+.MuiTableBody-root tr:nth-child(17) { animation-delay: 0.51s; }
+.MuiTableBody-root tr:nth-child(18) { animation-delay: 0.54s; }
+.MuiTableBody-root tr:nth-child(19) { animation-delay: 0.57s; }
+.MuiTableBody-root tr:nth-child(20) { animation-delay: 0.60s; }
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 1200px) {
+  .admin-ticket-page {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 1000px) {
+  .admin-ticket-page {
+    padding: var(--spacing-md);
+
+    .page-header {
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+
+      .header-title {
+        width: 100%;
+      }
+
+      .stats-container {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .tickets-table-container {
+      width: 100%;
+      margin-top: var(--spacing-md);
+      border-radius: var(--radius-md) !important;
+    }
+
+    .tickets-table {
+      min-width: 900px;
+    }
+
+    .MuiTableHead-root th,
+    .MuiTableBody-root td {
+      font-size: 0.85rem;
+      padding: 12px 8px;
+    }
+
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      min-width: 90px;
+    }
+
+    .response-section {
+      min-width: 200px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-ticket-page {
+    padding: var(--spacing-sm);
+
+    .page-header {
+      .stats-container {
+        flex-direction: column;
+
+        .stat-card {
+          width: 100%;
+        }
+      }
+    }
+
+    .tickets-table-container {
+      padding: var(--spacing-xs);
+    }
+
+    .tickets-table {
+      min-width: 800px;
+    }
+
+    .MuiTableHead-root th,
+    .MuiTableBody-root td {
+      font-size: 0.8rem;
+      padding: 10px 6px;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      min-width: 80px;
+      padding: 3px 8px;
+    }
+
+    .response-section {
+      min-width: 180px;
+
+      .submit-response-btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      gap: var(--spacing-xs);
+
+      .quick-change-btn {
+        font-size: 0.75rem !important;
+        padding: 4px 8px !important;
+        min-width: 80px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-ticket-page {
+    .tickets-table-container {
+      box-shadow: var(--shadow-md) !important;
+    }
+
+    .tickets-table {
+      min-width: 700px;
+    }
+
+    .MuiTableHead-root th,
+    .MuiTableBody-root td {
+      font-size: 0.75rem;
+      padding: 8px 4px;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      min-width: 70px;
+    }
+  }
+}
+
+/* ==================== SCROLLBAR STYLING ==================== */
+.tickets-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tickets-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.tickets-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+
+  &:hover {
+    background: #a1a1a1;
+  }
+}
+
+/* ==================== PERSIAN NUMBER STYLES ==================== */
+.admin-ticket-page {
+  /* Apply Persian numbers to all numeric displays */
+  font-feature-settings: "ss02";
+  -webkit-font-feature-settings: "ss02";
+  -moz-font-feature-settings: "ss02";
+
+  .MuiTableCell-root,
+  .stat-value,
+  .date,
+  .MuiTypography-root,
+  .MuiInputBase-input,
+  .status-badge {
+    font-feature-settings: "ss02";
+    -webkit-font-feature-settings: "ss02";
+    -moz-font-feature-settings: "ss02";
+  }
+}
