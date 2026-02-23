@@ -1,21 +1,19 @@
 export interface StoredTicket {
-    id: string;
+    id: string | number;
     userId: string;
     title: string;
     description: string;
     date: string;
     time: string;
-    status: string;
+    status?: "pending" | "answered" | "in-progress" | string;
     adminResponse?: string | null;
-    file?:  {
+    file?: {
         name: string;
         type: string;
         size: number;
         url: string;
     } | null;
 }
-
-
 
 export interface TodayTicketsProps {
     tickets: StoredTicket[];

@@ -1,0 +1,57 @@
+.user-tickets-page {
+  width: 93%;
+  margin-right: 4rem;
+  padding: 20px;
+  font-family: 'Vazirmatn', sans-serif;
+
+  .page-header {
+    margin-bottom: 30px;
+    h1 { font-size: 1.8rem; color: #333; }
+    p { color: #666; font-size: 0.9rem; }
+  }
+
+  .table-container {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  }
+
+  .title-cell {
+    max-width: 250px;
+    .description-preview {
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+      color: #777;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .date-box {
+    display: flex;
+    flex-direction: column;
+    .time-label { font-size: 0.75rem; color: #999; }
+  }
+
+  .admin-reply {
+    background: #f0f7ff;
+    padding: 10px;
+    border-radius: 8px;
+    border-right: 4px solid #007bff;
+    color: #0056b3;
+    font-size: 0.9rem;
+  }
+
+  .no-response {
+    color: #bbb;
+    font-style: italic;
+    font-size: 0.85rem;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+  }
+}

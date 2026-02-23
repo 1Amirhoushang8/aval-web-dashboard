@@ -37,8 +37,7 @@ export default function ManageSitePage() {
         });
     };
 
-    // --- Helper: Get Today's Date in Persian Digits (e.g. ۱۴۰۲/۱۲/۰۱) ---
-    // This MUST match the digits used in your db.json
+
     const getTodayPersianDate = () => {
         return new Intl.DateTimeFormat('fa-IR', {
             year: 'numeric',
@@ -69,7 +68,7 @@ export default function ManageSitePage() {
     // --- Filtering Logic ---
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
-        // Filters tickets where the date string matches exactly
+
         return tickets.filter(ticket => ticket.date === today);
     }, [tickets]);
 

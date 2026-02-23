@@ -6,7 +6,7 @@ import TicketFileUpload from "../../components/TicketFileUpload/TicketFileUpload
 import { ticketService } from "../../API/TicketService.ts";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress"; // Added for better UX
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ManageTicketPage() {
     const [title, setTitle] = useState("");
@@ -17,7 +17,6 @@ export default function ManageTicketPage() {
     const [fileError, setFileError] = useState<string | null>(null);
     const [uploadKey, setUploadKey] = useState(0);
 
-    // Snackbar states
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
         message: string;
@@ -88,6 +87,15 @@ export default function ManageTicketPage() {
             return;
         }
 
+        // --- CRITICAL FIX: GET USER FROM LOCAL STORAGE ---
+        const userStr = localStorage.getItem("user");
+        if (!userStr) {
+            showError("لطفاً ابتدا وارد حساب کاربری خود شوید");
+            return;
+        }
+        const currentUser = JSON.parse(userStr);
+        // ------------------------------------------------
+
         setIsSaving(true);
 
         try {
@@ -98,7 +106,9 @@ export default function ManageTicketPage() {
                 description: description.trim(),
                 date: dateStr,
                 time: timeStr,
-                userId:"",
+                userId: String(currentUser.id), // LINKING TICKET TO USER
+                status: "pending",             // DEFAULT STATUS
+                adminResponse: null,          // INITIAL RESPONSE
                 ...(file && previewUrl && {
                     file: {
                         name: file.name,
@@ -122,7 +132,6 @@ export default function ManageTicketPage() {
 
     return (
         <div className="ticket-page" dir="rtl">
-            {/* Loading Overlay */}
             {isSaving && (
                 <div className="loading-overlay">
                     <div className="loading-content">

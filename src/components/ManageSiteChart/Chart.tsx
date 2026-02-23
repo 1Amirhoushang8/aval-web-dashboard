@@ -61,9 +61,7 @@ export default function ManageSiteChart() {
                 <div className="error-icon">!</div>
                 <h3>داده‌ای یافت نشد</h3>
                 <p>اطلاعات مربوط به بازه {timeFilter === 'day' ? 'روزانه' : timeFilter === 'week' ? 'هفتگی' : 'ماهانه'} در دیتابیس موجود نیست.</p>
-                <div className="time-filter-buttons" style={{marginTop: '10px'}}>
-                    <button className="time-filter-btn active" onClick={() => setTimeFilter('day')}>بازگشت به روزانه</button>
-                </div>
+
             </div>
         );
     }

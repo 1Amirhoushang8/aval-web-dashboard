@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo,} from "react";
+import { useState, useEffect, useMemo } from "react";
 import React from 'react';
 import SinglePaymentButton from "../../components/SinglePayButton/SinglePayButton.tsx";
 import MultiPaymentButton from "../../components/MultiPayButton/MultiPayButton.tsx";
@@ -138,7 +138,16 @@ export default function AccountingPage() {
         const fetchUsers = async () => {
             try {
                 const response = await userService.getAll();
-                setUsers(Array.isArray(response.data) ? response.data : []);
+                const usersData = Array.isArray(response.data) ? response.data : [];
+                // Normalize data to include missing fields with default values
+                const normalizedUsers = usersData.map(user => ({
+                    ...user,
+                    price: user.price || "۰ تومان",
+                    paymentType: user.paymentType || "پرداخت-تکی",
+                    monthlyPayment: user.monthlyPayment || null,
+                    totalMonths: user.totalMonths || null,
+                }));
+                setUsers(normalizedUsers);
             } catch (error) {
                 console.error("Failed to fetch users:", error);
                 showError("خطا در دریافت اطلاعات کاربران");
@@ -360,6 +369,14 @@ export default function AccountingPage() {
             return;
         }
 
+        // Check if the full name exists in the users list
+        const normalizedInputName = normalizePersianText(newTransaction.fullname);
+        const nameExists = users.some(user => normalizePersianText(user.FullName) === normalizedInputName);
+        if (!nameExists) {
+            showError("نام مشتری در سیستم وجود ندارد. لطفاً ابتدا مشتری را ثبت کنید.");
+            return;
+        }
+
         try {
             const priceNum = extractPriceNumber(newTransaction.price);
             const formattedPrice = formatPriceWithToman(priceNum);
@@ -377,7 +394,7 @@ export default function AccountingPage() {
             }
 
             const newUser: Omit<User, "id"> = {
-                SerialNumber: toPersianNumber(newTransaction.serialnumber), // store in Persian digits
+                SerialNumber: toPersianNumber(newTransaction.serialnumber),
                 FullName: newTransaction.fullname,
                 service: newTransaction.service,
                 price: formattedPrice,
@@ -385,6 +402,8 @@ export default function AccountingPage() {
                 paymentType: newTransaction.paymentType,
                 monthlyPayment,
                 totalMonths,
+                username: newTransaction.fullname, // Use fullname as username (or generate a unique one)
+                // password and phoneNumber are optional; they can be added later by user
             };
 
             const response = await userService.create(newUser);
@@ -437,6 +456,7 @@ export default function AccountingPage() {
                 paymentType: editTransaction.paymentType,
                 monthlyPayment,
                 totalMonths,
+                username: userToUpdate.username, // preserve existing username
             };
 
             const response = await userService.update(userToUpdate.id, updatedUser);

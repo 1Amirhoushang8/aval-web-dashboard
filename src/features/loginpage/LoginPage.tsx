@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import "./LoginPage.scss";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
+import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
+
+
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -15,38 +18,45 @@ const LoginPage: React.FC = () => {
         setError("");
 
         try {
-            // Force the URL to the users collection
-            const response = await apiClient.get("/users");
-            const users = response.data;
 
-            // Debugging: This will show you exactly what the server sent
-            console.log("Server Users List:", users);
-            console.log("Attempting login with:", { username, password });
+            const [usersRes, adminsRes] = await Promise.all([
+                apiClient.get<User[]>("/users"),
+                apiClient.get<User[]>("/admins")
+            ]);
 
-            const foundUser = users.find((u: any) =>
-                u.username.toLowerCase().trim() === username.toLowerCase().trim() &&
-                u.password.toString().trim() === password.trim()
-            );
+            const allUsers = usersRes.data;
+            const allAdmins = adminsRes.data;
 
-            if (foundUser) {
-                localStorage.setItem("user", JSON.stringify(foundUser));
+            // Fixed the "any" error by specifying the User type
+            const findInArray = (array: User[]): User | undefined =>
+                array.find((u: User) =>
+                    u.username?.toLowerCase().trim() === username.toLowerCase().trim() &&
+                    u.password?.toString().trim() === password.trim()
+                );
 
-                // Set a fake token for your interceptor to work
-                localStorage.setItem("token", "fake-session-token");
+            const adminMatch = findInArray(allAdmins);
+            const userMatch = findInArray(allUsers);
 
-                if (foundUser.roleKey === "ADMIN") {
-                    navigate("/ManageSite");
-                } else {
-                    navigate("/MyTickets");
-                }
+            if (adminMatch) {
+                // Ensure roleKey exists for the ProtectedRoute
+                const adminData = { ...adminMatch, roleKey: "ADMIN" };
+                localStorage.setItem("user", JSON.stringify(adminData));
+                localStorage.setItem("token", "fake-admin-token");
+                navigate("/ManageSite", { replace: true });
+            } else if (userMatch) {
+                // Manually set roleKey to USER so the Router accepts it
+                const userData = { ...userMatch, roleKey: "USER" };
+                localStorage.setItem("user", JSON.stringify(userData));
+                localStorage.setItem("token", "fake-user-token");
+                navigate("/MyTickets", { replace: true });
             } else {
                 setError("نام کاربری یا رمز عبور اشتباه است");
             }
         } catch (err) {
             console.error("Connection error:", err);
-            setError("اتصال برقرار نشد. بررسی کنید json-server روی پورت ۴۰۰۰ در حال اجرا باشد.");
+            setError("اتصال به سرور برقرار نشد...");
         }
-    };;
+    };
 
     return (
         <div className="login-page">
@@ -58,6 +68,7 @@ const LoginPage: React.FC = () => {
                         <label>نام کاربری</label>
                         <input
                             type="text"
+                            placeholder="نام کاربری خود را وارد کنید"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
@@ -67,6 +78,7 @@ const LoginPage: React.FC = () => {
                         <label>رمز عبور</label>
                         <input
                             type="password"
+                            placeholder="********"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -75,7 +87,28 @@ const LoginPage: React.FC = () => {
                     <div id="button" className="row">
                         <button type="submit">ورود</button>
                     </div>
-                    {error && <p className="error-text" style={{color: 'red', marginTop: '10px'}}>{error}</p>}
+
+
+                    <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
+                        <span style={{ fontSize: "0.9rem", color: "#666" }}>حساب کاربری ندارید؟ </span>
+                        <Link
+                            to="/signup"
+                            style={{
+                                textDecoration: "none",
+                                color: "#666AF2",
+                                fontWeight: "bold",
+                                fontSize: "0.9rem"
+                            }}
+                        >
+                            ثبت نام
+                        </Link>
+                    </div>
+
+                    {error && (
+                        <p className="error-text" style={{ color: 'red', marginTop: '10px', fontWeight: 'bold' }}>
+                            {error}
+                        </p>
+                    )}
                 </form>
             </div>
         </div>

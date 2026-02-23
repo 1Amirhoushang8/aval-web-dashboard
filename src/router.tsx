@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Layout from "./layout.tsx";
 import LoginPage from "./features/loginpage/LoginPage.tsx";
+import SignUpPage from "./features/SignUpPage/SignUpPage.tsx";
 import ManageSitePage from "./features/ManageSite/ManagePage.tsx";
 import AccountingPage from "./features/Accounting/Accounting.tsx";
 import AdminTicketPage from "./features/AdminTicketPage/AdminTicketPage.tsx";
@@ -23,16 +24,14 @@ export default function Router() {
         <AnimatePresence mode="wait" initial={false}>
             <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<PageWrapper key="login"><LoginPage /></PageWrapper>} />
+                <Route path="/signup" element={<PageWrapper key="signup"><SignUpPage /></PageWrapper>} />
 
                 <Route element={<Layout />}>
-                    {/* ADMIN PAGES */}
-                    <Route path="/ManageSite" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper key="manage"><ManageSitePage /></PageWrapper></ProtectedRoute>} />
-                    <Route path="/Accountp" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper key="account"><AccountingPage /></PageWrapper></ProtectedRoute>} />
-                    <Route path="/AdminTicketPage" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper key="admin-tickets"><AdminTicketPage /></PageWrapper></ProtectedRoute>} />
-
-                    {/* USER PAGES */}
-                    <Route path="/MyTickets" element={<ProtectedRoute allowedRole="USER"><PageWrapper key="my-tickets"><UserMyTicketsPage /></PageWrapper></ProtectedRoute>} />
-                    <Route path="/SendTicket" element={<ProtectedRoute allowedRole="USER"><PageWrapper key="send-ticket"><ManageTicketPage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/ManageSite" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><ManageSitePage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/Accountp" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AccountingPage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/AdminTicketPage" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AdminTicketPage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/MyTickets" element={<ProtectedRoute allowedRole="USER"><PageWrapper><UserMyTicketsPage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/SendTicket" element={<ProtectedRoute allowedRole="USER"><PageWrapper><ManageTicketPage /></PageWrapper></ProtectedRoute>} />
                 </Route>
             </Routes>
         </AnimatePresence>
