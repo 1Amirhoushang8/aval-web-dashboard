@@ -7,15 +7,15 @@ export const userService = {
     getAll: () =>
         apiClient.get<User[]>("/users"),
 
-    getById: (id: number) =>
+    getById: (id: string | number) =>
         apiClient.get<User>(`/users/${id}`),
 
     create: (data: CreateUserDto) =>
         apiClient.post<User>("/users", data),
 
-    update: (id: number, data: CreateUserDto) =>
+    update: (id: string | number, data: CreateUserDto) =>
         apiClient.put<User>(`/users/${id}`, data),
 
-    delete: (id: number) =>
+    delete: (id: string | number) =>
         apiClient.delete<void>(`/users/${id}`),
 };

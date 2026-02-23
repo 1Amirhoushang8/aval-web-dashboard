@@ -108,27 +108,46 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
+
+        filter: brightness(1.05);
       }
+
 
       &.total {
         border-color: var(--color-primary);
         .stat-value { color: var(--color-primary); }
       }
 
-      &.pending {
-        border-color: var(--color-warning);
-        .stat-value { color: var(--color-warning); }
-      }
 
       &.in-progress {
-        border-color: var(--color-purple);
-        .stat-value { color: var(--color-purple); }
+        background: linear-gradient(135deg, #ffee99, #fbbf24);
+        color: black;
+        border: 1px solid #fbbf24;
+        box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+
+        .stat-label, .stat-value { color: black; }
       }
 
+
       &.answered {
-        border-color: var(--color-success);
-        .stat-value { color: var(--color-success); }
+        background: linear-gradient(135deg, #99ffbb, #10b981);
+        color: black;
+        border: 1px solid #10b981;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+
+        .stat-label, .stat-value { color: black; }
       }
+
+
+      &.pending {
+        background: linear-gradient(135deg, #ff9090, #ef4444);
+        color: black;
+        border: 1px solid #ef4444;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+
+        .stat-label, .stat-value { color: black; }
+      }
+
 
       .stat-label {
         display: block;
@@ -143,8 +162,7 @@
         font-weight: 700;
         line-height: 1;
       }
-    }
-  }
+    }  }
 }
 
 /* ==================== TABLE CONTAINER ==================== */
@@ -305,36 +323,43 @@
 
 /* ==================== STATUS BADGE ==================== */
 .status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.4rem 0.8rem;
-  border-radius: 999px;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
   font-size: 0.85rem;
   font-weight: 600;
-  min-width: 100px;
+  text-align: center;
   transition: all 0.3s ease;
+  border: 1px solid transparent;
+  cursor: default;
 
-  &.pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
-    border: 1px solid #f59e0b;
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
   }
 
+  // --- In Progress (Yellow Style) ---
   &.in-progress {
-    background: rgba(102, 106, 242, 0.1);
-    color: #666AF2;
-    border: 1px solid #666AF2;
+    background: linear-gradient(135deg, #ffee99, #fbbf24);
+    color: black;
+    border: 1px solid #fbbf24;
+    box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);
   }
 
+  // --- Answered (Green Style) ---
   &.answered {
-    background: rgba(45, 198, 141, 0.1);
-    color: #2DC68D;
-    border: 1px solid #2DC68D;
+    background: linear-gradient(135deg, #99ffbb, #10b981);
+    color: black;
+    border: 1px solid #10b981;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
   }
 
-  svg {
-    margin-left: 0.5rem;
-    font-size: 16px;
+  // --- Pending (Red Style) ---
+  &.pending {
+    background: linear-gradient(135deg, #ff9090, #ef4444);
+    color: black;
+    border: 1px solid #ef4444;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
   }
 }
 

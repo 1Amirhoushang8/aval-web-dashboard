@@ -13,6 +13,6 @@ export const ticketService = {
     update: (id: number, data: CreateTicketDto) =>
         apiClient.put<StoredTicket>(`/tickets/${id}`, data),
 
-    delete: (id: number) =>
+    delete: (id: number | string) =>
         apiClient.delete<void>(`/tickets/${id}`),
 };

@@ -35,10 +35,8 @@ export default function ManageSiteChart() {
         return toPersianNumber(formattedAmount) + ' تومان';
     };
 
-    // Safely extract current data
     const rawData: ChartData | null = allStats ? allStats[timeFilter] : null;
 
-    // Calculate totals automatically if they aren't in the JSON
     const currentData = rawData ? {
         ...rawData,
         totalRequests: rawData.totalRequests || rawData.requests.reduce((a, b) => a + b, 0),
@@ -54,14 +52,12 @@ export default function ManageSiteChart() {
         );
     }
 
-    // This triggers if the button you clicked doesn't have data in db.json
     if (isError || !currentData) {
         return (
             <div className="chart-error">
                 <div className="error-icon">!</div>
                 <h3>داده‌ای یافت نشد</h3>
                 <p>اطلاعات مربوط به بازه {timeFilter === 'day' ? 'روزانه' : timeFilter === 'week' ? 'هفتگی' : 'ماهانه'} در دیتابیس موجود نیست.</p>
-
             </div>
         );
     }
@@ -69,6 +65,9 @@ export default function ManageSiteChart() {
     const maxValue = Math.max(...currentData.requests, ...currentData.payments, 1);
     const chartHeight = 300;
     const getBarHeight = (value: number) => (value / maxValue) * chartHeight;
+
+    // Logic for subtle resizing
+    const isMonthView = timeFilter === 'month';
 
     return (
         <div className="financial-chart-section" dir="rtl">
@@ -92,12 +91,12 @@ export default function ManageSiteChart() {
                     <div className="legend-item">
                         <span className="legend-color requests-color"></span>
                         <span className="legend-text">طلب‌ها</span>
-                        <span className="legend-value">{formatCurrencyPersian(currentData.totalRequests)}</span>
+                        <span className="legend-value">{formatCurrencyPersian(currentData.totalRequests || 0)}</span>
                     </div>
                     <div className="legend-item">
                         <span className="legend-color payments-color"></span>
                         <span className="legend-text">واریزی‌ها</span>
-                        <span className="legend-value">{formatCurrencyPersian(currentData.totalPayments)}</span>
+                        <span className="legend-value">{formatCurrencyPersian(currentData.totalPayments || 0)}</span>
                     </div>
                 </div>
             </div>
@@ -112,28 +111,46 @@ export default function ManageSiteChart() {
                         ))}
                     </div>
 
-                    <div className="chart-bars-container">
+                    <div className={`chart-bars-container ${isMonthView ? 'month-mode' : ''}`}>
                         {currentData.labels.map((label, index) => (
-                            <div key={index} className="chart-bar-group">
-                                <div className="bar-label">{label}</div>
+                            <div
+                                key={index}
+                                className="chart-bar-group"
+                                // Adjusting group width slightly for 12 columns
+                                style={{ width: isMonthView ? '55px' : '85px' }}
+                            >
+                                <div className="bar-label" style={{ fontSize: isMonthView ? '0.78rem' : '0.85rem' }}>
+                                    {label}
+                                </div>
                                 <div className="bars-wrapper">
                                     <div
                                         className="bar bar-requests"
-                                        style={{ height: `${getBarHeight(currentData.requests[index])}px` }}
+                                        style={{
+                                            height: `${getBarHeight(currentData.requests[index])}px`,
+                                            // Slender width for month view
+                                            width: isMonthView ? '14px' : '22px'
+                                        }}
                                         title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`}
                                     >
-                                        <span className="bar-value">
-                                            {formatCurrencyPersian(currentData.requests[index])}
-                                        </span>
+                                        {!isMonthView && (
+                                            <span className="bar-value">
+                                                {formatCurrencyPersian(currentData.requests[index])}
+                                            </span>
+                                        )}
                                     </div>
                                     <div
                                         className="bar bar-payments"
-                                        style={{ height: `${getBarHeight(currentData.payments[index])}px` }}
+                                        style={{
+                                            height: `${getBarHeight(currentData.payments[index])}px`,
+                                            width: isMonthView ? '14px' : '22px'
+                                        }}
                                         title={`واریزی‌ها: ${formatCurrencyPersian(currentData.payments[index])}`}
                                     >
-                                        <span className="bar-value">
-                                            {formatCurrencyPersian(currentData.payments[index])}
-                                        </span>
+                                        {!isMonthView && (
+                                            <span className="bar-value">
+                                                {formatCurrencyPersian(currentData.payments[index])}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>

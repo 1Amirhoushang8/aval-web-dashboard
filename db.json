@@ -38,18 +38,17 @@
       "totalMonths": 10
     },
     {
-      "id": "13",
       "username": "fatemeh_r",
-      "password": "password456",
       "FullName": "فاطمه رضایی",
-      "phoneNumber": "09197778899",
       "SerialNumber": "۱۹۲۰۴۸۴۰",
+      "phoneNumber": "09197778899",
       "service": "طراحی گرافیک",
-      "price": "۸,۰۰۰,۰۰۰ تومان",
+      "price": "۸۰,۰۰۰,۰۰۰ تومان",
       "status": "لغو-شده",
       "paymentType": "پرداخت-تکی",
       "monthlyPayment": null,
-      "totalMonths": null
+      "totalMonths": null,
+      "id": "13"
     },
     {
       "id": "b98e",
@@ -90,6 +89,19 @@
       "totalMonths": 10,
       "username": "jalil",
       "id": "0d54"
+    },
+    {
+      "id": "d247",
+      "SerialNumber": "۱۲۴۱۹۳۴۷۳۱۵۹۸۷",
+      "FullName": "امیرمهدی جلیلیان",
+      "service": "طراحی گرافیک",
+      "phoneNumber": "",
+      "price": "۶۵,۳۰۰,۰۰۰ تومان",
+      "status": "درحال-انجام",
+      "paymentType": "پرداخت-دوره-ای",
+      "monthlyPayment": "۵,۴۴۱,۶۶۶ تومان",
+      "totalMonths": 12,
+      "username": "امیرمهدی جلیلیان"
     }
   ],
   "tickets": [
@@ -170,8 +182,8 @@
       "description": "تست فایل",
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۱:۴۳",
-      "status": "pending",
-      "adminResponse": null
+      "status": "answered",
+      "adminResponse": "تایید شد"
     },
     {
       "id": "5a5b",
@@ -180,7 +192,7 @@
       "description": "تیکت اینترنت",
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۲:۰۵",
-      "status": "pending",
+      "status": "in-progress",
       "adminResponse": null
     },
     {
@@ -190,8 +202,8 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۳:۱۲",
       "userId": "13",
-      "status": "answered",
-      "adminResponse": "پاسخ تیکت فاطمه"
+      "status": "in-progress",
+      "adminResponse": null
     }
   ],
   "financialStats": {
@@ -248,17 +260,44 @@
       "labels": [
         "فروردین",
         "اردیبهشت",
-        "خرداد"
+        "خرداد",
+        "تیر",
+        "مرداد",
+        "شهریور",
+        "مهر",
+        "آبان",
+        "آذر",
+        "دی",
+        "بهمن",
+        "اسفند"
       ],
       "requests": [
         8000000,
         7500000,
-        9000000
+        9000000,
+        8200000,
+        8500000,
+        8800000,
+        9200000,
+        9500000,
+        9100000,
+        8900000,
+        9300000,
+        10000000
       ],
       "payments": [
         5000000,
         4800000,
-        6000000
+        6000000,
+        5500000,
+        5700000,
+        5900000,
+        6200000,
+        6500000,
+        6100000,
+        6000000,
+        6300000,
+        7000000
       ]
     }
   }

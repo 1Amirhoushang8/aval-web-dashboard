@@ -5,7 +5,7 @@ import ManageSiteChartSkeleton from "../../Skeleton/ManageSiteChartSkeleton/Mana
 import FooterCards from "../../components/ManageSiteFooterCards/FooterCards.tsx";
 import FooterCardsSkeleton from "../../Skeleton/ManageSiteFooterCard/ManageSiteFooterCard.tsx";
 import TodayTickets from "../../components/TodayTickets/TodayTickets.tsx";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
@@ -15,6 +15,8 @@ import Alert from "@mui/material/Alert";
 export default function ManageSitePage() {
     const navigate = useNavigate();
     const [showTicketList, setShowTicketList] = useState(false);
+
+    // --- Snackbar State ---
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
         message: string;
@@ -25,18 +27,18 @@ export default function ManageSitePage() {
         severity: "error",
     });
 
-    const handleCloseSnackbar = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
-
-    const showError = (message: string) => {
+    // Memoize error handler to prevent unnecessary re-renders
+    const showError = useCallback((message: string) => {
         setSnackbar({
             open: true,
             message,
             severity: "error",
         });
-    };
+    }, []);
 
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
 
     const getTodayPersianDate = () => {
         return new Intl.DateTimeFormat('fa-IR', {
@@ -47,11 +49,17 @@ export default function ManageSitePage() {
     };
 
     // --- Fetching Data ---
-    const { data: tickets = [], isLoading: ticketsLoading, isError: ticketsError } = useQuery<StoredTicket[]>({
+    // Note: We remove the useEffect and handle error triggers via query options
+    const { data: tickets = [], isLoading: ticketsLoading } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
             return response.data;
+        },
+        // For production: Error logic is now tied to the query lifecycle
+        // If you use a Global QueryClient, you can catch this 'meta' field there
+        meta: {
+            onError: () => showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.")
         }
     });
 
@@ -60,6 +68,9 @@ export default function ManageSitePage() {
         queryFn: async () => {
             const response = await apiClient.get("/users");
             return response.data;
+        },
+        meta: {
+            onError: () => showError("خطا در دریافت اطلاعات کاربران.")
         }
     });
 
@@ -68,16 +79,8 @@ export default function ManageSitePage() {
     // --- Filtering Logic ---
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
-
         return tickets.filter(ticket => ticket.date === today);
     }, [tickets]);
-
-    // Error Handling
-    useEffect(() => {
-        if (ticketsError) {
-            showError("خطا در دریافت اطلاعات از سرور.");
-        }
-    }, [ticketsError]);
 
     const toPersianNumber = (num: number | string): string => {
         if (!num && num !== 0) return "۰";
@@ -87,14 +90,13 @@ export default function ManageSitePage() {
 
     const toggleTicketList = () => setShowTicketList(prev => !prev);
 
-    const handleTicketClick = (ticketId: string) => {
-        navigate("/AdminTicketPage", { state: { ticketId } });
+    const handleTicketClick = (ticketId: string | number) => {
+        navigate("/AdminTicketPage", { state: { ticketId: String(ticketId) } });
     };
 
     return (
         <div className={`mainchart ${isLoading ? 'is-loading' : ''}`} dir="rtl" style={{ fontFamily: "Vazirmatn, Vazir, system-ui, sans-serif" }}>
 
-            {/* Dashboard Heading */}
             <div className="dash-h1">
                 {isLoading ? (
                     <div className="skeleton-item skeleton-h1"></div>
@@ -103,7 +105,6 @@ export default function ManageSitePage() {
                 )}
             </div>
 
-            {/* KPI Row */}
             <div className={`kpi-row ${showTicketList ? 'list-open' : ''}`}>
                 <div className="kpi-card">
                     {isLoading ? (
@@ -128,7 +129,6 @@ export default function ManageSitePage() {
                 />
             </div>
 
-            {/* Ticket List Drawer */}
             {!isLoading && showTicketList && (
                 <div className="ticket-list-container">
                     <div className="ticket-list-header">
@@ -149,7 +149,7 @@ export default function ManageSitePage() {
                                 <div
                                     key={ticket.id || index}
                                     className="ticket-item"
-                                    onClick={() => handleTicketClick(ticket.id)}
+                                    onClick={() => handleTicketClick(String(ticket.id))}
                                     style={{ cursor: "pointer" }}
                                 >
                                     <div className="item-cell title-cell">
@@ -173,7 +173,6 @@ export default function ManageSitePage() {
                 </div>
             )}
 
-            {/* Charts and Summaries */}
             {isLoading ? (
                 <>
                     <ManageSiteChartSkeleton />

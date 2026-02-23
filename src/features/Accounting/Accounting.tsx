@@ -206,6 +206,7 @@ export default function AccountingPage() {
         serialnumber: "",
         fullname: "",
         service: "",
+        phoneNumber: "",
         price: "",
         status: "درحال-انجام" as User["status"],
         paymentType: "پرداخت-تکی" as User["paymentType"],
@@ -223,20 +224,35 @@ export default function AccountingPage() {
     const handleAddTicket = () => setOpenModal(true);
 
     const handleEditTicket = (index: number) => {
+
         const user = users[index];
+
+
+        if (!user) {
+            console.error("User not found at index:", index);
+            return;
+        }
+
+
         setEditTransaction({
-            serialnumber: user.SerialNumber,
-            fullname: user.FullName,
-            service: user.service,
-            price: extractPriceNumber(user.price),
-            status: user.status,
-            paymentType: user.paymentType,
+
+            serialnumber: user.SerialNumber || "",
+            fullname: user.FullName || "",
+            service: user.service || "",
+
+            price: user.price ? extractPriceNumber(user.price) : "",
+            phoneNumber: user.phoneNumber || "",
+            status: user.status || "درحال-انجام",
+            paymentType: user.paymentType || "",
             monthlyPayment: user.monthlyPayment ? extractPriceNumber(user.monthlyPayment) : "",
-            totalMonths: user.totalMonths ? user.totalMonths.toString() : "",
+            totalMonths: user.totalMonths !== undefined && user.totalMonths !== null
+                ? user.totalMonths.toString()
+                : "",
         });
+
         setEditingIndex(index);
         setEditModal(true);
-    };
+    };;
 
     const handleDeleteClick = (index: number) => {
         setDeleteIndex(index);
@@ -263,14 +279,30 @@ export default function AccountingPage() {
     };
 
     const handleOpenPaymentModal = (index: number) => {
+
         const user = users[index];
+
+
+        if (!user) {
+            console.warn("User not found at index:", index);
+            return;
+        }
+
         setActivePaymentIndex(index);
+
+
         setPaymentDetails({
-            totalPrice: extractPriceNumber(user.price),
-            totalMonths: user.totalMonths ? user.totalMonths.toString() : "1",
+
+            totalPrice: extractPriceNumber(user.price || ""),
+
+
+            totalMonths: user.totalMonths !== undefined && user.totalMonths !== null
+                ? user.totalMonths.toString()
+                : "1",
         });
+
         setPaymentModal(true);
-    };
+    };;
 
     const handleClosePaymentModal = () => {
         setPaymentModal(false);
@@ -347,6 +379,7 @@ export default function AccountingPage() {
             fullname: "",
             service: "",
             price: "",
+            phoneNumber: "",
             status: "درحال-انجام",
             paymentType: "پرداخت-تکی",
             monthlyPayment: "",
@@ -356,6 +389,7 @@ export default function AccountingPage() {
 
     // -------------------- Save Handlers --------------------
     const handleSaveTransaction = async () => {
+        // 1. Validation for empty fields
         if (!newTransaction.serialnumber.trim() ||
             !newTransaction.fullname.trim() ||
             !newTransaction.service.trim() ||
@@ -364,15 +398,17 @@ export default function AccountingPage() {
             return;
         }
 
+
         if (isDuplicateSerialNumber(newTransaction.serialnumber)) {
             showError("شماره فاکتور تکراری است");
             return;
         }
 
-        // Check if the full name exists in the users list
+        // 3. Check if the full name exists and FIND that user object
         const normalizedInputName = normalizePersianText(newTransaction.fullname);
-        const nameExists = users.some(user => normalizePersianText(user.FullName) === normalizedInputName);
-        if (!nameExists) {
+        const existingUser = users.find(u => normalizePersianText(u.FullName) === normalizedInputName);
+
+        if (!existingUser) {
             showError("نام مشتری در سیستم وجود ندارد. لطفاً ابتدا مشتری را ثبت کنید.");
             return;
         }
@@ -380,35 +416,43 @@ export default function AccountingPage() {
         try {
             const priceNum = extractPriceNumber(newTransaction.price);
             const formattedPrice = formatPriceWithToman(priceNum);
-            let monthlyPayment = null;
-            let totalMonths = null;
+
+
+            let monthlyPayment: string | null = null;
+            let totalMonths: number | null = null;
 
             if (newTransaction.paymentType === "پرداخت-دوره-ای") {
-                const monthsNum = extractPriceNumber(newTransaction.totalMonths);
-                if (!monthsNum || parseInt(monthsNum) < 1) {
+                const monthsStr = extractPriceNumber(newTransaction.totalMonths);
+                const monthsNum = parseInt(monthsStr);
+
+                if (!monthsNum || monthsNum < 1) {
                     showError("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                     return;
                 }
-                monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsNum);
-                totalMonths = parseInt(monthsNum) || 1;
+                monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsStr);
+                totalMonths = monthsNum;
             }
+
 
             const newUser: Omit<User, "id"> = {
                 SerialNumber: toPersianNumber(newTransaction.serialnumber),
                 FullName: newTransaction.fullname,
                 service: newTransaction.service,
+
+                phoneNumber: existingUser.phoneNumber || "",
                 price: formattedPrice,
-                status: newTransaction.status,
+
+                status: newTransaction.status as "لغو-شده" | "درحال-انجام" | "پرداخت-شده",
                 paymentType: newTransaction.paymentType,
                 monthlyPayment,
                 totalMonths,
-                username: newTransaction.fullname, // Use fullname as username (or generate a unique one)
-                // password and phoneNumber are optional; they can be added later by user
+                username: newTransaction.fullname,
             };
 
             const response = await userService.create(newUser);
             setUsers(prevUsers => [...prevUsers, response.data]);
             handleCloseModal();
+
         } catch (error) {
             console.error("Failed to create transaction:", error);
             showError("خطا در ایجاد فاکتور");
@@ -416,6 +460,7 @@ export default function AccountingPage() {
     };
 
     const handleSaveEditTransaction = async () => {
+
         if (!editTransaction.serialnumber.trim() ||
             !editTransaction.fullname.trim() ||
             !editTransaction.service.trim() ||
@@ -425,6 +470,7 @@ export default function AccountingPage() {
             return;
         }
 
+
         if (isDuplicateSerialNumber(editTransaction.serialnumber, editingIndex)) {
             showError("شماره فاکتور تکراری است");
             return;
@@ -433,42 +479,57 @@ export default function AccountingPage() {
         try {
             const priceNum = extractPriceNumber(editTransaction.price);
             const formattedPrice = formatPriceWithToman(priceNum);
-            let monthlyPayment = null;
-            let totalMonths = null;
+
+
+            let monthlyPayment: string | null = null;
+            let totalMonths: number | null = null;
 
             if (editTransaction.paymentType === "پرداخت-دوره-ای") {
-                const monthsNum = extractPriceNumber(editTransaction.totalMonths);
-                if (!monthsNum || parseInt(monthsNum) < 1) {
+                const monthsStr = extractPriceNumber(editTransaction.totalMonths);
+                const monthsNum = parseInt(monthsStr);
+
+                if (!monthsNum || monthsNum < 1) {
                     showError("برای پرداخت دوره‌ای، تعداد ماه‌ها باید وارد شود");
                     return;
                 }
-                monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsNum);
-                totalMonths = parseInt(monthsNum) || 1;
+                monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsStr);
+                totalMonths = monthsNum;
             }
 
             const userToUpdate = users[editingIndex];
+            if (!userToUpdate) return;
+
+
             const updatedUser: Omit<User, "id"> = {
-                SerialNumber: toPersianNumber(editTransaction.serialnumber),
+                username: userToUpdate.username || "",
                 FullName: editTransaction.fullname,
+                SerialNumber: toPersianNumber(editTransaction.serialnumber),
+                phoneNumber: String(editTransaction.phoneNumber || userToUpdate.phoneNumber || ""),
                 service: editTransaction.service,
                 price: formattedPrice,
-                status: editTransaction.status,
+
+                status: editTransaction.status as "لغو-شده" | "درحال-انجام" | "پرداخت-شده",
                 paymentType: editTransaction.paymentType,
                 monthlyPayment,
                 totalMonths,
-                username: userToUpdate.username, // preserve existing username
             };
 
+
             const response = await userService.update(userToUpdate.id, updatedUser);
+
+
             const updatedUsers = [...users];
             updatedUsers[editingIndex] = response.data;
             setUsers(updatedUsers);
+
+
+
             handleCloseEditModal();
         } catch (error) {
             console.error("Failed to update transaction:", error);
             showError("خطا در ویرایش فاکتور");
         }
-    };
+    };;
 
     // -------------------- Input Change Handlers --------------------
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

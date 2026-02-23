@@ -1,11 +1,12 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./AdminTicketPage.scss";
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, Button, TextField,
     IconButton,
     Dialog, DialogTitle, DialogActions,
-    Snackbar, Alert, Menu, MenuItem, Tooltip
+    Snackbar, Alert, Menu, MenuItem, Tooltip,
+    type AlertColor,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
@@ -18,6 +19,7 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.tsx";
 
+// Define a strict type for the local UI state
 interface Ticket extends StoredTicket {
     username: string;
     userPhone: string;
@@ -33,16 +35,20 @@ const toPersianNumber = (num: number | string): string => {
 export default function AdminTicketPage() {
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [responses, setResponses] = useState<{ [key: string]: string }>({});
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [submittingId, setSubmittingId] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
     const [deleteId, setDeleteId] = useState<string | number | null>(null);
-    const [snackbar, setSnackbar] = useState({
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: AlertColor;
+    }>({
         open: false,
         message: "",
-        severity: "success" as "success" | "error" | "info"
+        severity: "success"
     });
 
     const fetchData = async () => {
@@ -58,12 +64,12 @@ export default function AdminTicketPage() {
 
             fetchedUsers.forEach((u) => {
                 userMap.set(String(u.id), {
-                    username: u.username || "نامشخص",
+                    username: u.FullName || u.username || "نامشخص",
                     phone: u.phoneNumber || "—"
                 });
             });
 
-            const ticketsData: Ticket[] = ticketsRes.data.map((t: StoredTicket) => {
+            const ticketsData: Ticket[] = ticketsRes.data.map((t: StoredTicket): Ticket => {
                 const userData = userMap.get(String(t.userId));
                 let localStatus: "pending" | "answered" | "in-progress" = "pending";
 
@@ -91,7 +97,7 @@ export default function AdminTicketPage() {
         fetchData();
     }, []);
 
-    const handleDownload = (fileUrl: string, fileName: string) => {
+    const handleDownload = (fileUrl: string, fileName: string): void => {
         if (!fileUrl) return;
         const link = document.createElement('a');
         link.href = fileUrl;
@@ -102,7 +108,7 @@ export default function AdminTicketPage() {
         document.body.removeChild(link);
     };
 
-    const submitResponse = async (id: string | number) => {
+    const submitResponse = async (id: string | number): Promise<void> => {
         const idString = String(id);
         const responseText = responses[idString];
         if (!responseText?.trim()) return;
@@ -112,7 +118,8 @@ export default function AdminTicketPage() {
             const currentTicket = tickets.find(t => String(t.id) === idString);
             if (!currentTicket) return;
 
-            const { username, userPhone, localStatus, ...apiPayload } = currentTicket;
+
+            const {  ...apiPayload } = currentTicket;
 
             const updatedTicket: StoredTicket = {
                 ...apiPayload,
@@ -122,7 +129,7 @@ export default function AdminTicketPage() {
 
             await ticketService.update(id, updatedTicket);
 
-            setTickets(prev => prev.map(t => String(t.id) === idString ? { ...t, adminResponse: responseText, localStatus: "answered" } : t));
+            setTickets(prev => prev.map(t => String(t.id) === idString ? { ...t, adminResponse: responseText, localStatus: "answered", status: "answered" } : t));
             setResponses(prev => {
                 const updated = { ...prev };
                 delete updated[idString];
@@ -137,7 +144,7 @@ export default function AdminTicketPage() {
         }
     };
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = async (): Promise<void> => {
         if (deleteId === null) return;
         try {
             await ticketService.delete(deleteId);
@@ -151,10 +158,11 @@ export default function AdminTicketPage() {
         }
     };
 
-    const handleStatusChange = async (status: "pending" | "answered" | "in-progress") => {
+    const handleStatusChange = async (status: "pending" | "answered" | "in-progress"): Promise<void> => {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { username, userPhone, localStatus, ...apiData } = ticket;
 
             const updatedPayload: StoredTicket = {
@@ -232,7 +240,7 @@ export default function AdminTicketPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    {ticket.file && ticket.file.url ? (
+                                    {ticket.file?.url ? (
                                         <Tooltip title={`دانلود فایل: ${ticket.file.name} (${(ticket.file.size / 1024).toFixed(1)} KB)`}>
                                             <IconButton onClick={() => handleDownload(ticket.file!.url, ticket.file!.name)}>
                                                 <AttachFileIcon sx={{ color: '#666AF2', transform: 'rotate(45deg)' }} />
@@ -280,8 +288,19 @@ export default function AdminTicketPage() {
                                 </TableCell>
                                 <TableCell>
                                     <div className="action-buttons">
-                                        <Button size="small" variant="outlined" onClick={(e) => {setAnchorEl(e.currentTarget); setActiveIndex(index);}}>تغییر وضعیت</Button>
-                                        <IconButton onClick={() => {setDeleteId(ticket.id); setDeleteConfirmOpen(true);}} sx={{ color: '#dc2626' }}><DeleteIcon /></IconButton>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                                setAnchorEl(e.currentTarget);
+                                                setActiveIndex(index);
+                                            }}
+                                        >
+                                            تغییر وضعیت
+                                        </Button>
+                                        <IconButton onClick={() => {setDeleteId(ticket.id); setDeleteConfirmOpen(true);}} sx={{ color: '#dc2626' }}>
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -304,8 +323,15 @@ export default function AdminTicketPage() {
                 </DialogActions>
             </Dialog>
 
-            <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(p => ({...p, open: false}))} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert severity={snackbar.severity as any} sx={{ fontFamily: 'Vazirmatn' }}>{snackbar.message}</Alert>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar(p => ({...p, open: false}))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn' }}>
+                    {snackbar.message}
+                </Alert>
             </Snackbar>
         </div>
     );
