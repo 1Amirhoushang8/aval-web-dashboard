@@ -39,8 +39,7 @@ import "./Accounting.scss";
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface.ts";
 import { userService } from "../../API/UserService.ts";
 
-// -------------------- Utility Functions --------------------
-// Convert Persian/Arabic digits to English digits
+
 const convertPersianToEnglishDigits = (text: string): string => {
     if (!text) return '';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -55,32 +54,32 @@ const convertPersianToEnglishDigits = (text: string): string => {
     return result;
 };
 
-// Normalize Persian text for search: convert Arabic letters to Persian, digits to English, trim, lowercase
+
 const normalizePersianText = (text: string): string => {
     if (!text) return '';
-    // Convert Arabic 'ي' to Persian 'ی' and Arabic 'ك' to Persian 'ک'
+
     let normalized = text.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
-    // Convert digits to English
+
     normalized = convertPersianToEnglishDigits(normalized);
-    // Trim and lowercase (for English parts)
+
     return normalized.trim().toLowerCase();
 };
 
-// Convert English numbers to Persian (for display)
+
 const toPersianNumber = (num: number | string): string => {
     if (num === null || num === undefined) return '';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
     return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
 };
 
-// Extract only digits from a string (after converting Persian digits to English)
+
 const extractPriceNumber = (priceString: string): string => {
     if (!priceString) return "0";
     const englishString = convertPersianToEnglishDigits(priceString);
     return englishString.replace(/\D/g, '') || "0";
 };
 
-// Format price with commas and تومان (returns Persian digits)
+
 const formatPriceWithToman = (priceInput: string): string => {
     if (!priceInput || priceInput.trim() === '') return "۰ تومان";
     const numberPart = extractPriceNumber(priceInput);
@@ -91,7 +90,7 @@ const formatPriceWithToman = (priceInput: string): string => {
     return toPersianNumber(formattedNumber) + " تومان";
 };
 
-// Calculate monthly payment (returns Persian formatted string)
+
 const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): string => {
     const cleanTotal = extractPriceNumber(totalPrice);
     const cleanMonths = extractPriceNumber(months);
@@ -102,13 +101,13 @@ const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): str
     return toPersianNumber(monthly.toLocaleString('en-US')) + " تومان";
 };
 
-// Clean input for processing (convert to English digits and remove non-digits)
+
 const cleanNumberInput = (value: string): string => {
     if (!value) return '';
     return convertPersianToEnglishDigits(value).replace(/\D/g, '');
 };
 
-// Format number with commas for display (returns Persian digits)
+
 const formatNumberWithCommas = (value: string): string => {
     if (!value) return '';
     const cleanValue = cleanNumberInput(value);
@@ -119,27 +118,27 @@ const formatNumberWithCommas = (value: string): string => {
     return toPersianNumber(formattedNumber);
 };
 
-// -------------------- Main Component --------------------
+
 export default function AccountingPage() {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Delete confirmation dialog state
+
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
     const showError = (message: string) => setError(message);
     const handleCloseError = () => setError(null);
 
-    // Fetch users on mount
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await userService.getAll();
                 const usersData = Array.isArray(response.data) ? response.data : [];
-                // Normalize data to include missing fields with default values
+
                 const normalizedUsers = usersData.map(user => ({
                     ...user,
                     price: user.price || "۰ تومان",
@@ -165,7 +164,7 @@ export default function AccountingPage() {
         );
     };
 
-    // -------------------- Filtering --------------------
+
     const filteredUsers = useMemo(() => {
         if (!searchTerm.trim()) return users;
         const term = normalizePersianText(searchTerm);
@@ -175,7 +174,7 @@ export default function AccountingPage() {
         });
     }, [users, searchTerm]);
 
-    // -------------------- State for modals and menus --------------------
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [openModal, setOpenModal] = useState(false);
@@ -189,7 +188,7 @@ export default function AccountingPage() {
         totalMonths: "",
     });
 
-    // New transaction form state
+
     const [newTransaction, setNewTransaction] = useState({
         serialnumber: "",
         fullname: "",
@@ -201,7 +200,7 @@ export default function AccountingPage() {
         totalMonths: "",
     });
 
-    // Edit transaction form state
+
     const [editTransaction, setEditTransaction] = useState({
         serialnumber: "",
         fullname: "",
@@ -216,11 +215,11 @@ export default function AccountingPage() {
 
     const open = Boolean(anchorEl);
 
-    // Placeholders in Persian
+
     const pricePlaceholder = toPersianNumber("۱,۰۰۰,۰۰۰");
     const monthsPlaceholder = toPersianNumber("۴");
 
-    // -------------------- Modal Handlers --------------------
+
     const handleAddTicket = () => setOpenModal(true);
 
     const handleEditTicket = (index: number) => {
@@ -387,7 +386,7 @@ export default function AccountingPage() {
         });
     };
 
-    // -------------------- Save Handlers --------------------
+
     const handleSaveTransaction = async () => {
         // 1. Validation for empty fields
         if (!newTransaction.serialnumber.trim() ||
@@ -404,7 +403,7 @@ export default function AccountingPage() {
             return;
         }
 
-        // 3. Check if the full name exists and FIND that user object
+
         const normalizedInputName = normalizePersianText(newTransaction.fullname);
         const existingUser = users.find(u => normalizePersianText(u.FullName) === normalizedInputName);
 
@@ -531,7 +530,7 @@ export default function AccountingPage() {
         }
     };
 
-    // -------------------- Input Change Handlers --------------------
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
     };
@@ -597,7 +596,7 @@ export default function AccountingPage() {
         }));
     };
 
-    // Quick status change menu
+
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, index: number) => {
         setAnchorEl(event.currentTarget);
         setActiveIndex(index);
@@ -625,7 +624,7 @@ export default function AccountingPage() {
         }
     };
 
-    // -------------------- Render --------------------
+
     if (loading) {
         return <AccountingSkeleton />;
     }
@@ -633,7 +632,7 @@ export default function AccountingPage() {
     return (
         <div className="accounting" dir="rtl">
 
-            {/* Header with plus button and search bar */}
+
             <div className="accounting-header">
                 <div className="search-bar">
                     <TextField
@@ -681,7 +680,7 @@ export default function AccountingPage() {
                 </div>
             </div>
 
-            {/* Add New Transaction Modal */}
+
             <Modal open={openModal} onClose={handleCloseModal}>
                 <Box sx={{
                     position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -739,7 +738,7 @@ export default function AccountingPage() {
                 </Box>
             </Modal>
 
-            {/* Edit Transaction Modal */}
+
             <Modal open={editModal} onClose={handleCloseEditModal}>
                 <Box sx={{
                     position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -795,7 +794,7 @@ export default function AccountingPage() {
                 </Box>
             </Modal>
 
-            {/* Payment Details Modal */}
+
             <Dialog open={paymentModal} onClose={handleClosePaymentModal} maxWidth="sm" fullWidth
                     slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>جزئیات پرداخت</DialogTitle>
@@ -850,7 +849,7 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Edit Payment Details Modal */}
+            {
             <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
                     slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
@@ -882,9 +881,9 @@ export default function AccountingPage() {
                     <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
                     <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
                 </DialogActions>
-            </Dialog>
+            </Dialog> }
 
-            {/* Delete Confirmation Dialog */}
+
             <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm} maxWidth="xs" fullWidth
                     slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl', p: 2 } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700, color: '#ef4444', borderBottom: '2px solid #fee2e2' }}>تایید حذف</DialogTitle>
@@ -898,7 +897,7 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Transactions Table */}
+
             <TableContainer component={Paper} className="accounting-card">
                 <Table>
                     <TableHead>
@@ -965,14 +964,14 @@ export default function AccountingPage() {
                 </Table>
             </TableContainer>
 
-            {/* Quick Status Change Menu */}
+
             <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu} anchorOrigin={{ vertical: "bottom", horizontal: "right" }} transformOrigin={{ vertical: "top", horizontal: "right" }}>
                 <MenuItem onClick={() => handleStatusChange("درحال-انجام")}>درحال انجام</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("پرداخت-شده")}>پرداخت شده</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("لغو-شده")}>لغو شده</MenuItem>
             </Menu>
 
-            {/* Error Snackbar */}
+
             <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>{error}</Alert>
             </Snackbar>

@@ -8,7 +8,7 @@ import type { User } from "../../models/AccountingInterfaces/AccountingInterface
 const SignUpPage: React.FC = () => {
     const navigate = useNavigate();
 
-    // Form States
+
     const [formData, setFormData] = useState({
         fullName: "",
         username: "",
@@ -32,7 +32,7 @@ const SignUpPage: React.FC = () => {
         setLoading(true);
 
         try {
-            // 1. Check if username already exists
+
             const existingUsers = await apiClient.get<User[]>("/users");
             const isDuplicate = existingUsers.data.some(
                 (u) => u.username.toLowerCase() === formData.username.toLowerCase()
@@ -60,7 +60,7 @@ const SignUpPage: React.FC = () => {
                 totalMonths: null
             };
 
-            // 3. Post to JSON Server
+
             await apiClient.post("/users", newUser);
 
 

@@ -16,7 +16,7 @@ export default function ManageSitePage() {
     const navigate = useNavigate();
     const [showTicketList, setShowTicketList] = useState(false);
 
-    // --- Snackbar State ---
+
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
         message: string;
@@ -27,7 +27,7 @@ export default function ManageSitePage() {
         severity: "error",
     });
 
-    // Memoize error handler to prevent unnecessary re-renders
+
     const showError = useCallback((message: string) => {
         setSnackbar({
             open: true,
@@ -48,16 +48,14 @@ export default function ManageSitePage() {
         }).format(new Date());
     };
 
-    // --- Fetching Data ---
-    // Note: We remove the useEffect and handle error triggers via query options
+
     const { data: tickets = [], isLoading: ticketsLoading } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
             return response.data;
         },
-        // For production: Error logic is now tied to the query lifecycle
-        // If you use a Global QueryClient, you can catch this 'meta' field there
+
         meta: {
             onError: () => showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.")
         }
@@ -76,7 +74,7 @@ export default function ManageSitePage() {
 
     const isLoading = ticketsLoading || usersLoading;
 
-    // --- Filtering Logic ---
+
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
         return tickets.filter(ticket => ticket.date === today);

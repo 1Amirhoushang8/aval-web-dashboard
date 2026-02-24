@@ -11,7 +11,12 @@ export default function Layout() {
     const role = user?.roleKey || "USER";
 
     useEffect(() => {
-        setExpanded(false);
+        
+        const handle = requestAnimationFrame(() => {
+            setExpanded(false);
+        });
+
+        return () => cancelAnimationFrame(handle);
     }, [location.pathname]);
 
     const sidebarItems = useMemo(() => {

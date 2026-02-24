@@ -1,4 +1,4 @@
-// components/FileUpload/FileUpload.tsx
+
 import React, { useState, useEffect, useRef } from "react";
 import "./TicketFileUpload.scss";
 import type {FileUploadProps} from "../../models/FileUploadInterface/FileUploadInterface.ts";
@@ -19,7 +19,7 @@ export default function TicketFileUpload({
     const [fileError, setFileError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Clean up preview URL on unmount
+
     useEffect(() => {
         return () => {
             if (previewUrl && previewUrl.startsWith('blob:')) {
@@ -28,7 +28,7 @@ export default function TicketFileUpload({
         };
     }, [previewUrl]);
 
-    // Format file size for display
+
     const formatFileSize = (bytes: number): string => {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -37,12 +37,12 @@ export default function TicketFileUpload({
 
 
 
-    // Validate file
+
     const validateFile = (selected: File): boolean => {
-        // Check file type
+
         const isValidType = allowedTypes.includes(selected.type);
 
-        // Check by extension for rare MIME types
+
         const fileExtension = selected.name.split('.').pop()?.toLowerCase();
         const isValidExtension = fileExtension ? allowedExtensions.includes(fileExtension) : false;
 
@@ -52,7 +52,7 @@ export default function TicketFileUpload({
             return false;
         }
 
-        // Check file size
+
         if (selected.size > maxSize) {
             const maxSizeMB = maxSize / 1024 / 1024;
             const fileSizeMB = (selected.size / 1024 / 1024).toFixed(2);
@@ -63,7 +63,7 @@ export default function TicketFileUpload({
         return true;
     };
 
-    // Handle file selection
+
     const handleFileSelect = (selected: File | null) => {
         if (!selected) return;
 
@@ -74,7 +74,7 @@ export default function TicketFileUpload({
             onFileChange(selected);
             onFileError(null);
 
-            // Create preview for images
+
             if (selected.type.startsWith("image/")) {
                 const url = URL.createObjectURL(selected);
                 setPreviewUrl(url);
@@ -100,7 +100,7 @@ export default function TicketFileUpload({
         onFileChange(null);
         onFileError(null);
 
-        // Clear the file input
+
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -119,7 +119,7 @@ export default function TicketFileUpload({
                 />
             </label>
 
-            {/* File restrictions info */}
+
             <div className="file-restrictions">
                 <small>
                     فرمت‌های مجاز: تصاویر، PDF، Zip، Rar |
@@ -127,7 +127,7 @@ export default function TicketFileUpload({
                 </small>
             </div>
 
-            {/* File error message */}
+
             {fileError && (
                 <div className="file-error-message">
                     <span className="error-icon">⚠️</span>
@@ -170,7 +170,7 @@ export default function TicketFileUpload({
                 )}
             </div>
 
-            {/* Remove file button - outside the preview box */}
+
             {file && (
                 <button
                     className="remove-btn outside"

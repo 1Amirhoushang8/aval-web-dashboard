@@ -3,7 +3,7 @@ import "./TodayTickets.scss";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
 
 interface TodayTicketsProps {
-    tickets: StoredTicket[]; // This should be the filtered "today" list from ManageSitePage
+    tickets: StoredTicket[];
     loading?: boolean;
     toPersianNumber?: (num: number | string) => string;
     open: boolean;
@@ -19,17 +19,17 @@ export default function TodayTickets({
                                      }: TodayTicketsProps) {
     const navigate = useNavigate();
 
-    // Default Persian number converter (fallback)
+
     const persian = toPersianNumber || ((num) => {
         if (num === undefined || num === null) return "۰";
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
     });
 
-    // Count how many of today's tickets are still "pending"
+
     const pendingCount = tickets.filter(t => t.status === "pending").length;
 
-    // Navigation function to see all tickets
+
     const handleNavigate = () => {
         navigate("/AdminTicketPage");
     };

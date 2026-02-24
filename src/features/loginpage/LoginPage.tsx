@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
             const allUsers = usersRes.data;
             const allAdmins = adminsRes.data;
 
-            // Fixed the "any" error by specifying the User type
+
             const findInArray = (array: User[]): User | undefined =>
                 array.find((u: User) =>
                     u.username?.toLowerCase().trim() === username.toLowerCase().trim() &&
@@ -38,13 +38,13 @@ const LoginPage: React.FC = () => {
             const userMatch = findInArray(allUsers);
 
             if (adminMatch) {
-                // Ensure roleKey exists for the ProtectedRoute
+
                 const adminData = { ...adminMatch, roleKey: "ADMIN" };
                 localStorage.setItem("user", JSON.stringify(adminData));
                 localStorage.setItem("token", "fake-admin-token");
                 navigate("/ManageSite", { replace: true });
             } else if (userMatch) {
-                // Manually set roleKey to USER so the Router accepts it
+
                 const userData = { ...userMatch, roleKey: "USER" };
                 localStorage.setItem("user", JSON.stringify(userData));
                 localStorage.setItem("token", "fake-user-token");

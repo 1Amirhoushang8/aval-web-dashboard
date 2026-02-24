@@ -81,7 +81,7 @@ export default function UserSeeTickets() {
         if (selectedTicketId === null) return;
 
         try {
-            // The service now receives the correct type
+
             await ticketService.delete(selectedTicketId);
             setTickets(prev => prev.filter(t => t.id !== selectedTicketId));
             setSnackbar({ open: true, message: "تیکت با موفقیت حذف شد", severity: "success" });
@@ -94,7 +94,7 @@ export default function UserSeeTickets() {
     };
 
     const getStatusChip = (status: string) => {
-        // Defined explicit types instead of 'any'
+
         const configs: Record<string, {
             label: string,
             color: "success" | "primary" | "warning" | "default"
@@ -116,7 +116,7 @@ export default function UserSeeTickets() {
 
     return (
         <div className="user-tickets-page" dir="rtl" style={{ fontFamily: 'Vazirmatn, sans-serif', padding: '20px' }}>
-            {/* Header Section */}
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                 <Box>
                     <Typography variant="h5" sx={{ fontFamily: 'Vazirmatn', fontWeight: 800 }}>تیکت‌های من</Typography>

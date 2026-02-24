@@ -6,7 +6,7 @@ import "./FooterCards.scss"
 export default function FooterCards() {
     const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month'>('day');
 
-    // 1. Fetching data - using same queryKey as the chart for efficiency
+
     const { data: allStats, isError, isLoading } = useQuery({
         queryKey: ["financialStats"],
         queryFn: async () => {
@@ -31,10 +31,10 @@ export default function FooterCards() {
         return labels[filter];
     };
 
-    // 2. Extract and Process Data Safely
+
     const rawData = allStats ? allStats[timeFilter] : null;
 
-    // Automatic Summation Logic (prevents zeros/errors if JSON fields are missing)
+
     const currentData = rawData ? {
         ...rawData,
         totalRequests: rawData.totalRequests || (rawData.requests ? rawData.requests.reduce((a: number, b: number) => a + b, 0) : 0),
@@ -43,10 +43,10 @@ export default function FooterCards() {
 
     const balance = currentData ? currentData.totalRequests - currentData.totalPayments : 0;
 
-    // 3. Handling States
+
     if (isLoading) return <div className="loading-text">در حال محاسبه مقادیر...</div>;
 
-    // If data is missing for a filter, we show the filter buttons but an empty state message
+
     if (isError || !currentData) {
         return (
             <div className="financial-summary" dir="rtl">

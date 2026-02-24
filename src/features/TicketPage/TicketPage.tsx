@@ -87,14 +87,14 @@ export default function ManageTicketPage() {
             return;
         }
 
-        // --- CRITICAL FIX: GET USER FROM LOCAL STORAGE ---
+
         const userStr = localStorage.getItem("user");
         if (!userStr) {
             showError("لطفاً ابتدا وارد حساب کاربری خود شوید");
             return;
         }
         const currentUser = JSON.parse(userStr);
-        // ------------------------------------------------
+
 
         setIsSaving(true);
 
@@ -106,9 +106,9 @@ export default function ManageTicketPage() {
                 description: description.trim(),
                 date: dateStr,
                 time: timeStr,
-                userId: String(currentUser.id), // LINKING TICKET TO USER
-                status: "pending",             // DEFAULT STATUS
-                adminResponse: null,          // INITIAL RESPONSE
+                userId: String(currentUser.id),
+                status: "pending",
+                adminResponse: null,
                 ...(file && previewUrl && {
                     file: {
                         name: file.name,

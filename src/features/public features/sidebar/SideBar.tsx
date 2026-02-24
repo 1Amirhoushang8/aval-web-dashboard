@@ -19,15 +19,15 @@ const Sidebar: React.FC<SidebarPropsType> = ({ expanded, setExpanded, sidebarIte
 
     return (
         <>
-            {/* Mobile Header */}
+
             {isMobile && (
                 <div className="mobile_header">
                     <span className="toggle" onClick={() => setExpanded(!expanded)}>☰</span>
-                    <h1 style={{fontSize: '1.2rem'}}>پنل مدیریت</h1>
+                    <h1 style={{fontSize: '1.2rem'}}>پنل مدیریت اول وب</h1>
                 </div>
             )}
 
-            {/* Backdrop for mobile only - prevents the "shadow" from sticking */}
+
             {isMobile && expanded && (
                 <div
                     className="sidebar-overlay"
@@ -69,10 +69,10 @@ const Sidebar: React.FC<SidebarPropsType> = ({ expanded, setExpanded, sidebarIte
                 </List>
 
                 <IconButton
-                    sx={{ color: "#fff", gap: "10px", marginTop: 'auto', padding: '20px' }}
+                    sx={{ color: "#fff", gap: "10px", marginTop: 'auto', padding: '10px' }}
                     onClick={handleLogout}
                 >
-                    <AiOutlineLogout size={23} />
+                    <AiOutlineLogout size={20} />
                     <span className="title">خروج</span>
                 </IconButton>
             </Box>

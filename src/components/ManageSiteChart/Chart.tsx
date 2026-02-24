@@ -2,14 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import "./Chart.scss";
+import type {ChartData} from "../../models/ChartDataInterface/ChartDataInterface.ts"
 
-interface ChartData {
-    labels: string[];
-    requests: number[];
-    payments: number[];
-    totalRequests?: number;
-    totalPayments?: number;
-}
 
 type TimeFilter = 'day' | 'week' | 'month';
 
@@ -57,7 +51,7 @@ export default function ManageSiteChart() {
             <div className="chart-error">
                 <div className="error-icon">!</div>
                 <h3>داده‌ای یافت نشد</h3>
-                <p>اطلاعات مربوط به بازه {timeFilter === 'day' ? 'روزانه' : timeFilter === 'week' ? 'هفتگی' : 'ماهانه'} در دیتابیس موجود نیست.</p>
+                <p>اطلاعات مربوط به بازه {timeFilter === 'day' ? 'روزانه' : timeFilter === 'week' ? 'هفتگی' : 'ماهانه'} یافت نشد</p>
             </div>
         );
     }
@@ -66,7 +60,7 @@ export default function ManageSiteChart() {
     const chartHeight = 300;
     const getBarHeight = (value: number) => (value / maxValue) * chartHeight;
 
-    // Logic for subtle resizing
+
     const isMonthView = timeFilter === 'month';
 
     return (
@@ -116,7 +110,7 @@ export default function ManageSiteChart() {
                             <div
                                 key={index}
                                 className="chart-bar-group"
-                                // Adjusting group width slightly for 12 columns
+
                                 style={{ width: isMonthView ? '55px' : '85px' }}
                             >
                                 <div className="bar-label" style={{ fontSize: isMonthView ? '0.78rem' : '0.85rem' }}>
@@ -127,7 +121,7 @@ export default function ManageSiteChart() {
                                         className="bar bar-requests"
                                         style={{
                                             height: `${getBarHeight(currentData.requests[index])}px`,
-                                            // Slender width for month view
+
                                             width: isMonthView ? '14px' : '22px'
                                         }}
                                         title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`}

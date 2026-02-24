@@ -19,7 +19,7 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.tsx";
 
-// Define a strict type for the local UI state
+
 interface Ticket extends StoredTicket {
     username: string;
     userPhone: string;
@@ -103,7 +103,7 @@ export default function AdminTicketPage() {
             return;
         }
 
-        // TypeScript now knows 'file' is an object here
+
         const link = document.createElement('a');
         link.href = file.url;
         link.download = file.name || 'download';
@@ -123,8 +123,8 @@ export default function AdminTicketPage() {
             const currentTicket = tickets.find(t => String(t.id) === idString);
             if (!currentTicket) return;
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { username, userPhone, localStatus, ...apiPayload } = currentTicket;
+
+            const {  ...apiPayload } = currentTicket;
 
             const updatedTicket: StoredTicket = {
                 ...apiPayload,
@@ -168,8 +168,8 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { username, userPhone, localStatus, ...apiData } = ticket;
+
+            const {  ...apiData } = ticket;
 
             const updatedPayload: StoredTicket = {
                 ...apiData,
@@ -177,7 +177,7 @@ export default function AdminTicketPage() {
                 status: newStatus
             };
 
-            // Using the raw ID (string or number) to match your db.json
+
             await ticketService.update(ticket.id, updatedPayload);
 
             setTickets(prev => prev.map((t, i) => i === activeIndex ? {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import React ,{ useState, useEffect, useRef } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import "./TicketTitle.scss";
@@ -16,7 +16,7 @@ export default function TicketTitle({
     const dropdownRef = useRef<HTMLDivElement>(null);
     const dropdownContentRef = useRef<HTMLDivElement>(null);
 
-    /* ---------- Close dropdown when clicking outside ---------- */
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -33,7 +33,7 @@ export default function TicketTitle({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    /* ---------- Prevent body scroll when dropdown is open ---------- */
+
     useEffect(() => {
         if (isDropdownOpen) {
             document.body.style.overflow = 'hidden';
