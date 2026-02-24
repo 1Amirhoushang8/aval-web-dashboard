@@ -3,6 +3,7 @@ import { Box, IconButton, List, ListItem, useTheme, useMediaQuery } from "@mui/m
 import { CgMenuLeft } from "react-icons/cg";
 import { AiOutlineLogout } from "react-icons/ai";
 import "./SideBar.scss";
+import React from "react";
 import type { SidebarPropsType } from "../../../models/SideBarInterface/SidebarInterface";
 
 const Sidebar: React.FC<SidebarPropsType> = ({ expanded, setExpanded, sidebarItems }) => {

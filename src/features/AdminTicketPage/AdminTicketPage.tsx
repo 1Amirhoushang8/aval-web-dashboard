@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminTicketPage.scss";
 import {
     Table, TableBody, TableCell, TableContainer,
@@ -86,7 +86,7 @@ export default function AdminTicketPage() {
 
             setTickets(ticketsData.reverse());
         } catch (error) {
-            console.error("Critical error fetching dashboard data:", error);
+            console.error("Fetch error:", error);
             setSnackbar({ open: true, message: "خطا در دریافت اطلاعات", severity: "error" });
         } finally {
             setLoading(false);
@@ -97,11 +97,16 @@ export default function AdminTicketPage() {
         fetchData();
     }, []);
 
-    const handleDownload = (fileUrl: string, fileName: string): void => {
-        if (!fileUrl) return;
+    const handleDownload = (file: StoredTicket['file'] | boolean): void => {
+        if (!file || file === true || typeof file === "boolean") {
+            setSnackbar({ open: true, message: "فایل آماده دانلود است (عملکرد بزودی اضافه می‌شود)", severity: "info" });
+            return;
+        }
+
+        // TypeScript now knows 'file' is an object here
         const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = fileName || 'download';
+        link.href = file.url;
+        link.download = file.name || 'download';
         link.target = "_blank";
         document.body.appendChild(link);
         link.click();
@@ -118,8 +123,8 @@ export default function AdminTicketPage() {
             const currentTicket = tickets.find(t => String(t.id) === idString);
             if (!currentTicket) return;
 
-
-            const {  ...apiPayload } = currentTicket;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { username, userPhone, localStatus, ...apiPayload } = currentTicket;
 
             const updatedTicket: StoredTicket = {
                 ...apiPayload,
@@ -137,7 +142,7 @@ export default function AdminTicketPage() {
             });
             setSnackbar({ open: true, message: "پاسخ ثبت شد", severity: "success" });
         } catch (error) {
-            console.error("Failed to submit response:", error);
+            console.error("Submit error:", error);
             setSnackbar({ open: true, message: "خطا در ثبت پاسخ", severity: "error" });
         } finally {
             setSubmittingId(null);
@@ -151,6 +156,7 @@ export default function AdminTicketPage() {
             setTickets(prev => prev.filter(t => t.id !== deleteId));
             setSnackbar({ open: true, message: "تیکت حذف شد", severity: "success" });
         } catch (error) {
+            console.error("Delete error:", error);
             setSnackbar({ open: true, message: "خطا در حذف تیکت", severity: "error" });
         } finally {
             setDeleteConfirmOpen(false);
@@ -158,7 +164,7 @@ export default function AdminTicketPage() {
         }
     };
 
-    const handleStatusChange = async (status: "pending" | "answered" | "in-progress"): Promise<void> => {
+    const handleStatusChange = async (newStatus: "pending" | "answered" | "in-progress"): Promise<void> => {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
@@ -167,23 +173,26 @@ export default function AdminTicketPage() {
 
             const updatedPayload: StoredTicket = {
                 ...apiData,
-                adminResponse: status === "answered" ? (ticket.adminResponse || "تایید شد") : (status === "pending" ? null : ticket.adminResponse),
-                status: status
+                adminResponse: newStatus === "answered" ? (ticket.adminResponse || "تایید شد") : (newStatus === "pending" ? null : ticket.adminResponse),
+                status: newStatus
             };
 
+            // Using the raw ID (string or number) to match your db.json
             await ticketService.update(ticket.id, updatedPayload);
 
             setTickets(prev => prev.map((t, i) => i === activeIndex ? {
                 ...t,
-                localStatus: status,
-                adminResponse: updatedPayload.adminResponse || null,
-                status: status
+                localStatus: newStatus,
+                adminResponse: updatedPayload.adminResponse,
+                status: newStatus
             } : t));
             setSnackbar({ open: true, message: "وضعیت بروز شد", severity: "success" });
         } catch (error) {
+            console.error("Status update failed:", error);
             setSnackbar({ open: true, message: "خطا در تغییر وضعیت", severity: "error" });
         } finally {
             setAnchorEl(null);
+            setActiveIndex(null);
         }
     };
 
@@ -240,9 +249,9 @@ export default function AdminTicketPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    {ticket.file?.url ? (
-                                        <Tooltip title={`دانلود فایل: ${ticket.file.name} (${(ticket.file.size / 1024).toFixed(1)} KB)`}>
-                                            <IconButton onClick={() => handleDownload(ticket.file!.url, ticket.file!.name)}>
+                                    {ticket.file ? (
+                                        <Tooltip title={typeof ticket.file === 'object' ? `دانلود فایل: ${ticket.file.name}` : "دانلود پیوست"}>
+                                            <IconButton onClick={() => handleDownload(ticket.file)}>
                                                 <AttachFileIcon sx={{ color: '#666AF2', transform: 'rotate(45deg)' }} />
                                             </IconButton>
                                         </Tooltip>
@@ -291,6 +300,7 @@ export default function AdminTicketPage() {
                                         <Button
                                             size="small"
                                             variant="outlined"
+                                            className="quick-change-btn"
                                             onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                                 setAnchorEl(e.currentTarget);
                                                 setActiveIndex(index);
@@ -309,7 +319,7 @@ export default function AdminTicketPage() {
                 </Table>
             </TableContainer>
 
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => { setAnchorEl(null); setActiveIndex(null); }}>
                 <MenuItem onClick={() => handleStatusChange("pending")}>در انتظار</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("in-progress")}>در حال بررسی</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("answered")}>پاسخ داده شد</MenuItem>

@@ -26,9 +26,9 @@ export default function UserSeeTickets() {
     const [error, setError] = useState<string | null>(null);
     const [userName, setUserName] = useState<string>("");
 
-    // Dialog & Snackbar States
+
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    // Use string | number to match your db.json IDs
+
     const [selectedTicketId, setSelectedTicketId] = useState<string | number | null>(null);
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -39,20 +39,32 @@ export default function UserSeeTickets() {
     const fetchUserTickets = async () => {
         setLoading(true);
         setError(null);
+
         try {
             const userStr = localStorage.getItem("user");
-            if (!userStr) throw new Error("User not found");
+
+
+            if (!userStr) {
+                setError("کاربر یافت نشد. لطفا ابتدا وارد حساب خود شوید.");
+                setLoading(false);
+                return;
+            }
+
             const currentUser = JSON.parse(userStr);
             setUserName(currentUser.FullName || currentUser.username || "کاربر");
 
+
             const response = await ticketService.getAll();
+
             const userTickets = response.data.filter(
                 (t: StoredTicket) => String(t.userId) === String(currentUser.id)
             );
+
             setTickets(userTickets.reverse());
-        } catch {
-            // Replaced unused 'err' with empty catch or could use catch(_)
-            setError("خطا در بارگذاری اطلاعات. لطفا اتصال اینترنت خود را بررسی کنید.");
+        } catch (err) {
+
+            console.error("JSON Server connection error:", err);
+            setError("خطا در اتصال به سرور. لطفا مطمئن شوید JSON Server در حال اجراست.");
         } finally {
             setTimeout(() => setLoading(false), 800);
         }

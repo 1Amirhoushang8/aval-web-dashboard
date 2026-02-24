@@ -12,7 +12,7 @@ export interface StoredTicket {
         type: string;
         size: number;
         url: string;
-    } | null;
+    } | null | boolean;
 }
 
 export interface TodayTicketsProps {

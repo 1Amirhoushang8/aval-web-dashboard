@@ -39,6 +39,7 @@
     },
     {
       "username": "fatemeh_r",
+      "password": "123",
       "FullName": "فاطمه رضایی",
       "SerialNumber": "۱۹۲۰۴۸۴۰",
       "phoneNumber": "09197778899",
@@ -89,19 +90,6 @@
       "totalMonths": 10,
       "username": "jalil",
       "id": "0d54"
-    },
-    {
-      "id": "d247",
-      "SerialNumber": "۱۲۴۱۹۳۴۷۳۱۵۹۸۷",
-      "FullName": "امیرمهدی جلیلیان",
-      "service": "طراحی گرافیک",
-      "phoneNumber": "",
-      "price": "۶۵,۳۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۵,۴۴۱,۶۶۶ تومان",
-      "totalMonths": 12,
-      "username": "امیرمهدی جلیلیان"
     }
   ],
   "tickets": [
@@ -113,7 +101,8 @@
       "date": "1402/12/01",
       "time": "10:00",
       "status": "answered",
-      "adminResponse": "رمز عبور شما بازیابی شد."
+      "adminResponse": "رمز عبور شما بازیابی شد.",
+      "file": true
     },
     {
       "id": "102",
@@ -123,7 +112,8 @@
       "date": "1402/12/02",
       "time": "11:30",
       "status": "pending",
-      "adminResponse": null
+      "adminResponse": null,
+      "file": true
     },
     {
       "id": "103",
@@ -133,7 +123,8 @@
       "date": "1402/12/01",
       "time": "09:15",
       "status": "answered",
-      "adminResponse": "گزارش سئو ایمیل شد."
+      "adminResponse": "گزارش سئو ایمیل شد.",
+      "file": false
     },
     {
       "id": "104",
@@ -143,7 +134,8 @@
       "date": "1402/12/03",
       "time": "14:20",
       "status": "pending",
-      "adminResponse": null
+      "adminResponse": null,
+      "file": true
     },
     {
       "id": "106",
@@ -153,7 +145,8 @@
       "date": "1402/12/02",
       "time": "12:00",
       "status": "answered",
-      "adminResponse": "طرح جدید در پنل آپلود شد."
+      "adminResponse": "طرح جدید در پنل آپلود شد.",
+      "file": false
     },
     {
       "id": "fcd0",
@@ -163,7 +156,8 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۰:۵۱",
       "status": "pending",
-      "adminResponse": null
+      "adminResponse": null,
+      "file": true
     },
     {
       "id": "ba30",
@@ -173,7 +167,8 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۱:۰۷",
       "status": "pending",
-      "adminResponse": null
+      "adminResponse": null,
+      "file": false
     },
     {
       "id": "bad6",
@@ -183,7 +178,8 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۱:۴۳",
       "status": "answered",
-      "adminResponse": "تایید شد"
+      "adminResponse": "تایید شد",
+      "file": false
     },
     {
       "id": "5a5b",
@@ -193,7 +189,8 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۲:۰۵",
       "status": "in-progress",
-      "adminResponse": null
+      "adminResponse": null,
+      "file": true
     },
     {
       "id": "a258",
@@ -202,8 +199,20 @@
       "date": "۱۴۰۴/۱۲/۰۴",
       "time": "۱۳:۱۲",
       "userId": "13",
-      "status": "in-progress",
-      "adminResponse": null
+      "status": "pending",
+      "adminResponse": null,
+      "file": true
+    },
+    {
+      "id": "02b5",
+      "title": "پشتیبان گیری",
+      "description": "پشتیبانی سایت",
+      "date": "۱۴۰۴/۱۲/۰۵",
+      "time": "۰۹:۴۰",
+      "userId": "13",
+      "status": "answered",
+      "adminResponse": "تایید شد",
+      "file": false
     }
   ],
   "financialStats": {

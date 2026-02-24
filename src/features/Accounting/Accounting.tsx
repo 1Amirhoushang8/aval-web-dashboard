@@ -252,7 +252,7 @@ export default function AccountingPage() {
 
         setEditingIndex(index);
         setEditModal(true);
-    };;
+    };
 
     const handleDeleteClick = (index: number) => {
         setDeleteIndex(index);
@@ -302,7 +302,7 @@ export default function AccountingPage() {
         });
 
         setPaymentModal(true);
-    };;
+    };
 
     const handleClosePaymentModal = () => {
         setPaymentModal(false);
@@ -529,7 +529,7 @@ export default function AccountingPage() {
             console.error("Failed to update transaction:", error);
             showError("خطا در ویرایش فاکتور");
         }
-    };;
+    };
 
     // -------------------- Input Change Handlers --------------------
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

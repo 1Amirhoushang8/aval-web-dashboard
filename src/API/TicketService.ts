@@ -10,7 +10,7 @@ export const ticketService = {
     create: (data: CreateTicketDto) =>
         apiClient.post<StoredTicket>("/tickets", data),
 
-    update: (id: number, data: CreateTicketDto) =>
+    update: (id: number | string, data: CreateTicketDto) =>
         apiClient.put<StoredTicket>(`/tickets/${id}`, data),
 
     delete: (id: number | string) =>
