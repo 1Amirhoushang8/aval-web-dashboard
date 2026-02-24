@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./SignUpPage.scss";
 import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
+// Import the Skeleton
+import SignUpPageSkeleton from "../../Skeleton/SignUpPageSkeleton/SignUpPageSkeleton";
+import { motion } from "framer-motion";
 
 const SignUpPage: React.FC = () => {
     const navigate = useNavigate();
@@ -18,6 +21,17 @@ const SignUpPage: React.FC = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+
+    const [pageLoading, setPageLoading] = useState(true);
+
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+            setPageLoading(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
@@ -29,13 +43,11 @@ const SignUpPage: React.FC = () => {
         e.preventDefault();
         setError("");
 
-
         const farsiRegex = /^[\u0600-\u06FF\s]+$/;
         if (formData.fullName.trim().length < 4 || !farsiRegex.test(formData.fullName)) {
             setError("نام و نام خانوادگی باید حداقل ۴ کاراکتر و به زبان فارسی باشد");
             return;
         }
-
 
         const englishNoSpaceRegex = /^[A-Za-z0-9_]+$/;
         if (!englishNoSpaceRegex.test(formData.username)) {
@@ -47,7 +59,6 @@ const SignUpPage: React.FC = () => {
             return;
         }
 
-
         if (formData.password.length < 6) {
             setError("رمز عبور باید حداقل ۶ کاراکتر باشد");
             return;
@@ -56,10 +67,8 @@ const SignUpPage: React.FC = () => {
         setLoading(true);
 
         try {
-
             const existingUsersRes = await apiClient.get<User[]>("/users");
             const users = existingUsersRes.data;
-
 
             const isUsernameDuplicate = users.some(
                 (u) => u.username.toLowerCase() === formData.username.toLowerCase()
@@ -69,7 +78,6 @@ const SignUpPage: React.FC = () => {
                 setLoading(false);
                 return;
             }
-
 
             const isPasswordDuplicate = users.some((u) => u.password === formData.password);
             if (isPasswordDuplicate) {
@@ -95,7 +103,6 @@ const SignUpPage: React.FC = () => {
 
             await apiClient.post("/users", newUser);
 
-
             setError("ثبت نام با موفقیت انجام شد! در حال انتقال...");
             setTimeout(() => {
                 navigate("/");
@@ -109,8 +116,18 @@ const SignUpPage: React.FC = () => {
         }
     };
 
+
+    if (pageLoading) {
+        return <SignUpPageSkeleton />;
+    }
+
     return (
-        <div className="login-page">
+        <motion.div
+            className="login-page"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+        >
             <div className="login-container">
                 <LoginImageSection />
                 <form id="loginform" dir="rtl" onSubmit={handleSignUp}>
@@ -193,7 +210,7 @@ const SignUpPage: React.FC = () => {
                     )}
                 </form>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

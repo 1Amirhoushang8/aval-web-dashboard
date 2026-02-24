@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LoginPage.scss";
 import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
-
-
+import LoginPageSkeleton from "../../Skeleton/LoginPageSkeleton/LoginPageSkeleton";
+import { motion } from "framer-motion";
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -13,12 +13,22 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+
+    const [pageLoading, setPageLoading] = useState(true);
+
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+            setPageLoading(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
         try {
-
             const [usersRes, adminsRes] = await Promise.all([
                 apiClient.get<User[]>("/users"),
                 apiClient.get<User[]>("/admins")
@@ -26,7 +36,6 @@ const LoginPage: React.FC = () => {
 
             const allUsers = usersRes.data;
             const allAdmins = adminsRes.data;
-
 
             const findInArray = (array: User[]): User | undefined =>
                 array.find((u: User) =>
@@ -38,13 +47,11 @@ const LoginPage: React.FC = () => {
             const userMatch = findInArray(allUsers);
 
             if (adminMatch) {
-
                 const adminData = { ...adminMatch, roleKey: "ADMIN" };
                 localStorage.setItem("user", JSON.stringify(adminData));
                 localStorage.setItem("token", "fake-admin-token");
                 navigate("/ManageSite", { replace: true });
             } else if (userMatch) {
-
                 const userData = { ...userMatch, roleKey: "USER" };
                 localStorage.setItem("user", JSON.stringify(userData));
                 localStorage.setItem("token", "fake-user-token");
@@ -58,12 +65,23 @@ const LoginPage: React.FC = () => {
         }
     };
 
+   
+    if (pageLoading) {
+        return <LoginPageSkeleton />;
+    }
+
     return (
-        <div className="login-page">
+        <motion.div
+            className="login-page"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+        >
             <div className="login-container">
                 <LoginImageSection />
                 <form id="loginform" dir="rtl" onSubmit={handleLogin}>
                     <h2 id="headerTitle">ورود به پنل کاربری</h2>
+
                     <div className="row">
                         <label>نام کاربری</label>
                         <input
@@ -74,6 +92,7 @@ const LoginPage: React.FC = () => {
                             required
                         />
                     </div>
+
                     <div className="row">
                         <label>رمز عبور</label>
                         <input
@@ -84,10 +103,10 @@ const LoginPage: React.FC = () => {
                             required
                         />
                     </div>
+
                     <div id="button" className="row">
                         <button type="submit">ورود</button>
                     </div>
-
 
                     <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
                         <span style={{ fontSize: "0.9rem", color: "#666" }}>حساب کاربری ندارید؟ </span>
@@ -111,7 +130,7 @@ const LoginPage: React.FC = () => {
                     )}
                 </form>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
