@@ -8,7 +8,6 @@ import type { User } from "../../models/AccountingInterfaces/AccountingInterface
 const SignUpPage: React.FC = () => {
     const navigate = useNavigate();
 
-
     const [formData, setFormData] = useState({
         fullName: "",
         username: "",
@@ -29,21 +28,55 @@ const SignUpPage: React.FC = () => {
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+
+        const farsiRegex = /^[\u0600-\u06FF\s]+$/;
+        if (formData.fullName.trim().length < 4 || !farsiRegex.test(formData.fullName)) {
+            setError("نام و نام خانوادگی باید حداقل ۴ کاراکتر و به زبان فارسی باشد");
+            return;
+        }
+
+
+        const englishNoSpaceRegex = /^[A-Za-z0-9_]+$/;
+        if (!englishNoSpaceRegex.test(formData.username)) {
+            if (formData.username.includes(" ")) {
+                setError("استفاده از فاصله (Space) در نام کاربری مجاز نیست");
+            } else {
+                setError("نام کاربری باید فقط شامل حروف انگلیسی و اعداد باشد");
+            }
+            return;
+        }
+
+
+        if (formData.password.length < 6) {
+            setError("رمز عبور باید حداقل ۶ کاراکتر باشد");
+            return;
+        }
+
         setLoading(true);
 
         try {
 
-            const existingUsers = await apiClient.get<User[]>("/users");
-            const isDuplicate = existingUsers.data.some(
+            const existingUsersRes = await apiClient.get<User[]>("/users");
+            const users = existingUsersRes.data;
+
+
+            const isUsernameDuplicate = users.some(
                 (u) => u.username.toLowerCase() === formData.username.toLowerCase()
             );
-
-            if (isDuplicate) {
+            if (isUsernameDuplicate) {
                 setError("این نام کاربری قبلاً انتخاب شده است");
                 setLoading(false);
                 return;
             }
 
+
+            const isPasswordDuplicate = users.some((u) => u.password === formData.password);
+            if (isPasswordDuplicate) {
+                setError("این رمز عبور قبلاً استفاده شده است؛ لطفا رمز دیگری انتخاب کنید");
+                setLoading(false);
+                return;
+            }
 
             const newUser: Omit<User, "id"> = {
                 FullName: formData.fullName,
@@ -51,7 +84,7 @@ const SignUpPage: React.FC = () => {
                 password: formData.password,
                 phoneNumber: formData.phoneNumber,
                 roleKey: "USER",
-                SerialNumber: Math.floor(10000000 + Math.random() * 90000000).toString(), // Random Serial
+                SerialNumber: Math.floor(10000000 + Math.random() * 90000000).toString(),
                 service: "انتخاب نشده",
                 price: "۰ تومان",
                 status: "درحال-انجام",
@@ -60,12 +93,13 @@ const SignUpPage: React.FC = () => {
                 totalMonths: null
             };
 
-
             await apiClient.post("/users", newUser);
 
 
-            alert("ثبت نام با موفقیت انجام شد");
-            navigate("/");
+            setError("ثبت نام با موفقیت انجام شد! در حال انتقال...");
+            setTimeout(() => {
+                navigate("/");
+            }, 2000);
 
         } catch (err) {
             console.error("SignUp Error:", err);
@@ -83,7 +117,7 @@ const SignUpPage: React.FC = () => {
                     <h2 id="headerTitle">ثبت نام در سیستم</h2>
 
                     <div className="row">
-                        <label>نام و نام خانوادگی</label>
+                        <label>نام و نام خانوادگی (فارسی)</label>
                         <input
                             type="text"
                             name="fullName"
@@ -95,11 +129,11 @@ const SignUpPage: React.FC = () => {
                     </div>
 
                     <div className="row">
-                        <label>نام کاربری</label>
+                        <label>نام کاربری (English - بدون فاصله)</label>
                         <input
                             type="text"
                             name="username"
-                            placeholder="یک نام کاربری انتخاب کنید"
+                            placeholder="username"
                             value={formData.username}
                             onChange={handleChange}
                             required
@@ -123,7 +157,7 @@ const SignUpPage: React.FC = () => {
                         <input
                             type="password"
                             name="password"
-                            placeholder="********"
+                            placeholder="حداقل ۶ کاراکتر"
                             value={formData.password}
                             onChange={handleChange}
                             required
@@ -143,9 +177,19 @@ const SignUpPage: React.FC = () => {
                     </div>
 
                     {error && (
-                        <p className="error-text" style={{ color: 'red', marginTop: '10px', fontWeight: 'bold' }}>
+                        <div className="alert-box" style={{
+                            marginTop: '20px',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            backgroundColor: error.includes("موفقیت") ? '#e8f5e9' : '#ffebee',
+                            color: error.includes("موفقیت") ? '#2e7d32' : '#c62828',
+                            textAlign: 'center',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                            border: `1px solid ${error.includes("موفقیت") ? '#a5d6a7' : '#ef9a9a'}`
+                        }}>
                             {error}
-                        </p>
+                        </div>
                     )}
                 </form>
             </div>

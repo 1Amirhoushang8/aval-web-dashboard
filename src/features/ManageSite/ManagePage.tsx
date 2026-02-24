@@ -12,10 +12,16 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
+// Define User interface locally for clarity
+interface User {
+    id: string | number;
+    username: string;
+    FullName: string;
+}
+
 export default function ManageSitePage() {
     const navigate = useNavigate();
     const [showTicketList, setShowTicketList] = useState(false);
-
 
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
@@ -26,7 +32,6 @@ export default function ManageSitePage() {
         message: "",
         severity: "error",
     });
-
 
     const showError = useCallback((message: string) => {
         setSnackbar({
@@ -48,20 +53,18 @@ export default function ManageSitePage() {
         }).format(new Date());
     };
 
-
     const { data: tickets = [], isLoading: ticketsLoading } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
             return response.data;
         },
-
         meta: {
             onError: () => showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.")
         }
     });
 
-    const { data: users = [], isLoading: usersLoading } = useQuery({
+    const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
         queryKey: ["users"],
         queryFn: async () => {
             const response = await apiClient.get("/users");
@@ -74,6 +77,26 @@ export default function ManageSitePage() {
 
     const isLoading = ticketsLoading || usersLoading;
 
+    // Logic to count users uniquely based on FullName or Username
+    const uniqueUsersCount = useMemo(() => {
+        const seenUsernames = new Set();
+        const seenFullNames = new Set();
+
+        const uniqueUsers = users.filter(user => {
+            const lowerUsername = user.username?.toLowerCase().trim();
+            const lowerFullName = user.FullName?.toLowerCase().trim();
+
+            if (seenUsernames.has(lowerUsername) || seenFullNames.has(lowerFullName)) {
+                return false;
+            }
+
+            if (lowerUsername) seenUsernames.add(lowerUsername);
+            if (lowerFullName) seenFullNames.add(lowerFullName);
+            return true;
+        });
+
+        return uniqueUsers.length;
+    }, [users]);
 
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
@@ -113,7 +136,7 @@ export default function ManageSitePage() {
                     ) : (
                         <>
                             <span className="kpi-title">تعداد کاربران</span>
-                            <span className="kpi-value">{toPersianNumber(users.length)}</span>
+                            <span className="kpi-value">{toPersianNumber(uniqueUsersCount)}</span>
                         </>
                     )}
                 </div>

@@ -139,13 +139,17 @@ export default function AccountingPage() {
                 const response = await userService.getAll();
                 const usersData = Array.isArray(response.data) ? response.data : [];
 
-                const normalizedUsers = usersData.map(user => ({
-                    ...user,
-                    price: user.price || "۰ تومان",
-                    paymentType: user.paymentType || "پرداخت-تکی",
-                    monthlyPayment: user.monthlyPayment || null,
-                    totalMonths: user.totalMonths || null,
-                }));
+                const normalizedUsers = usersData
+                    .map(user => ({
+                        ...user,
+                        price: user.price || "۰ تومان",
+                        paymentType: user.paymentType || "پرداخت-تکی",
+                        monthlyPayment: user.monthlyPayment || null,
+                        totalMonths: user.totalMonths || null,
+                    }))
+                    // Filter out users without a service (null, undefined, or empty string)
+                    .filter(user => user.service && user.service.trim() !== '');
+
                 setUsers(normalizedUsers);
             } catch (error) {
                 console.error("Failed to fetch users:", error);
@@ -850,38 +854,38 @@ export default function AccountingPage() {
             </Dialog>
 
             {
-            <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
-                    slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
-                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>اطلاعات مربوط به پرداخت را ویرایش کنید</Typography>
-                        <TextField variant="outlined" label="مبلغ کل (تومان)" name="totalPrice" value={paymentDetails.totalPrice}
-                                   onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
-                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }} />
-                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" && (
-                            <TextField variant="outlined" label="تعداد ماه‌ها" name="totalMonths" value={paymentDetails.totalMonths}
-                                       onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`} />
-                        )}
-                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" &&
-                            paymentDetails.totalPrice && paymentDetails.totalMonths && (
-                                <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9', textAlign: 'center' }}>
-                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>مبلغ هر قسط:</strong></Typography>
-                                    <Typography variant="h6" color="success.main">{calculateMonthlyPaymentPersian(paymentDetails.totalPrice, paymentDetails.totalMonths)}</Typography>
+                <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
+                        slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
+                    <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
+                    <DialogContent>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>اطلاعات مربوط به پرداخت را ویرایش کنید</Typography>
+                            <TextField variant="outlined" label="مبلغ کل (تومان)" name="totalPrice" value={paymentDetails.totalPrice}
+                                       onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                       helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }} />
+                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" && (
+                                <TextField variant="outlined" label="تعداد ماه‌ها" name="totalMonths" value={paymentDetails.totalMonths}
+                                           onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`} />
+                            )}
+                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" &&
+                                paymentDetails.totalPrice && paymentDetails.totalMonths && (
+                                    <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9', textAlign: 'center' }}>
+                                        <Typography variant="body2" sx={{ mb: 1 }}><strong>مبلغ هر قسط:</strong></Typography>
+                                        <Typography variant="h6" color="success.main">{calculateMonthlyPaymentPersian(paymentDetails.totalPrice, paymentDetails.totalMonths)}</Typography>
+                                    </Box>
+                                )}
+                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-تکی" && (
+                                <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb', textAlign: 'center' }}>
+                                    <Typography variant="body2">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
                                 </Box>
                             )}
-                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-تکی" && (
-                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb', textAlign: 'center' }}>
-                                <Typography variant="body2">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
-                            </Box>
-                        )}
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-                    <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
-                    <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
-                </DialogActions>
-            </Dialog> }
+                        </Box>
+                    </DialogContent>
+                    <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
+                        <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
+                        <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
+                    </DialogActions>
+                </Dialog> }
 
 
             <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm} maxWidth="xs" fullWidth
