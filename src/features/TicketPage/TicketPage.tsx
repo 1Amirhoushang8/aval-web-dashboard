@@ -10,6 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ManageTicketPage() {
     const [title, setTitle] = useState("");
+    const [shortDetail, setShortDetail] = useState(""); // State for the required short description
     const [description, setDescription] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -74,6 +75,7 @@ export default function ManageTicketPage() {
 
     const clearForm = () => {
         setTitle("");
+        setShortDetail("");
         setDescription("");
         setFile(null);
         setPreviewUrl(null);
@@ -82,11 +84,11 @@ export default function ManageTicketPage() {
     };
 
     const handleSave = async () => {
-        if (!title.trim() || !description.trim()) {
-            showError("لطفاً عنوان و توضیحات را وارد کنید");
+        // Validation: shortDetail is now required
+        if (!title.trim() || !shortDetail.trim() || !description.trim()) {
+            showError("لطفاً عنوان، توضیحات کوتاه و توضیحات کامل را وارد کنید");
             return;
         }
-
 
         const userStr = localStorage.getItem("user");
         if (!userStr) {
@@ -95,7 +97,6 @@ export default function ManageTicketPage() {
         }
         const currentUser = JSON.parse(userStr);
 
-
         setIsSaving(true);
 
         try {
@@ -103,6 +104,7 @@ export default function ManageTicketPage() {
 
             const ticketData = {
                 title: title.trim(),
+                shortDetail: shortDetail.trim(), // Mapping to interface
                 description: description.trim(),
                 date: dateStr,
                 time: timeStr,
@@ -148,6 +150,39 @@ export default function ManageTicketPage() {
                     disabled={isSaving}
                     commonProblems={commonProblems}
                 />
+
+                {/* Short Detail Input Section */}
+                <div className="short-detail-input-wrapper" style={{ marginBottom: "20px" }}>
+                    <label style={{
+                        display: "block",
+                        marginBottom: "8px",
+                        fontWeight: "600",
+                        color: "#444",
+                        fontSize: "0.95rem"
+                    }}>
+                        توضیحات کوتاه <span style={{ color: "#f44336" }}>*</span>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="خلاصه‌ای از مشکل را در یک جمله بنویسید"
+                        value={shortDetail}
+                        onChange={(e) => setShortDetail(e.target.value)}
+                        disabled={isSaving}
+                        style={{
+                            width: "100%",
+                            padding: "12px 15px",
+                            borderRadius: "12px",
+                            border: "1px solid #ddd",
+                            fontFamily: "Vazirmatn, sans-serif",
+                            fontSize: "1rem",
+                            transition: "border-color 0.3s ease",
+                            outline: "none",
+                            backgroundColor: isSaving ? "#f5f5f5" : "#fff"
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = "#666AF2")}
+                        onBlur={(e) => (e.target.style.borderColor = "#ddd")}
+                    />
+                </div>
 
                 <TicketDescription
                     value={description}

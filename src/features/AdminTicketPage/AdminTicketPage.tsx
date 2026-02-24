@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./AdminTicketPage.scss";
+import { useNavigate } from "react-router-dom";
 import {
     Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Button, TextField,
+    TableHead, TableRow, Paper, Button,
     IconButton,
     Dialog, DialogTitle, DialogActions,
     Snackbar, Alert, Menu, MenuItem, Tooltip,
@@ -10,7 +11,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
-import SendIcon from "@mui/icons-material/Send";
 import PhoneIcon from "@mui/icons-material/Phone";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { ticketService } from "../../API/TicketService";
@@ -33,10 +33,9 @@ const toPersianNumber = (num: number | string): string => {
 };
 
 export default function AdminTicketPage() {
+    const navigate = useNavigate();
     const [tickets, setTickets] = useState<Ticket[]>([]);
-    const [responses, setResponses] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState<boolean>(true);
-    const [submittingId, setSubmittingId] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
@@ -103,7 +102,6 @@ export default function AdminTicketPage() {
             return;
         }
 
-
         const link = document.createElement('a');
         link.href = file.url;
         link.download = file.name || 'download';
@@ -113,40 +111,8 @@ export default function AdminTicketPage() {
         document.body.removeChild(link);
     };
 
-    const submitResponse = async (id: string | number): Promise<void> => {
-        const idString = String(id);
-        const responseText = responses[idString];
-        if (!responseText?.trim()) return;
-
-        try {
-            setSubmittingId(idString);
-            const currentTicket = tickets.find(t => String(t.id) === idString);
-            if (!currentTicket) return;
-
-
-            const {  ...apiPayload } = currentTicket;
-
-            const updatedTicket: StoredTicket = {
-                ...apiPayload,
-                adminResponse: responseText,
-                status: "answered"
-            };
-
-            await ticketService.update(id, updatedTicket);
-
-            setTickets(prev => prev.map(t => String(t.id) === idString ? { ...t, adminResponse: responseText, localStatus: "answered", status: "answered" } : t));
-            setResponses(prev => {
-                const updated = { ...prev };
-                delete updated[idString];
-                return updated;
-            });
-            setSnackbar({ open: true, message: "پاسخ ثبت شد", severity: "success" });
-        } catch (error) {
-            console.error("Submit error:", error);
-            setSnackbar({ open: true, message: "خطا در ثبت پاسخ", severity: "error" });
-        } finally {
-            setSubmittingId(null);
-        }
+    const handleNavigateToDetails = (id: string | number) => {
+        navigate(`/ticket-details/${id}`);
     };
 
     const handleConfirmDelete = async (): Promise<void> => {
@@ -168,15 +134,13 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-
-            const {  ...apiData } = ticket;
+            const { ...apiData } = ticket;
 
             const updatedPayload: StoredTicket = {
                 ...apiData,
                 adminResponse: newStatus === "answered" ? (ticket.adminResponse || "تایید شد") : (newStatus === "pending" ? null : ticket.adminResponse),
                 status: newStatus
             };
-
 
             await ticketService.update(ticket.id, updatedPayload);
 
@@ -219,11 +183,11 @@ export default function AdminTicketPage() {
                         <TableRow>
                             <TableCell>نام کاربری / تماس</TableCell>
                             <TableCell>عنوان</TableCell>
-                            <TableCell>توضیحات</TableCell>
+                            <TableCell>توضیحات کوتاه</TableCell>
                             <TableCell>پیوست</TableCell>
                             <TableCell>زمان</TableCell>
                             <TableCell>وضعیت</TableCell>
-                            <TableCell>پاسخ ادمین</TableCell>
+                            <TableCell>جزئیات</TableCell>
                             <TableCell>عملیات</TableCell>
                         </TableRow>
                     </TableHead>
@@ -244,8 +208,9 @@ export default function AdminTicketPage() {
                                 </TableCell>
                                 <TableCell>{ticket.title}</TableCell>
                                 <TableCell>
-                                    <div className="ticket-description" title={ticket.description}>
-                                        {ticket.description}
+                                    {/* Tooltip 'title' attribute removed to stop hover description */}
+                                    <div className="ticket-description">
+                                        {ticket.shortDetail || "---"}
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -272,28 +237,15 @@ export default function AdminTicketPage() {
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    {ticket.localStatus !== 'answered' ? (
-                                        <div className="response-section">
-                                            <TextField
-                                                placeholder="پاسخ خود را بنویسید..."
-                                                size="small"
-                                                fullWidth
-                                                value={responses[String(ticket.id)] || ""}
-                                                onChange={(e) => setResponses(p => ({...p, [String(ticket.id)]: e.target.value}))}
-                                            />
-                                            <IconButton
-                                                onClick={() => submitResponse(ticket.id)}
-                                                disabled={submittingId === String(ticket.id)}
-                                                color="primary"
-                                            >
-                                                <SendIcon />
-                                            </IconButton>
-                                        </div>
-                                    ) : (
-                                        <div className="completed-response" style={{ color: '#2e7d32', fontWeight: '500' }}>
-                                            {ticket.adminResponse}
-                                        </div>
-                                    )}
+                                    <Button
+                                        size="small"
+                                        variant="outlined"
+                                        className="quick-change-btn"
+                                        style={{ fontFamily: 'Vazirmatn' }}
+                                        onClick={() => handleNavigateToDetails(ticket.id)}
+                                    >
+                                        مشاهده جزئیات
+                                    </Button>
                                 </TableCell>
                                 <TableCell>
                                     <div className="action-buttons">
@@ -301,6 +253,7 @@ export default function AdminTicketPage() {
                                             size="small"
                                             variant="outlined"
                                             className="quick-change-btn"
+                                            style={{ fontFamily: 'Vazirmatn' }}
                                             onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                                 setAnchorEl(e.currentTarget);
                                                 setActiveIndex(index);
@@ -319,17 +272,21 @@ export default function AdminTicketPage() {
                 </Table>
             </TableContainer>
 
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => { setAnchorEl(null); setActiveIndex(null); }}>
-                <MenuItem onClick={() => handleStatusChange("pending")}>در انتظار</MenuItem>
-                <MenuItem onClick={() => handleStatusChange("in-progress")}>در حال بررسی</MenuItem>
-                <MenuItem onClick={() => handleStatusChange("answered")}>پاسخ داده شد</MenuItem>
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() => { setAnchorEl(null); setActiveIndex(null); }}
+            >
+                <MenuItem sx={{ fontFamily: 'Vazirmatn' }} onClick={() => handleStatusChange("pending")}>در انتظار</MenuItem>
+                <MenuItem sx={{ fontFamily: 'Vazirmatn' }} onClick={() => handleStatusChange("in-progress")}>در حال بررسی</MenuItem>
+                <MenuItem sx={{ fontFamily: 'Vazirmatn' }} onClick={() => handleStatusChange("answered")}>پاسخ داده شد</MenuItem>
             </Menu>
 
             <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
                 <DialogTitle sx={{ fontFamily: 'Vazirmatn' }}>آیا از حذف این تیکت مطمئن هستید؟</DialogTitle>
                 <DialogActions>
-                    <Button onClick={() => setDeleteConfirmOpen(false)}>انصراف</Button>
-                    <Button onClick={handleConfirmDelete} variant="contained" color="error">حذف نهایی</Button>
+                    <Button sx={{ fontFamily: 'Vazirmatn' }} onClick={() => setDeleteConfirmOpen(false)}>انصراف</Button>
+                    <Button sx={{ fontFamily: 'Vazirmatn' }} onClick={handleConfirmDelete} variant="contained" color="error">حذف نهایی</Button>
                 </DialogActions>
             </Dialog>
 
@@ -339,7 +296,7 @@ export default function AdminTicketPage() {
                 onClose={() => setSnackbar(p => ({...p, open: false}))}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn' }}>
+                <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn', direction: 'rtl' }}>
                     {snackbar.message}
                 </Alert>
             </Snackbar>

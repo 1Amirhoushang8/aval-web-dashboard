@@ -7,6 +7,10 @@ export const ticketService = {
     getAll: () =>
         apiClient.get<StoredTicket[]>("/tickets"),
 
+
+    getById: (id: number | string) =>
+        apiClient.get<StoredTicket>(`/tickets/${id}`),
+
     create: (data: CreateTicketDto) =>
         apiClient.post<StoredTicket>("/tickets", data),
 

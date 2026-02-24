@@ -7,6 +7,8 @@ import AccountingPage from "./features/Accounting/Accounting.tsx";
 import AdminTicketPage from "./features/AdminTicketPage/AdminTicketPage.tsx";
 import UserMyTicketsPage from "./features/UserSeeTicket/UserSeeTicket.tsx";
 import ManageTicketPage from "./features/TicketPage/TicketPage.tsx";
+import TicketDetails from "./features/TicketDetails/TicketDetails.tsx";
+import UserTicketDetail from "./features/UserTicketDetail/UserTicketDetail.tsx"; // Added this import
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -27,11 +29,18 @@ export default function Router() {
                 <Route path="/signup" element={<PageWrapper key="signup"><SignUpPage /></PageWrapper>} />
 
                 <Route element={<Layout />}>
+                    {/* ADMIN ROUTES */}
                     <Route path="/ManageSite" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><ManageSitePage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/Accountp" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AccountingPage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/AdminTicketPage" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AdminTicketPage /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/ticket-details/:id" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><TicketDetails /></PageWrapper></ProtectedRoute>} />
+
+                    {/* USER ROUTES */}
                     <Route path="/MyTickets" element={<ProtectedRoute allowedRole="USER"><PageWrapper><UserMyTicketsPage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/SendTicket" element={<ProtectedRoute allowedRole="USER"><PageWrapper><ManageTicketPage /></PageWrapper></ProtectedRoute>} />
+
+
+                    <Route path="/user-ticket-detail/:id" element={<ProtectedRoute allowedRole="USER"><PageWrapper><UserTicketDetail /></PageWrapper></ProtectedRoute>} />
                 </Route>
             </Routes>
         </AnimatePresence>

@@ -161,7 +161,7 @@ export default function ManageSitePage() {
                     <div className="ticket-list">
                         <div className="list-header-row">
                             <div className="header-cell title-cell">عنوان تیکت</div>
-                            <div className="header-cell description-cell">توضیحات</div>
+                            <div className="header-cell description-cell">توضیحات کوتاه</div>
                             <div className="header-cell time-cell">زمان</div>
                         </div>
 
@@ -177,7 +177,7 @@ export default function ManageSitePage() {
                                         <span className="ticket-title">{ticket.title}</span>
                                     </div>
                                     <div className="item-cell description-cell">
-                                        <span className="ticket-description">{ticket.description}</span>
+                                        <span className="ticket-description">{ticket.shortDetail}</span>
                                     </div>
                                     <div className="item-cell time-cell">
                                         <span className="ticket-time">{toPersianNumber(ticket.time)}</span>
