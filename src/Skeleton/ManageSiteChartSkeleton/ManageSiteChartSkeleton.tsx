@@ -1,12 +1,12 @@
 import "./ManageSiteChartSkeleton.scss";
 
 export default function ManageSiteChartSkeleton() {
-    // We mock the number of bars based on a standard 'day' view (7 bars)
+
     const skeletonBars = Array(7).fill(null);
 
     return (
         <div className="financial-chart-section skeleton-loading" dir="rtl">
-            {/* Header Skeleton */}
+
             <div className="chart-header">
                 <div className="chart-title-section">
                     <div className="skeleton-item skeleton-title"></div>
@@ -29,17 +29,17 @@ export default function ManageSiteChartSkeleton() {
                 </div>
             </div>
 
-            {/* Chart Body Skeleton */}
+
             <div className="big-chart-container">
                 <div className="vertical-bar-chart">
-                    {/* Y-Axis Labels */}
+
                     <div className="chart-y-axis">
                         {[1, 2, 3, 4, 5].map((i) => (
                             <div key={i} className="skeleton-item skeleton-y-label"></div>
                         ))}
                     </div>
 
-                    {/* Bars Skeleton */}
+
                     <div className="chart-bars-container">
                         {skeletonBars.map((_, index) => (
                             <div key={index} className="chart-bar-group">

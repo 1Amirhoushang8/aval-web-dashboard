@@ -3,6 +3,7 @@ import React from 'react';
 import SinglePaymentButton from "../../components/SinglePayButton/SinglePayButton.tsx";
 import MultiPaymentButton from "../../components/MultiPayButton/MultiPayButton.tsx";
 import AccountingSkeleton from "../../Skeleton/AccountingSkeleton/AccountingSkeleton.tsx";
+import ModalSkeleton from "../../Skeleton/AccountingPanelSkeleton/AccountingPanelSkeleton.tsx";
 import {
     Table,
     TableBody,
@@ -40,6 +41,7 @@ import type { User } from "../../models/AccountingInterfaces/AccountingInterface
 import { userService } from "../../API/UserService.ts";
 
 
+
 const convertPersianToEnglishDigits = (text: string): string => {
     if (!text) return '';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -54,17 +56,12 @@ const convertPersianToEnglishDigits = (text: string): string => {
     return result;
 };
 
-
 const normalizePersianText = (text: string): string => {
     if (!text) return '';
-
     let normalized = text.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
-
     normalized = convertPersianToEnglishDigits(normalized);
-
     return normalized.trim().toLowerCase();
 };
-
 
 const toPersianNumber = (num: number | string): string => {
     if (num === null || num === undefined) return '';
@@ -72,13 +69,11 @@ const toPersianNumber = (num: number | string): string => {
     return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
 };
 
-
 const extractPriceNumber = (priceString: string): string => {
     if (!priceString) return "0";
     const englishString = convertPersianToEnglishDigits(priceString);
     return englishString.replace(/\D/g, '') || "0";
 };
-
 
 const formatPriceWithToman = (priceInput: string): string => {
     if (!priceInput || priceInput.trim() === '') return "۰ تومان";
@@ -90,7 +85,6 @@ const formatPriceWithToman = (priceInput: string): string => {
     return toPersianNumber(formattedNumber) + " تومان";
 };
 
-
 const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): string => {
     const cleanTotal = extractPriceNumber(totalPrice);
     const cleanMonths = extractPriceNumber(months);
@@ -101,12 +95,10 @@ const calculateMonthlyPaymentPersian = (totalPrice: string, months: string): str
     return toPersianNumber(monthly.toLocaleString('en-US')) + " تومان";
 };
 
-
 const cleanNumberInput = (value: string): string => {
     if (!value) return '';
     return convertPersianToEnglishDigits(value).replace(/\D/g, '');
 };
-
 
 const formatNumberWithCommas = (value: string): string => {
     if (!value) return '';
@@ -118,13 +110,11 @@ const formatNumberWithCommas = (value: string): string => {
     return toPersianNumber(formattedNumber);
 };
 
-
 export default function AccountingPage() {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
-
 
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -147,7 +137,6 @@ export default function AccountingPage() {
                         monthlyPayment: user.monthlyPayment || null,
                         totalMonths: user.totalMonths || null,
                     }))
-                    // Filter out users without a service (null, undefined, or empty string)
                     .filter(user => user.service && user.service.trim() !== '');
 
                 setUsers(normalizedUsers);
@@ -161,7 +150,7 @@ export default function AccountingPage() {
         fetchUsers().catch(err => console.error("Uncaught error in fetchUsers:", err));
     }, []);
 
-    // Duplicate serial number check (serialNumber is in Persian digits as stored)
+
     const isDuplicateSerialNumber = (serialNumber: string, excludeIndex?: number): boolean => {
         return users.some((user, idx) =>
             user.SerialNumber === serialNumber && (excludeIndex === undefined || idx !== excludeIndex)
@@ -183,6 +172,7 @@ export default function AccountingPage() {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
+    const [editModalLoading, setEditModalLoading] = useState(false); // <-- new loading state for edit modal
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [paymentModal, setPaymentModal] = useState(false);
     const [activePaymentIndex, setActivePaymentIndex] = useState<number | null>(null);
@@ -226,35 +216,55 @@ export default function AccountingPage() {
 
     const handleAddTicket = () => setOpenModal(true);
 
-    const handleEditTicket = (index: number) => {
-
+    const handleEditTicket = async (index: number) => {
         const user = users[index];
-
-
         if (!user) {
             console.error("User not found at index:", index);
             return;
         }
 
-
-        setEditTransaction({
-
-            serialnumber: user.SerialNumber || "",
-            fullname: user.FullName || "",
-            service: user.service || "",
-
-            price: user.price ? extractPriceNumber(user.price) : "",
-            phoneNumber: user.phoneNumber || "",
-            status: user.status || "درحال-انجام",
-            paymentType: user.paymentType || "",
-            monthlyPayment: user.monthlyPayment ? extractPriceNumber(user.monthlyPayment) : "",
-            totalMonths: user.totalMonths !== undefined && user.totalMonths !== null
-                ? user.totalMonths.toString()
-                : "",
-        });
-
         setEditingIndex(index);
         setEditModal(true);
+        setEditModalLoading(true);
+
+        try {
+
+            const response = await userService.getById(user.id);
+            const fetchedUser = response.data;
+
+            setEditTransaction({
+                serialnumber: fetchedUser.SerialNumber || "",
+                fullname: fetchedUser.FullName || "",
+                service: fetchedUser.service || "",
+                price: fetchedUser.price ? extractPriceNumber(fetchedUser.price) : "",
+                phoneNumber: fetchedUser.phoneNumber || "",
+                status: fetchedUser.status || "درحال-انجام",
+                paymentType: fetchedUser.paymentType || "",
+                monthlyPayment: fetchedUser.monthlyPayment ? extractPriceNumber(fetchedUser.monthlyPayment) : "",
+                totalMonths: fetchedUser.totalMonths !== undefined && fetchedUser.totalMonths !== null
+                    ? fetchedUser.totalMonths.toString()
+                    : "",
+            });
+        } catch (error) {
+            console.error("Failed to fetch user details:", error);
+            showError("مشکلی پیش امده");
+
+            setEditTransaction({
+                serialnumber: user.SerialNumber || "",
+                fullname: user.FullName || "",
+                service: user.service || "",
+                price: user.price ? extractPriceNumber(user.price) : "",
+                phoneNumber: user.phoneNumber || "",
+                status: user.status || "درحال-انجام",
+                paymentType: user.paymentType || "",
+                monthlyPayment: user.monthlyPayment ? extractPriceNumber(user.monthlyPayment) : "",
+                totalMonths: user.totalMonths !== undefined && user.totalMonths !== null
+                    ? user.totalMonths.toString()
+                    : "",
+            });
+        } finally {
+            setEditModalLoading(false);
+        }
     };
 
     const handleDeleteClick = (index: number) => {
@@ -282,28 +292,18 @@ export default function AccountingPage() {
     };
 
     const handleOpenPaymentModal = (index: number) => {
-
         const user = users[index];
-
-
         if (!user) {
             console.warn("User not found at index:", index);
             return;
         }
-
         setActivePaymentIndex(index);
-
-
         setPaymentDetails({
-
             totalPrice: extractPriceNumber(user.price || ""),
-
-
             totalMonths: user.totalMonths !== undefined && user.totalMonths !== null
                 ? user.totalMonths.toString()
                 : "1",
         });
-
         setPaymentModal(true);
     };
 
@@ -388,11 +388,11 @@ export default function AccountingPage() {
             monthlyPayment: "",
             totalMonths: "",
         });
+        setEditModalLoading(false);
     };
 
 
     const handleSaveTransaction = async () => {
-        // 1. Validation for empty fields
         if (!newTransaction.serialnumber.trim() ||
             !newTransaction.fullname.trim() ||
             !newTransaction.service.trim() ||
@@ -401,12 +401,10 @@ export default function AccountingPage() {
             return;
         }
 
-
         if (isDuplicateSerialNumber(newTransaction.serialnumber)) {
             showError("شماره فاکتور تکراری است");
             return;
         }
-
 
         const normalizedInputName = normalizePersianText(newTransaction.fullname);
         const existingUser = users.find(u => normalizePersianText(u.FullName) === normalizedInputName);
@@ -419,7 +417,6 @@ export default function AccountingPage() {
         try {
             const priceNum = extractPriceNumber(newTransaction.price);
             const formattedPrice = formatPriceWithToman(priceNum);
-
 
             let monthlyPayment: string | null = null;
             let totalMonths: number | null = null;
@@ -436,15 +433,12 @@ export default function AccountingPage() {
                 totalMonths = monthsNum;
             }
 
-
             const newUser: Omit<User, "id"> = {
                 SerialNumber: toPersianNumber(newTransaction.serialnumber),
                 FullName: newTransaction.fullname,
                 service: newTransaction.service,
-
                 phoneNumber: existingUser.phoneNumber || "",
                 price: formattedPrice,
-
                 status: newTransaction.status as "لغو-شده" | "درحال-انجام" | "پرداخت-شده",
                 paymentType: newTransaction.paymentType,
                 monthlyPayment,
@@ -455,7 +449,6 @@ export default function AccountingPage() {
             const response = await userService.create(newUser);
             setUsers(prevUsers => [...prevUsers, response.data]);
             handleCloseModal();
-
         } catch (error) {
             console.error("Failed to create transaction:", error);
             showError("خطا در ایجاد فاکتور");
@@ -463,7 +456,6 @@ export default function AccountingPage() {
     };
 
     const handleSaveEditTransaction = async () => {
-
         if (!editTransaction.serialnumber.trim() ||
             !editTransaction.fullname.trim() ||
             !editTransaction.service.trim() ||
@@ -473,7 +465,6 @@ export default function AccountingPage() {
             return;
         }
 
-
         if (isDuplicateSerialNumber(editTransaction.serialnumber, editingIndex)) {
             showError("شماره فاکتور تکراری است");
             return;
@@ -482,7 +473,6 @@ export default function AccountingPage() {
         try {
             const priceNum = extractPriceNumber(editTransaction.price);
             const formattedPrice = formatPriceWithToman(priceNum);
-
 
             let monthlyPayment: string | null = null;
             let totalMonths: number | null = null;
@@ -502,7 +492,6 @@ export default function AccountingPage() {
             const userToUpdate = users[editingIndex];
             if (!userToUpdate) return;
 
-
             const updatedUser: Omit<User, "id"> = {
                 username: userToUpdate.username || "",
                 FullName: editTransaction.fullname,
@@ -510,22 +499,16 @@ export default function AccountingPage() {
                 phoneNumber: String(editTransaction.phoneNumber || userToUpdate.phoneNumber || ""),
                 service: editTransaction.service,
                 price: formattedPrice,
-
                 status: editTransaction.status as "لغو-شده" | "درحال-انجام" | "پرداخت-شده",
                 paymentType: editTransaction.paymentType,
                 monthlyPayment,
                 totalMonths,
             };
 
-
             const response = await userService.update(userToUpdate.id, updatedUser);
-
-
             const updatedUsers = [...users];
             updatedUsers[editingIndex] = response.data;
             setUsers(updatedUsers);
-
-
 
             handleCloseEditModal();
         } catch (error) {
@@ -627,7 +610,6 @@ export default function AccountingPage() {
             handleCloseMenu();
         }
     };
-
 
     if (loading) {
         return <AccountingSkeleton />;
@@ -744,58 +726,62 @@ export default function AccountingPage() {
 
 
             <Modal open={editModal} onClose={handleCloseEditModal}>
-                <Box sx={{
-                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                    width: 450, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2, direction: 'rtl'
-                }}>
-                    <Typography variant="h6" sx={{ mb: 3, textAlign: 'center', fontWeight: 700 }}>ویرایش فاکتور</Typography>
-                    <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField label="شماره فاکتور" name="serialnumber" value={editTransaction.serialnumber}
-                                   onChange={handleEditInputChange} fullWidth required placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
-                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
-                        <TextField label="نام کامل مشتری" name="fullname" value={editTransaction.fullname}
-                                   onChange={handleEditInputChange} fullWidth required placeholder="نام و نام خانوادگی" />
-                        <TextField label="خدمت/سرویس" name="service" value={editTransaction.service}
-                                   onChange={handleEditInputChange} fullWidth required placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید" />
-                        <TextField label="مبلغ کل (تومان)" name="price" value={editTransaction.price}
-                                   onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
-                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
-                                   slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
-                        <FormControl fullWidth required>
-                            <InputLabel id="edit-payment-type-label">نوع پرداخت</InputLabel>
-                            <Select labelId="edit-payment-type-label" value={editTransaction.paymentType}
-                                    label="نوع پرداخت" onChange={handleEditPaymentTypeChangeForm}>
-                                <MenuItem value="پرداخت-تکی">پرداخت تکی</MenuItem>
-                                <MenuItem value="پرداخت-دوره-ای">پرداخت دوره ای</MenuItem>
-                            </Select>
-                        </FormControl>
-                        {editTransaction.paymentType === "پرداخت-دوره-ای" && (
-                            <>
-                                <TextField label="تعداد ماه‌ها" name="totalMonths" value={editTransaction.totalMonths}
-                                           onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`}
-                                           slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
-                                {editTransaction.price && editTransaction.totalMonths && (
-                                    <Typography variant="body2" sx={{ color: 'success.main', textAlign: 'center' }}>
-                                        پرداخت ماهیانه: {calculateMonthlyPaymentPersian(editTransaction.price, editTransaction.totalMonths)}
-                                    </Typography>
-                                )}
-                            </>
-                        )}
-                        <FormControl fullWidth required>
-                            <InputLabel id="edit-status-label">وضعیت</InputLabel>
-                            <Select labelId="edit-status-label" value={editTransaction.status}
-                                    label="وضعیت" onChange={handleEditStatusChangeForm}>
-                                <MenuItem value="درحال-انجام">درحال انجام</MenuItem>
-                                <MenuItem value="پرداخت-شده">پرداخت شده</MenuItem>
-                                <MenuItem value="لغو-شده">لغو شده</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                            <Button variant="contained" onClick={handleSaveEditTransaction} fullWidth sx={{ backgroundColor: '#10b981' }}>ذخیره تغییرات</Button>
-                            <Button variant="outlined" onClick={handleCloseEditModal} fullWidth sx={{ borderColor: '#ef4444', color: '#ef4444' }}>انصراف</Button>
+                {editModalLoading ? (
+                    <ModalSkeleton />
+                ) : (
+                    <Box sx={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        width: 450, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2, direction: 'rtl'
+                    }}>
+                        <Typography variant="h6" sx={{ mb: 3, textAlign: 'center', fontWeight: 700 }}>ویرایش فاکتور</Typography>
+                        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <TextField label="شماره فاکتور" name="serialnumber" value={editTransaction.serialnumber}
+                                       onChange={handleEditInputChange} fullWidth required placeholder={toPersianNumber("۱۲۳۴۵۶۷۸۹")}
+                                       slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                            <TextField label="نام کامل مشتری" name="fullname" value={editTransaction.fullname}
+                                       onChange={handleEditInputChange} fullWidth required placeholder="نام و نام خانوادگی" />
+                            <TextField label="خدمت/سرویس" name="service" value={editTransaction.service}
+                                       onChange={handleEditInputChange} fullWidth required placeholder="نام خدمت یا سرویس مورد نظر را وارد کنید" />
+                            <TextField label="مبلغ کل (تومان)" name="price" value={editTransaction.price}
+                                       onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                       helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }}
+                                       slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                            <FormControl fullWidth required>
+                                <InputLabel id="edit-payment-type-label">نوع پرداخت</InputLabel>
+                                <Select labelId="edit-payment-type-label" value={editTransaction.paymentType}
+                                        label="نوع پرداخت" onChange={handleEditPaymentTypeChangeForm}>
+                                    <MenuItem value="پرداخت-تکی">پرداخت تکی</MenuItem>
+                                    <MenuItem value="پرداخت-دوره-ای">پرداخت دوره ای</MenuItem>
+                                </Select>
+                            </FormControl>
+                            {editTransaction.paymentType === "پرداخت-دوره-ای" && (
+                                <>
+                                    <TextField label="تعداد ماه‌ها" name="totalMonths" value={editTransaction.totalMonths}
+                                               onChange={handleEditInputChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`}
+                                               slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+                                    {editTransaction.price && editTransaction.totalMonths && (
+                                        <Typography variant="body2" sx={{ color: 'success.main', textAlign: 'center' }}>
+                                            پرداخت ماهیانه: {calculateMonthlyPaymentPersian(editTransaction.price, editTransaction.totalMonths)}
+                                        </Typography>
+                                    )}
+                                </>
+                            )}
+                            <FormControl fullWidth required>
+                                <InputLabel id="edit-status-label">وضعیت</InputLabel>
+                                <Select labelId="edit-status-label" value={editTransaction.status}
+                                        label="وضعیت" onChange={handleEditStatusChangeForm}>
+                                    <MenuItem value="درحال-انجام">درحال انجام</MenuItem>
+                                    <MenuItem value="پرداخت-شده">پرداخت شده</MenuItem>
+                                    <MenuItem value="لغو-شده">لغو شده</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                                <Button variant="contained" onClick={handleSaveEditTransaction} fullWidth sx={{ backgroundColor: '#10b981' }}>ذخیره تغییرات</Button>
+                                <Button variant="outlined" onClick={handleCloseEditModal} fullWidth sx={{ borderColor: '#ef4444', color: '#ef4444' }}>انصراف</Button>
+                            </Box>
                         </Box>
                     </Box>
-                </Box>
+                )}
             </Modal>
 
 
@@ -853,39 +839,39 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {
-                <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
-                        slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
-                    <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
-                    <DialogContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>اطلاعات مربوط به پرداخت را ویرایش کنید</Typography>
-                            <TextField variant="outlined" label="مبلغ کل (تومان)" name="totalPrice" value={paymentDetails.totalPrice}
-                                       onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
-                                       helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }} />
-                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" && (
-                                <TextField variant="outlined" label="تعداد ماه‌ها" name="totalMonths" value={paymentDetails.totalMonths}
-                                           onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`} />
-                            )}
-                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" &&
-                                paymentDetails.totalPrice && paymentDetails.totalMonths && (
-                                    <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9', textAlign: 'center' }}>
-                                        <Typography variant="body2" sx={{ mb: 1 }}><strong>مبلغ هر قسط:</strong></Typography>
-                                        <Typography variant="h6" color="success.main">{calculateMonthlyPaymentPersian(paymentDetails.totalPrice, paymentDetails.totalMonths)}</Typography>
-                                    </Box>
-                                )}
-                            {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-تکی" && (
-                                <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb', textAlign: 'center' }}>
-                                    <Typography variant="body2">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
+
+            <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth
+                    slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>اطلاعات مربوط به پرداخت را ویرایش کنید</Typography>
+                        <TextField variant="outlined" label="مبلغ کل (تومان)" name="totalPrice" value={paymentDetails.totalPrice}
+                                   onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${pricePlaceholder}`}
+                                   helperText="مبلغ کل را به تومان وارد کنید" sx={{ '& .MuiFormHelperText-root': { textAlign: 'right' } }} />
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" && (
+                            <TextField variant="outlined" label="تعداد ماه‌ها" name="totalMonths" value={paymentDetails.totalMonths}
+                                       onChange={handlePaymentDetailsChange} fullWidth required placeholder={`مثال: ${monthsPlaceholder}`} />
+                        )}
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-دوره-ای" &&
+                            paymentDetails.totalPrice && paymentDetails.totalMonths && (
+                                <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9', textAlign: 'center' }}>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>مبلغ هر قسط:</strong></Typography>
+                                    <Typography variant="h6" color="success.main">{calculateMonthlyPaymentPersian(paymentDetails.totalPrice, paymentDetails.totalMonths)}</Typography>
                                 </Box>
                             )}
-                        </Box>
-                    </DialogContent>
-                    <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-                        <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
-                        <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
-                    </DialogActions>
-                </Dialog> }
+                        {activePaymentIndex !== null && users[activePaymentIndex]?.paymentType === "پرداخت-تکی" && (
+                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 2, border: '1px solid #bbdefb', textAlign: 'center' }}>
+                                <Typography variant="body2">این فاکتور به صورت یکجا پرداخت می‌شود</Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
+                    <Button onClick={handleCloseEditPaymentModal} variant="outlined">انصراف</Button>
+                    <Button onClick={handleSavePaymentDetails} variant="contained">ذخیره تغییرات</Button>
+                </DialogActions>
+            </Dialog>
 
 
             <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm} maxWidth="xs" fullWidth

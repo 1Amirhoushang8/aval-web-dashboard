@@ -4,15 +4,15 @@ import "./TicketFileUploadSkeleton.scss";
 const TicketFileUploadSkeleton: React.FC = () => {
     return (
         <div className="file-section skeleton-loading-file" dir="rtl">
-            {/* Button Skeleton */}
+
             <div className="skeleton-item skeleton-file-btn"></div>
 
-            {/* Restrictions Info Skeleton */}
+
             <div className="file-restrictions">
                 <div className="skeleton-item skeleton-restrictions-text"></div>
             </div>
 
-            {/* Preview Box Skeleton */}
+
             <div className="file-preview">
                 <div className="skeleton-preview-content">
                     <div className="skeleton-item skeleton-icon-circle"></div>

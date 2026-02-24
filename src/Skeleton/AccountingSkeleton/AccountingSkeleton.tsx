@@ -15,7 +15,7 @@ import "./AccountingSkeleton.scss";
 const AccountingSkeleton: React.FC = () => {
     return (
         <div className="accounting skeleton-loading-accounting" dir="rtl">
-            {/* Add Transaction Button Skeleton */}
+
             <div className="mydp">
                 <div className="dropdown">
                     <Skeleton
@@ -28,7 +28,7 @@ const AccountingSkeleton: React.FC = () => {
                 </div>
             </div>
 
-            {/* Table Skeleton */}
+
             <TableContainer component={Paper} className="accounting-card">
                 <Table>
                     <TableHead>

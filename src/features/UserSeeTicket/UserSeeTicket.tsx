@@ -63,8 +63,8 @@ export default function UserSeeTickets() {
             setTickets(userTickets.reverse());
         } catch (err) {
 
-            console.error("JSON Server connection error:", err);
-            setError("خطا در اتصال به سرور. لطفا مطمئن شوید JSON Server در حال اجراست.");
+            console.error(" Server connection error:", err);
+            setError("خطا در اتصال به سرور.");
         } finally {
             setTimeout(() => setLoading(false), 800);
         }

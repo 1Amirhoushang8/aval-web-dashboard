@@ -7,12 +7,12 @@ interface AdminTicketSkeletonProps {
 }
 
 const AdminTicketSkeleton: React.FC<AdminTicketSkeletonProps> = ({ rows = 5 }) => {
-    // We now use 9 columns to match the main table (User, Service, Title, Desc, File, Time, Status, Response, Actions)
+
     const columnCount = 9;
 
     return (
         <div className="admin-ticket-skeleton">
-            {/* Header Skeleton */}
+
             <div className="skeleton-header">
                 <div className="skeleton-header-title">
                     <div className="skeleton-title"></div>
@@ -26,7 +26,7 @@ const AdminTicketSkeleton: React.FC<AdminTicketSkeletonProps> = ({ rows = 5 }) =
                 </div>
             </div>
 
-            {/* Table Skeleton */}
+
             <TableContainer component={Paper} className="skeleton-table-container">
                 <Table className="skeleton-table">
                     <TableHead>
