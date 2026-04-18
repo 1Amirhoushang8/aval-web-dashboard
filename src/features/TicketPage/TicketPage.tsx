@@ -10,7 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ManageTicketPage() {
     const [title, setTitle] = useState("");
-    const [shortDetail, setShortDetail] = useState(""); // State for the required short description
+    const [shortDetail, setShortDetail] = useState("");
     const [description, setDescription] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -84,7 +84,6 @@ export default function ManageTicketPage() {
     };
 
     const handleSave = async () => {
-        // Validation: shortDetail is now required
         if (!title.trim() || !shortDetail.trim() || !description.trim()) {
             showError("لطفاً عنوان، توضیحات کوتاه و توضیحات کامل را وارد کنید");
             return;
@@ -104,12 +103,12 @@ export default function ManageTicketPage() {
 
             const ticketData = {
                 title: title.trim(),
-                shortDetail: shortDetail.trim(), // Mapping to interface
+                shortDetail: shortDetail.trim(),
                 description: description.trim(),
                 date: dateStr,
                 time: timeStr,
                 userId: String(currentUser.id),
-                status: "pending",
+                status: "pending" ,
                 adminResponse: null,
                 ...(file && previewUrl && {
                     file: {
@@ -151,7 +150,6 @@ export default function ManageTicketPage() {
                     commonProblems={commonProblems}
                 />
 
-                {/* Short Detail Input Section */}
                 <div className="short-detail-input-wrapper" style={{ marginBottom: "20px" }}>
                     <label style={{
                         display: "block",

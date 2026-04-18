@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-/* ==================== VARIABLES ==================== */
+
 :root {
   --color-primary: #3579F3;
   --color-primary-dark: #2a5fc2;
@@ -31,7 +31,7 @@
   --spacing-xl: 3rem;
 }
 
-/* ==================== BASE STYLES ==================== */
+
 .admin-ticket-page {
   direction: rtl;
   padding: var(--spacing-xl);
@@ -42,7 +42,7 @@
   font-family: "Vazirmatn", sans-serif !important;
 }
 
-/* Force font on ALL child elements */
+
 .admin-ticket-page,
 .admin-ticket-page * {
   font-family: "Vazirmatn", sans-serif !important;

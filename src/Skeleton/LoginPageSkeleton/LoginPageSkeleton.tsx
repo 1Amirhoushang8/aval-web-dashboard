@@ -1,45 +1,67 @@
 import { Skeleton } from "@mui/material";
 import "./LoginPageSkeleton.scss";
 
-export default function LoginPageSkeleton() {
+const LoginPageSkeleton: React.FC = () => {
     return (
-        <div className="login-page skeleton-page" dir="rtl">
+        <div className="login-page skeleton-page">
             <div className="login-container">
-
-
-                <div className="form-container">
-                    <div id="loginform">
-                        <div className="header-box">
-                            <Skeleton variant="text" width="50%" height={40} sx={{mb: 1}}/>
-                            <Skeleton variant="text" width="80%" height={20}/>
-                        </div>
-
-                        {[1, 2].map((i) => (
-                            <div className="input-row" key={i} style={{marginBottom: '24px'}}>
-                                <Skeleton variant="text" width="30%" height={20} sx={{mb: 1}}/>
-                                <Skeleton variant="rectangular" width="100%" height={50} sx={{borderRadius: '16px'}}/>
-                            </div>
-                        ))}
-
-                        <div className="button-row">
-                            <Skeleton variant="rectangular" width="100%" height={55}
-                                      sx={{borderRadius: '16px', mt: 2}}/>
-                        </div>
-
-                        <div className="footer-row"
-                             style={{display: 'flex', justifyContent: 'center', marginTop: '30px'}}>
-                            <Skeleton variant="text" width="60%" height={25}/>
-                        </div>
-                    </div>
-                </div>
-
-
+                {/* Image skeleton – first child in LTR container, appears on left */}
                 <div className="login-image-placeholder">
-                    <Skeleton variant="rectangular" width="100%" height="100%" animation="wave"/>
+                    <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height="100%"
+                        animation="wave"
+                        sx={{ borderRadius: 0 }}
+                    />
                 </div>
 
+                {/* Form skeleton – right side on desktop, RTL for text alignment */}
+                <form id="loginform" dir="rtl">
+                    <h2 id="headerTitle">
+                        <Skeleton variant="text" width="70%" height={40} />
+                    </h2>
 
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="30%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
+                    </div>
+
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="30%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
+                    </div>
+
+                    <div id="button" className="row">
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={55}
+                            sx={{ borderRadius: "16px" }}
+                        />
+                    </div>
+
+                    <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
+                        <Skeleton variant="text" width="60%" height={25} sx={{ margin: "0 auto" }} />
+                    </div>
+                </form>
             </div>
         </div>
     );
-}
+};
+
+export default LoginPageSkeleton;

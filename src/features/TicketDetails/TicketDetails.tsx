@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     Box,
     Typography,
     Paper,
-    Divider,
     Button,
     Container,
     TextField,
     Alert,
     Snackbar,
     IconButton,
-    Tooltip,
-    CircularProgress
+    CircularProgress,
+    Avatar,
+    Fade,
+    Link,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import PersonIcon from '@mui/icons-material/Person';
-import EditIcon from '@mui/icons-material/Edit';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import apiClient from "../../API/apiClient";
 import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
-
 import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton.tsx";
+
+import type { Message } from "../../models/Massage/TicketMassage.ts";
 
 const toPersianNumber = (num: number | string): string => {
     if (!num) return '۰';
@@ -35,205 +38,269 @@ const toPersianNumber = (num: number | string): string => {
 export default function TicketDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [ticket, setTicket] = useState<StoredTicket | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [userName, setUserName] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [adminReply, setAdminReply] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
-    useEffect(() => {
-        const fetchTicketAndUser = async () => {
-            if (id) {
-                try {
-                    setLoading(true);
-                    const res = await ticketService.getById(id);
-                    const ticketData = res.data;
-                    setTicket(ticketData);
+    const adminId = localStorage.getItem("userId") || "3962";
 
-                    try {
-                        const userRes = await apiClient.get(`/users/${ticketData.userId}`);
-                        setUserName(userRes.data.FullName || userRes.data.username || `شناسه: ${ticketData.userId}`);
-                    } catch (userErr) {
-                        setUserName(`شناسه کاربر: ${ticketData.userId}`);
-                    }
+    const fetchTicketAndMessages = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            const [ticketRes, messagesRes] = await Promise.all([
+                ticketService.getById(id),
+                apiClient.get<Message[]>("/messages", { params: { ticketId: id } })
+            ]);
+            const ticketData = ticketRes.data;
+            setTicket(ticketData);
 
-                    if (ticketData.adminResponse) {
-                        setAdminReply(ticketData.adminResponse);
-                        setIsEditing(false);
-                    } else {
-                        setIsEditing(true);
-                    }
-                } catch (err) {
-                    console.error("Error fetching ticket details:", err);
-                } finally {
-                    // Slight delay for smooth transition
-                    setTimeout(() => setLoading(false), 600);
-                }
+            try {
+                const userRes = await apiClient.get(`/users/${ticketData.userId}`);
+                setUserName(userRes.data.FullName || userRes.data.username || `کاربر ${ticketData.userId}`);
+            } catch {
+                setUserName(`کاربر ${ticketData.userId}`);
             }
-        };
-        fetchTicketAndUser();
+
+            const sortedMessages = messagesRes.data.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+            setMessages(sortedMessages);
+        } catch (err) {
+            console.error("Fetch Error:", err);
+        } finally {
+            setLoading(false);
+        }
     }, [id]);
 
-    const handleSubmitResponse = async () => {
-        if (!ticket || !id) return;
-        if (!adminReply.trim()) {
-            setSnackbar({ open: true, message: "لطفا متن پاسخ را وارد کنید", severity: "error" });
-            return;
-        }
+    useEffect(() => {
+        fetchTicketAndMessages();
+    }, [fetchTicketAndMessages]);
+
+    const scrollToBottom = useCallback(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, []);
+
+    useEffect(() => {
+        if (!loading) scrollToBottom();
+    }, [loading, messages, scrollToBottom]);
+
+    const handleSubmitResponse = useCallback(async () => {
+        if (!ticket || !id || !adminReply.trim()) return;
 
         setSubmitting(true);
         try {
-            const updatedData: StoredTicket = {
-                ...ticket,
-                adminResponse: adminReply,
-                status: "answered"
+            const newMessage: Omit<Message, "id"> = {
+                ticketId: id,
+                senderId: adminId,
+                senderType: "admin",
+                text: adminReply.trim(),
+                timestamp: new Date().toLocaleDateString('fa-IR') + " " + new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+                isRead: false
             };
 
-            await ticketService.update(id, updatedData);
-            setTicket(updatedData);
-            setIsEditing(false);
-            setSnackbar({ open: true, message: "پاسخ با موفقیت ثبت شد", severity: "success" });
+            const response = await apiClient.post<Message>("/messages", newMessage);
+            const savedMessage = response.data;
+
+            const updatedTicket: StoredTicket = {
+                ...ticket,
+                adminResponse: adminReply.trim(),
+                status: "answered"
+            };
+            await ticketService.update(id, updatedTicket);
+
+            setMessages(prev => [...prev, savedMessage].sort((a, b) => a.timestamp.localeCompare(b.timestamp)));
+            setTicket(updatedTicket);
+            setAdminReply("");
+            setSnackbar({ open: true, message: "پاسخ ارسال شد", severity: "success" });
         } catch (err) {
-            setSnackbar({ open: true, message: "خطا در ثبت پاسخ", severity: "error" });
+            console.error("Error sending message:", err);
+            setSnackbar({ open: true, message: "خطا در برقراری ارتباط", severity: "error" });
         } finally {
             setSubmitting(false);
         }
-    };
+    }, [ticket, id, adminReply, adminId]);
 
     if (loading) return <AdminTicketDetailSkeleton />;
 
     if (!ticket) return (
-        <Container maxWidth="sm" sx={{ mt: 10, textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ fontFamily: 'Vazirmatn' }}>تیکت یافت نشد.</Typography>
-            <Button onClick={() => navigate("/AdminTicketPage")} sx={{ mt: 2, fontFamily: 'Vazirmatn' }}>بازگشت</Button>
+        <Container maxWidth="sm" sx={{ mt: 10, textAlign: 'center', fontFamily: 'Vazirmatn' }}>
+            <Typography>تیکت مورد نظر یافت نشد.</Typography>
+            <Button onClick={() => navigate("/AdminTicketPage")}>بازگشت</Button>
         </Container>
     );
 
+    const hasFile = ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file;
+
+    const descriptionMessage = {
+        id: 'description-msg',
+        text: ticket.description,
+        senderType: 'user' as const,
+        timestamp: ticket.time,
+        date: ticket.date,
+        hasFile: hasFile
+    };
+
+    const allMessages = [
+        descriptionMessage,
+        ...messages.map(msg => ({
+            ...msg,
+            hasFile: false
+        }))
+    ];
+
     return (
-        <Container maxWidth="md" sx={{ py: 4, fontFamily: 'Vazirmatn' }} dir="rtl">
-            {/* Header */}
-            <Box sx={{ mb: 4 }}>
-                <Button
-                    startIcon={<ArrowForwardIcon sx={{ ml: 1 }} />}
-                    onClick={() => navigate("/AdminTicketPage")}
-                    sx={{ fontFamily: 'Vazirmatn', color: '#666AF2', mb: 2, fontWeight: 700 }}
-                >
-                    بازگشت به پنل مدیریت تیکت‌ها
-                </Button>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: '#2c3e50', fontFamily: 'Vazirmatn', mb: 1 }}>
-                    جزئیات تیکت: {ticket.title}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#7f8c8d', fontFamily: 'Vazirmatn' }}>
-                    ارسال کننده: <b>{userName}</b> | تاریخ: {toPersianNumber(ticket.date)} ساعت {toPersianNumber(ticket.time)}
-                </Typography>
+        <Container maxWidth={false} sx={{
+            width: '80%',
+            py: isMobile ? 1 : 2, px: isMobile ? 1 : 2, height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Vazirmatn' }} dir="rtl">
+            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                <Box>
+                    <Button
+                        startIcon={<ArrowForwardIcon sx={{ ml: 1 }} />}
+                        onClick={() => navigate("/AdminTicketPage")}
+                        sx={{ fontFamily: 'Vazirmatn', color: '#666AF2', fontWeight: 700 }}
+                    >
+                        بازگشت
+                    </Button>
+                    <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ fontWeight: 800, fontFamily: 'Vazirmatn', color: '#1a202c' }}>
+                        {ticket.title}
+                    </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'left' }}>
+                    <Typography variant="caption" sx={{ color: '#718096', display: 'block', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
+                        ارسال کننده: {userName}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#718096', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
+                        تاریخ: {toPersianNumber(ticket.date)}
+                    </Typography>
+                </Box>
             </Box>
 
-            {/* User Message Section */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #eee', bgcolor: '#fdfdfd', mb: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-                    <PersonIcon sx={{ color: '#555' }} />
-                    <Typography sx={{ fontWeight: 700, color: '#444', fontFamily: 'Vazirmatn' }}>پیام کاربر:</Typography>
-                </Box>
-                <Typography sx={{ lineHeight: 1.8, color: '#555', fontFamily: 'Vazirmatn', textAlign: 'justify' }}>
-                    {ticket.description}
-                </Typography>
+            <Paper
+                elevation={0}
+                sx={{
+                    flexGrow: 1,
+                    mb: 2,
+                    p: isMobile ? 2 : 3,
+                    borderRadius: 4,
+                    border: '1px solid #e0e0e0',
+                    bgcolor: '#fcfcfc',
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: isMobile ? 2 : 3
+                }}
+            >
+                {allMessages.map((msg, idx) => (
+                    <Fade in key={msg.id}>
+                        <Box sx={{
+                            alignSelf: msg.senderType === 'admin' ? 'flex-end' : 'flex-start',
+                            maxWidth: isMobile ? '95%' : '85%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: msg.senderType === 'admin' ? 'flex-end' : 'flex-start'
+                        }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                {msg.senderType === 'admin' && <Typography variant="caption" sx={{ color: '#a0aec0', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>مدیریت</Typography>}
+                                <Avatar sx={{
+                                    width: isMobile ? 24 : 28,
+                                    height: isMobile ? 24 : 28,
+                                    bgcolor: msg.senderType === 'admin' ? '#666AF2' : '#cbd5e0',
+                                    fontSize: 14
+                                }}>
+                                    {msg.senderType === 'admin' ? <AdminPanelSettingsIcon sx={{ fontSize: isMobile ? 14 : 16 }} /> : <PersonIcon sx={{ fontSize: isMobile ? 14 : 16 }} />}
+                                </Avatar>
+                                {msg.senderType === 'user' && <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, fontSize: isMobile ? '0.7rem' : '0.75rem' }}>{userName}</Typography>}
+                            </Box>
 
-                {ticket.file && (
-                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed #eee' }}>
-                        <Typography variant="caption" sx={{ color: '#666AF2', fontWeight: 600, fontFamily: 'Vazirmatn' }}>
-                            📎 این تیکت دارای فایل پیوست می‌باشد.
-                        </Typography>
-                    </Box>
-                )}
+                            <Paper sx={{
+                                p: isMobile ? 1.5 : 2,
+                                borderRadius: msg.senderType === 'admin' ? '20px 0 20px 20px' : '0 20px 20px 20px',
+                                bgcolor: msg.senderType === 'admin' ? '#f0f1ff' : '#ffffff',
+                                color: '#2d3748',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                                border: '1px solid #e0e0e0',
+                                width: '100%'
+                            }}>
+                                <Typography sx={{ fontFamily: 'Vazirmatn', fontSize: isMobile ? '0.85rem' : '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
+                                    {msg.text}
+                                </Typography>
+
+                                {msg.senderType === 'user' && idx === 0 && hasFile && (
+                                    <Link
+                                        href={ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file ? ticket.file.url : '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, color: '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem' }}
+                                    >
+                                        <AttachFileIcon fontSize="small" />
+                                        <Typography variant="caption">مشاهده فایل پیوست</Typography>
+                                    </Link>
+                                )}
+
+                                <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'left', opacity: 0.7, fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
+                                    {toPersianNumber(msg.timestamp)}
+                                </Typography>
+                            </Paper>
+                        </Box>
+                    </Fade>
+                ))}
+                <div ref={scrollRef} />
             </Paper>
 
-            <Divider sx={{ mb: 4 }}>
-                <Typography sx={{ color: '#bbb', fontSize: '0.8rem', fontFamily: 'Vazirmatn' }}>پاسخ مدیریت</Typography>
-            </Divider>
-
-            {/* Admin Reply Section */}
-            <Box>
-                {isEditing ? (
-                    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #666AF2', bgcolor: '#fff' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-                            <ChatBubbleOutlineIcon sx={{ color: '#666AF2' }} />
-                            <Typography sx={{ fontWeight: 700, color: '#666AF2', fontFamily: 'Vazirmatn' }}>
-                                {ticket.adminResponse ? "ویرایش پاسخ:" : "متن پاسخ شما:"}
-                            </Typography>
-                        </Box>
-
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={6}
-                            variant="outlined"
-                            autoFocus
-                            placeholder="پاسخ خود را اینجا بنویسید..."
-                            value={adminReply}
-                            onChange={(e) => setAdminReply(e.target.value)}
-                            sx={{
-                                "& .MuiOutlinedInput-root": { fontFamily: 'Vazirmatn', borderRadius: 2 },
-                                mb: 3
-                            }}
-                        />
-
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Button
-                                variant="contained"
-                                onClick={handleSubmitResponse}
-                                disabled={submitting}
-                                startIcon={submitting ? <CircularProgress size={20} /> : <SendIcon sx={{ ml: 1 }} />}
-                                className="quick-change-btn"
-                                sx={{ fontFamily: 'Vazirmatn', height: '40px' }}
-                            >
-                                {submitting ? "در حال ثبت..." : "ثبت و ارسال پاسخ"}
-                            </Button>
-                            {ticket.adminResponse && (
-                                <Button
-                                    onClick={() => {
-                                        setIsEditing(false);
-                                        setAdminReply(ticket.adminResponse || "");
-                                    }}
-                                    sx={{ fontFamily: 'Vazirmatn', color: '#95a5a6' }}
-                                >
-                                    انصراف
-                                </Button>
-                            )}
-                        </Box>
-                    </Paper>
-                ) : (
-                    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, bgcolor: '#f0f1ff', border: '1px solid #d1d4f9', position: 'relative' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <AdminPanelSettingsIcon sx={{ color: '#666AF2' }} />
-                                <Typography sx={{ fontWeight: 800, color: '#666AF2', fontFamily: 'Vazirmatn' }}>پاسخ شما:</Typography>
-                            </Box>
-                            <Tooltip title="ویرایش پاسخ">
-                                <IconButton
-                                    onClick={() => setIsEditing(true)}
-                                    sx={{ color: '#666AF2', bgcolor: 'rgba(102, 106, 242, 0.1)', '&:hover': { bgcolor: 'rgba(102, 106, 242, 0.2)' } }}
-                                >
-                                    <EditIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        <Typography variant="body1" sx={{ lineHeight: 2, color: '#2c3e50', fontFamily: 'Vazirmatn', whiteSpace: 'pre-line' }}>
-                            {ticket.adminResponse}
-                        </Typography>
-                    </Paper>
-                )}
-            </Box>
+            <Paper elevation={4} sx={{ p: isMobile ? 1 : 1.5, borderRadius: 5, border: '1px solid #666AF2', bgcolor: '#fff' }}>
+                <Box sx={{ display: 'flex', gap: isMobile ? 1 : 1.5, alignItems: 'center' }}>
+                    <TextField
+                        fullWidth
+                        multiline
+                        maxRows={5}
+                        variant="standard"
+                        placeholder="پاسخ خود را بنویسید..."
+                        value={adminReply}
+                        onChange={(e) => setAdminReply(e.target.value)}
+                        disabled={submitting}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmitResponse();
+                            }
+                        }}
+                        InputProps={{
+                            disableUnderline: true,
+                            sx: { fontFamily: 'Vazirmatn', px: isMobile ? 1 : 2, py: isMobile ? 0.5 : 1, fontSize: isMobile ? '0.85rem' : '0.9rem' }
+                        }}
+                    />
+                    <IconButton
+                        onClick={handleSubmitResponse}
+                        disabled={submitting || !adminReply.trim()}
+                        sx={{
+                            bgcolor: '#666AF2',
+                            color: '#fff',
+                            transition: 'all 0.2s',
+                            '&:hover': { bgcolor: '#5558d9', transform: 'scale(1.05)' },
+                            '&.Mui-disabled': { bgcolor: '#edf2f7', color: '#a0aec0' },
+                            width: isMobile ? 40 : 48,
+                            height: isMobile ? 40 : 48
+                        }}
+                    >
+                        {submitting ? <CircularProgress size={isMobile ? 20 : 22} color="inherit" /> : <SendIcon sx={{ transform: 'rotate(180deg)' }} />}
+                    </IconButton>
+                </Box>
+            </Paper>
 
             <Snackbar
                 open={snackbar.open}
-                autoHideDuration={4000}
+                autoHideDuration={3000}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn', width: '100%', borderRadius: 2 }}>
+                <Alert severity={snackbar.severity} variant="filled" sx={{ fontFamily: 'Vazirmatn', borderRadius: 3 }}>
                     {snackbar.message}
                 </Alert>
             </Snackbar>

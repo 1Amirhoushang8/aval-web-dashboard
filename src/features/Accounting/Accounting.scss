@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
-/* ==================== VARIABLES ==================== */
+
 :root {
   --color-primary: #3b82f6;
   --color-primary-dark: #2563eb;
@@ -33,7 +33,7 @@
   --spacing-xl: 3rem;
 }
 
-/* ==================== BASE STYLES ==================== */
+
 .accounting {
   direction: rtl;
   padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl) 5rem;
@@ -41,13 +41,13 @@
   min-height: 100vh;
   font-family: "Vazirmatn", sans-serif !important;
 
-  /* Force font on ALL child elements */
+
   &, * {
     font-family: "Vazirmatn", sans-serif !important;
   }
 }
 
-/* ==================== FONT OVERRIDES ==================== */
+
 .accounting {
   /* Table elements */
   .MuiTable-root,
@@ -99,7 +99,7 @@
 }
 
 
-/* ==================== HEADER WITH SEARCH AND PLUS BUTTON ==================== */
+
 .accounting-header {
   display: flex;
   justify-content: space-between;

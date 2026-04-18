@@ -1,40 +1,91 @@
-import {  Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import "./SignUpPageSkeleton.scss";
 
-export default function SignUpPageSkeleton() {
+const SignUpPageSkeleton: React.FC = () => {
     return (
-        <div className="signup-page skeleton-page" dir="rtl">
+        <div className="signup-page skeleton-page">
             <div className="signup-container">
-
-                <div className="login-image-placeholder">
-                    <Skeleton variant="rectangular" width="100%" height="100%" animation="wave" />
+                {/* Image skeleton – left side on desktop, top on tablet, hidden on mobile */}
+                <div className="signup-image-placeholder">
+                    <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height="100%"
+                        animation="wave"
+                        sx={{ borderRadius: 0 }}
+                    />
                 </div>
 
-                <div className="form-container">
-                    <div id="signupform">
-                        <div className="header-box">
-                            <Skeleton variant="text" width="40%" height={45} sx={{ mb: 1 }} />
-                            <Skeleton variant="text" width="70%" height={25} />
-                        </div>
+                {/* Form skeleton – right side on desktop, RTL for text alignment */}
+                <form id="signupform" dir="rtl">
+                    <h2 id="headerTitle">
+                        <Skeleton variant="text" width="40%" height={45} />
+                    </h2>
 
-
-                        {[1, 2, 3, 4].map((i) => (
-                            <div className="input-row" key={i} style={{ marginBottom: '18px' }}>
-                                <Skeleton variant="text" width="35%" height={20} sx={{ mb: 1, mr: 1 }} />
-                                <Skeleton variant="rectangular" width="100%" height={50} sx={{ borderRadius: '14px' }} />
-                            </div>
-                        ))}
-
-                        <div className="button-row" style={{ marginTop: '20px' }}>
-                            <Skeleton variant="rectangular" width="100%" height={55} sx={{ borderRadius: '16px' }} />
-                        </div>
-
-                        <div className="footer-row" style={{ display: 'flex', justifyContent: 'center', marginTop: '25px' }}>
-                            <Skeleton variant="text" width="50%" height={25} />
-                        </div>
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="35%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
                     </div>
-                </div>
+
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="35%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
+                    </div>
+
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="35%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
+                    </div>
+
+                    <div className="row">
+                        <label>
+                            <Skeleton variant="text" width="35%" height={20} />
+                        </label>
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={50}
+                            sx={{ borderRadius: "14px" }}
+                        />
+                    </div>
+
+                    <div id="button" className="row">
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height={55}
+                            sx={{ borderRadius: "16px" }}
+                        />
+                    </div>
+
+                    <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
+                        <Skeleton variant="text" width="50%" height={25} sx={{ margin: "0 auto" }} />
+                    </div>
+                </form>
             </div>
         </div>
     );
-}
+};
+
+export default SignUpPageSkeleton;

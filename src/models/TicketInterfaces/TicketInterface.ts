@@ -6,14 +6,14 @@ export interface StoredTicket {
     description: string;
     date: string;
     time: string;
-    status?: "pending" | "answered" | "in-progress" | string;
+    status: string;
     adminResponse?: string | null;
-    file?: {
+    file?: boolean | {
         name: string;
         type: string;
         size: number;
         url: string;
-    } | null | boolean;
+    };
 }
 
 export interface TodayTicketsProps {

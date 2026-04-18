@@ -1,209 +1,200 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
-.login-page {
-  /* Locked height and hidden overflow to prevent scrolling */
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-
+.signup-page {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #5769DE 0%, #002acf 100%);
-  font-family: 'Vazirmatn', sans-serif;
-  padding: 1rem; // Reduced slightly to save space
-}
+  justify-content: center;
+  background: #f4f7fe;
+  font-family: "Vazirmatn", "Tahoma", sans-serif;
+  padding: 20px;
 
-.login-container {
-  display: flex;
-  width: 95%;
-  max-width: 1000px;
-  /* Ensure container doesn't exceed viewport height */
-  max-height: 90vh;
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    max-width: 95%;
-    max-height: 95vh;
-    overflow-y: auto; // Allows internal scroll only on small mobile if needed
-  }
-}
-
-/* Left Side - Image Section */
-.login-image-section {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  border-right: 2px solid #303030;
-
-  .image-wrapper {
+  .signup-container {
+    background: #fff;
+    display: flex;
+    flex-direction: row;
     width: 100%;
-    height: 100%;
-    position: relative;
+    max-width: 1000px;
+    min-height: 600px;
+    border-radius: 30px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 
-    .interactive-image {
+    @media (max-width: 900px) {
+      flex-direction: column;
+      max-width: 480px;
+      min-height: auto;
+    }
+
+    @media (max-width: 600px) {
+      max-width: 100%;
+      border-radius: 20px;
+    }
+  }
+
+  // Fix image section sizing
+  .signup-container > :first-child {
+    flex: 1;
+    min-width: 0; // prevent overflow
+    display: flex;
+    align-items: stretch; // ensure full height
+
+    // Target the inner image wrapper if needed (depends on LoginImageSection structure)
+    & > div {
+      width: 100%;
+      height: 100%;
+    }
+
+    img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.5s ease;
-      opacity: 0.9;
-      filter: brightness(0.9);
+      display: block;
+    }
+  }
 
-      &:hover {
-        transform: scale(1.05);
-        filter: brightness(1);
-      }
+  #signupform {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+
+    @media (max-width: 900px) {
+      padding: 32px 24px;
+      max-width: 100%;
     }
 
-    .image-overlay {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-      color: white;
-      padding: 2rem;
-      text-align: center;
+    @media (max-width: 600px) {
+      padding: 24px 20px;
+    }
 
-      h3 {
+    #headerTitle {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #1b254b;
+      margin-bottom: 30px;
+      text-align: right;
+
+      @media (max-width: 900px) {
         font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
+        margin-bottom: 24px;
       }
 
-      p {
-        font-size: 1rem;
-        opacity: 0.9;
+      @media (max-width: 600px) {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
       }
     }
-  }
-}
 
-/* Right Side - Form Section */
-#loginform {
-  flex: 1;
-  padding: 2rem 3rem; // Slightly tighter padding to prevent overflow
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow-y: auto; // Allows form content to scroll internally if window is tiny
+    .row {
+      margin-bottom: 20px;
 
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
-}
-
-/* Keep your existing form styles below - they remain unchanged */
-#headerTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.row {
-  margin-bottom: 1.2rem; // Slightly reduced to help "no-scroll" fit
-
-  label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 0.4rem;
-    margin-right: 5px;
-  }
-
-  input {
-    width: 100%;
-    padding: 10px 16px; // Tighter padding
-    border: 2px solid #e1e5e9;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-family: 'Vazirmatn', sans-serif;
-    transition: border-color 0.3s ease;
-
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-  }
-}
-
-#button {
-  margin-top: 1rem;
-
-  button {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    font-family: 'Vazirmatn', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-}
-
-.error-text {
-  color: #ef4444;
-  font-size: 0.85rem;
-  text-align: center;
-  margin: 0.5rem 0;
-  padding: 8px;
-  background: #fef2f2;
-  border-radius: 8px;
-  border: 1px solid #fecaca;
-}
-
-#alternativeLogin {
-  margin-top: 1rem;
-  text-align: center;
-
-  .link-info {
-    color: #3b82f6;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: color 0.3s ease;
-
-    &:hover {
-      color: #1d4ed8;
-      text-decoration: underline;
-    }
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .login-image-section {
-    height: 150px; // Shorter on mobile to keep form visible without scroll
-
-    .image-overlay {
-      padding: 0.8rem;
-
-      h3 {
-        font-size: 1.1rem;
+      @media (max-width: 600px) {
+        margin-bottom: 16px;
       }
 
-      p {
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1b254b;
+        margin-bottom: 6px;
+        margin-right: 5px;
+
+        @media (max-width: 600px) {
+          font-size: 0.8rem;
+          margin-bottom: 4px;
+        }
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1.5px solid #e0e5f2;
+        border-radius: 14px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #1b254b;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #666AF2;
+          box-shadow: 0 10px 20px -5px rgba(102, 106, 242, 0.1);
+        }
+
+        @media (max-width: 900px) {
+          padding: 10px 12px;
+          font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+          padding: 12px 14px;
+          font-size: 0.95rem;
+          border-radius: 12px;
+        }
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        background: #666AF2;
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        font-family: inherit;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover:not(:disabled) {
+          background: #5558d9;
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px -6px rgba(102, 106, 242, 0.3);
+        }
+
+        @media (max-width: 900px) {
+          padding: 12px;
+          font-size: 1rem;
+        }
+
+        @media (max-width: 600px) {
+          padding: 14px;
+          font-size: 1.05rem;
+          border-radius: 14px;
+        }
+      }
+    }
+
+    .alert-box {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+
+      @media (max-width: 600px) {
         font-size: 0.8rem;
+        padding: 8px;
+        margin-top: 16px;
       }
     }
+  }
+}
+
+// Optional: hide image on very small screens to save space
+@media (max-width: 600px) {
+  .signup-page .signup-container > :first-child {
+    display: none;
+  }
+  .signup-page #signupform {
+    padding: 32px 24px;
   }
 }

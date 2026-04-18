@@ -18,7 +18,7 @@
       "SerialNumber": "۱۹۲۰۴۸۳۸",
       "service": "اپلیکیشن موبایل",
       "price": "۴۵,۰۰۰,۰۰۰ تومان",
-      "status": "درحال-انجام",
+      "status": "پرداخت-شده",
       "paymentType": "پرداخت-تکی",
       "monthlyPayment": null,
       "totalMonths": null
@@ -128,8 +128,8 @@
       "description": "کاربر در حال حاضر از نسخه اندروید استفاده می‌کند اما قصد خرید گوشی آیفون را دارد و می‌خواهد بداند آیا اپلیکیشن روی iOS همگام‌سازی می‌شود و نسخه پایدار دارد یا خیر.",
       "date": "1402/12/02",
       "time": "11:30",
-      "status": "pending",
-      "adminResponse": null,
+      "status": "answered",
+      "adminResponse": "بله سازگار است",
       "file": true
     },
     {
@@ -166,10 +166,7 @@
       "time": "12:00",
       "status": "in-progress",
       "adminResponse": "طرح جدید در پنل آپلود شد.",
-      "file": false,
-      "username": "فاطمه رضایی",
-      "userPhone": "09197778899",
-      "localStatus": "answered"
+      "file": false
     },
     {
       "id": "fcd0",
@@ -229,10 +226,7 @@
       "time": "۱۳:۱۲",
       "status": "in-progress",
       "adminResponse": null,
-      "file": true,
-      "username": "فاطمه رضایی",
-      "userPhone": "09197778899",
-      "localStatus": "pending"
+      "file": true
     },
     {
       "id": "02b5",
@@ -244,21 +238,295 @@
       "time": "۰۹:۴۰",
       "status": "pending",
       "adminResponse": null,
-      "file": false,
-      "username": "فاطمه رضایی",
-      "userPhone": "09197778899",
-      "localStatus": "in-progress"
+      "file": false
     },
     {
       "id": "e8ae",
       "title": "تیکت تستی",
       "shortDetail": "این یک تست است",
-      "description": "تست طولانی تر از همیشه",
+      "description": "تست",
       "date": "۱۴۰۴/۱۲/۰۵",
       "time": "۱۴:۴۳",
       "userId": "13",
+      "status": "pending",
+      "adminResponse": "دو",
+      "file": false
+    },
+    {
+      "id": "714f",
+      "title": "خرابی سخت افزار",
+      "shortDetail": "مشکل تست تیکت های امروز",
+      "description": "مشکل دارد",
+      "date": "۱۴۰۵/۰۱/۲۸",
+      "time": "۱۹:۴۲",
+      "userId": "13",
+      "status": "pending",
+      "adminResponse": null
+    },
+    {
+      "id": "9aee",
+      "title": "تنظیمات شبکه",
+      "shortDetail": "تست تنظیمات",
+      "description": "تشسنشکثنئبقحشسثئبحشخثیبئحئگئئح",
+      "date": "۱۴۰۵/۰۱/۲۹",
+      "time": "۱۱:۳۱",
+      "userId": "13",
       "status": "answered",
-      "adminResponse": "پاسخ به تیکت تستی XD "
+      "adminResponse": "خیف"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg_101_1",
+      "ticketId": "101",
+      "senderId": "11",
+      "senderType": "user",
+      "text": "سلام، من نمی‌توانم وارد حساب کاربری شوم. همیشه خطای اطلاعات نامعتبر می‌گیرم.",
+      "timestamp": "1402/12/01 10:05",
+      "isRead": true
+    },
+    {
+      "id": "msg_101_2",
+      "ticketId": "101",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "سلام سارا جان. رمز عبور شما ریست شد. لطفاً ایمیل خود را چک کنید و رمز جدید را امتحان کنید.",
+      "timestamp": "1402/12/01 10:15",
+      "isRead": true
+    },
+    {
+      "id": "msg_101_3",
+      "ticketId": "101",
+      "senderId": "11",
+      "senderType": "user",
+      "text": "ممنون، مشکل حل شد. موفق باشید.",
+      "timestamp": "1402/12/01 10:20",
+      "isRead": true
+    },
+    {
+      "id": "msg_102_1",
+      "ticketId": "102",
+      "senderId": "11",
+      "senderType": "user",
+      "text": "آیا نسخه iOS اپلیکیشن آماده است؟ من به زودی آیفون می‌خرم.",
+      "timestamp": "1402/12/02 11:35",
+      "isRead": true
+    },
+    {
+      "id": "msg_102_2",
+      "ticketId": "102",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "در حال حاضر نسخه iOS در مرحله بتا است. احتمالاً تا دو هفته دیگر به صورت پایدار منتشر می‌شود.",
+      "timestamp": "1402/12/02 11:40",
+      "isRead": false
+    },
+    {
+      "id": "msg_104_1",
+      "ticketId": "104",
+      "senderId": "12",
+      "senderType": "user",
+      "text": "سلام. لطفاً روی کلمه 'خرید آنلاین' بیشتر کار کنید. می‌خواهم در نتایج گوگل دیده شوم.",
+      "timestamp": "1402/12/03 14:25",
+      "isRead": true
+    },
+    {
+      "id": "msg_104_2",
+      "ticketId": "104",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "حتماً. تیم سئو مشغول تحقیق روی این کلیدواژه است. به زودی برنامه عملیاتی به شما ارائه می‌شود.",
+      "timestamp": "1402/12/03 14:35",
+      "isRead": true
+    },
+    {
+      "id": "msg_104_3",
+      "ticketId": "104",
+      "senderId": "12",
+      "senderType": "user",
+      "text": "ممنون. لطفاً سریعتر اقدام کنید چون رقبا جلو زدند.",
+      "timestamp": "1402/12/03 14:40",
+      "isRead": false
+    },
+    {
+      "id": "msg_106_1",
+      "ticketId": "106",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "سلام. می‌خواهم رنگ لوگو را به آبی روشن تغییر دهم. لطفاً نمونه اولیه را بفرستید.",
+      "timestamp": "1402/12/02 12:05",
+      "isRead": true
+    },
+    {
+      "id": "msg_106_2",
+      "ticketId": "106",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "سلام فاطمه. نمونه جدید را در پنل کاربری آپلود کردم. لطفاً مشاهده کنید و نظر بدهید.",
+      "timestamp": "1402/12/02 12:15",
+      "isRead": true
+    },
+    {
+      "id": "msg_106_3",
+      "ticketId": "106",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "خیلی عالی است. فقط لطفاً فایل PNG بدون پس‌زمینه را هم ارسال کنید.",
+      "timestamp": "1402/12/02 12:20",
+      "isRead": true
+    },
+    {
+      "id": "msg_106_4",
+      "ticketId": "106",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "الان برایتان ایمیل می‌کنم.",
+      "timestamp": "1402/12/02 12:25",
+      "isRead": true
+    },
+    {
+      "id": "msg_fcd0_1",
+      "ticketId": "fcd0",
+      "senderId": "b98e",
+      "senderType": "user",
+      "text": "سلام. هر فایلی بالای ۵ مگابایت آپلود می‌کنم، خطا می‌دهد. لطفاً بررسی کنید.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۰:۵۵",
+      "isRead": true
+    },
+    {
+      "id": "msg_fcd0_2",
+      "ticketId": "fcd0",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "در حال بررسی محدودیت سرور هستم. به زودی اطلاع می‌دهم.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۱:۰۰",
+      "isRead": false
+    },
+    {
+      "id": "msg_ba30_1",
+      "ticketId": "ba30",
+      "senderId": "62f1",
+      "senderType": "user",
+      "text": "سلام. تراکنش ۱۲۳۴۵ انجام شده ولی در پنل ثبت نشده. لطفاً پیگیری کنید.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۱:۱۰",
+      "isRead": true
+    },
+    {
+      "id": "msg_5a5b_1",
+      "ticketId": "5a5b",
+      "senderId": "12",
+      "senderType": "user",
+      "text": "سلام. با اینترنت همراه نمی‌توانم به سرور متصل شوم. با وای فای کار می‌کند.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۲:۱۰",
+      "isRead": true
+    },
+    {
+      "id": "msg_5a5b_2",
+      "ticketId": "5a5b",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "احتمالاً مشکل از تنظیمات DNS اپراتور شماست. لطفاً DNS را روی 8.8.8.8 تنظیم کنید و مجدد امتحان کنید.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۲:۱۵",
+      "isRead": true
+    },
+    {
+      "id": "msg_a258_1",
+      "ticketId": "a258",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "سلام. می‌خواهم به پلن طلایی ارتقا دهم. تفاوت هزینه و خدمات با پلن نقره‌ای چیست؟",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۳:۱۵",
+      "isRead": true
+    },
+    {
+      "id": "msg_a258_2",
+      "ticketId": "a258",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "سلام فاطمه. پلن طلایی شامل پشتیبانی ۲۴ ساعته، فضای ابری ۱۰۰ گیگ و مشاوره تخصصی ماهانه است. هزینه ارتقا ۲ میلیون تومان است.",
+      "timestamp": "۱۴۰۴/۱۲/۰۴ ۱۳:۲۵",
+      "isRead": false
+    },
+    {
+      "id": "a697",
+      "ticketId": "e8ae",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "سلام",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۲۴",
+      "isRead": false
+    },
+    {
+      "id": "6551",
+      "ticketId": "e8ae",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "تست میکنیم",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۲۴",
+      "isRead": false
+    },
+    {
+      "id": "0e74",
+      "ticketId": "e8ae",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "یک",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۳۰",
+      "isRead": false
+    },
+    {
+      "id": "3fa3",
+      "ticketId": "e8ae",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "دو",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۳۰",
+      "isRead": false
+    },
+    {
+      "id": "725f",
+      "ticketId": "e8ae",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "تست تیکت",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۳۹",
+      "isRead": false
+    },
+    {
+      "id": "670d",
+      "ticketId": "714f",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "مشکل حل میشه",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۵۳",
+      "isRead": false
+    },
+    {
+      "id": "be12",
+      "ticketId": "714f",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "اوکی",
+      "timestamp": "۱۴۰۵/۱/۲۸ ۱۹:۵۳",
+      "isRead": false
+    },
+    {
+      "id": "f9b3",
+      "ticketId": "102",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "بله سازگار است",
+      "timestamp": "۱۴۰۵/۱/۲۹ ۱۱:۱۴",
+      "isRead": false
+    },
+    {
+      "id": "dd16",
+      "ticketId": "9aee",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "خیف",
+      "timestamp": "۱۴۰۵/۱/۲۹ ۱۲:۳۲",
+      "isRead": false
     }
   ],
   "financialStats": {

@@ -12,12 +12,9 @@ const LoginPage: React.FC = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-
-
     const [pageLoading, setPageLoading] = useState(true);
 
     useEffect(() => {
-
         const timer = setTimeout(() => {
             setPageLoading(false);
         }, 800);
@@ -31,16 +28,17 @@ const LoginPage: React.FC = () => {
         try {
             const [usersRes, adminsRes] = await Promise.all([
                 apiClient.get<User[]>("/users"),
-                apiClient.get<User[]>("/admins")
+                apiClient.get<User[]>("/admins"),
             ]);
 
             const allUsers = usersRes.data;
             const allAdmins = adminsRes.data;
 
             const findInArray = (array: User[]): User | undefined =>
-                array.find((u: User) =>
-                    u.username?.toLowerCase().trim() === username.toLowerCase().trim() &&
-                    u.password?.toString().trim() === password.trim()
+                array.find(
+                    (u: User) =>
+                        u.username?.toLowerCase().trim() === username.toLowerCase().trim() &&
+                        u.password?.toString().trim() === password.trim()
                 );
 
             const adminMatch = findInArray(allAdmins);
@@ -65,7 +63,6 @@ const LoginPage: React.FC = () => {
         }
     };
 
-   
     if (pageLoading) {
         return <LoginPageSkeleton />;
     }
@@ -78,7 +75,10 @@ const LoginPage: React.FC = () => {
             transition={{ duration: 0.4 }}
         >
             <div className="login-container">
+
                 <LoginImageSection />
+
+                {/* Form section */}
                 <form id="loginform" dir="rtl" onSubmit={handleLogin}>
                     <h2 id="headerTitle">ورود به پنل کاربری</h2>
 
@@ -109,14 +109,16 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
-                        <span style={{ fontSize: "0.9rem", color: "#666" }}>حساب کاربری ندارید؟ </span>
+            <span style={{ fontSize: "0.9rem", color: "#666" }}>
+              حساب کاربری ندارید؟{" "}
+            </span>
                         <Link
                             to="/signup"
                             style={{
                                 textDecoration: "none",
                                 color: "#666AF2",
                                 fontWeight: "bold",
-                                fontSize: "0.9rem"
+                                fontSize: "0.9rem",
                             }}
                         >
                             ثبت نام
@@ -124,9 +126,16 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     {error && (
-                        <p className="error-text" style={{ color: 'red', marginTop: '10px', fontWeight: 'bold' }}>
+                        <div
+                            className="alert-box"
+                            style={{
+                                backgroundColor: "#ffebee",
+                                color: "#c62828",
+                                border: "1px solid #ef9a9a",
+                            }}
+                        >
                             {error}
-                        </p>
+                        </div>
                     )}
                 </form>
             </div>

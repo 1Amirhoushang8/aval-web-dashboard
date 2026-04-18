@@ -19,14 +19,12 @@ const Sidebar: React.FC<SidebarPropsType> = ({ expanded, setExpanded, sidebarIte
 
     return (
         <>
-
             {isMobile && (
                 <div className="mobile_header">
                     <span className="toggle" onClick={() => setExpanded(!expanded)}>☰</span>
-                    <h1 style={{fontSize: '1.2rem'}}>پنل مدیریت اول وب</h1>
+                    <h1 style={{fontSize: '1.2rem'}}> اول وب</h1>
                 </div>
             )}
-
 
             {isMobile && expanded && (
                 <div

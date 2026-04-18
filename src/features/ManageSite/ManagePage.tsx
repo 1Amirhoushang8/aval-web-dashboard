@@ -12,7 +12,7 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-// Define User interface locally for clarity
+
 interface User {
     id: string | number;
     username: string;
@@ -77,7 +77,7 @@ export default function ManageSitePage() {
 
     const isLoading = ticketsLoading || usersLoading;
 
-    // Logic to count users uniquely based on FullName or Username
+
     const uniqueUsersCount = useMemo(() => {
         const seenUsernames = new Set();
         const seenFullNames = new Set();

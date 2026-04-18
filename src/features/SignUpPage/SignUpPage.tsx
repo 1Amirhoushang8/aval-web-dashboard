@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
-// Import the Skeleton
 import SignUpPageSkeleton from "../../Skeleton/SignUpPageSkeleton/SignUpPageSkeleton";
 import { motion } from "framer-motion";
 
@@ -20,12 +19,9 @@ const SignUpPage: React.FC = () => {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-
     const [pageLoading, setPageLoading] = useState(true);
 
     useEffect(() => {
-
         const timer = setTimeout(() => {
             setPageLoading(false);
         }, 800);
@@ -116,21 +112,20 @@ const SignUpPage: React.FC = () => {
         }
     };
 
-
     if (pageLoading) {
         return <SignUpPageSkeleton />;
     }
 
     return (
         <motion.div
-            className="login-page"
+            className="signup-page"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
         >
-            <div className="login-container">
+            <div className="signup-container">
                 <LoginImageSection />
-                <form id="loginform" dir="rtl" onSubmit={handleSignUp}>
+                <form id="signupform" dir="rtl" onSubmit={handleSignUp}>
                     <h2 id="headerTitle">ثبت نام در سیستم</h2>
 
                     <div className="row">

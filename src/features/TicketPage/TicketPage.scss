@@ -40,6 +40,7 @@
   font-family: "Vazirmatn", sans-serif;
   padding: 2rem;
   animation: fadeIn 0.5s ease-out;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -66,6 +67,7 @@
   transform: translateY(0);
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   position: relative;
+  box-sizing: border-box;
 
   &:hover {
     box-shadow: var(--shadow-xl);
@@ -90,6 +92,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  box-sizing: border-box;
 
   &:hover {
     border-color: var(--color-border-light);
@@ -113,6 +116,7 @@
   color: var(--color-text-dark);
   text-align: right;
   outline: none;
+  box-sizing: border-box;
 
   &::placeholder {
     color: var(--color-text-light);
@@ -180,12 +184,13 @@
   background: var(--color-white);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
-  z-index: 9999 !important; /* Very high z-index */
+  z-index: 9999 !important;
   overflow: hidden;
   animation: slideDown 0.3s ease-out;
   border: 1px solid var(--color-border);
   max-height: 400px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 @keyframes slideDown {
@@ -245,6 +250,7 @@
   margin-bottom: 2px;
   position: relative;
   padding-right: 2.5rem;
+  box-sizing: border-box;
 
   &::before {
     content: '•';
@@ -288,6 +294,7 @@
   position: sticky;
   bottom: 0;
   z-index: 2;
+  box-sizing: border-box;
 
   .section-label {
     font-size: 0.85rem;
@@ -308,6 +315,7 @@
   transition: all var(--transition-normal);
   text-align: right;
   background: var(--color-white);
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
@@ -334,11 +342,12 @@
   gap: 0.5rem;
   animation: slideUp 0.4s ease-out forwards;
   opacity: 0;
-  position: relative; /* Make field relative for dropdown positioning */
+  position: relative;
+  box-sizing: border-box;
 
   &:nth-child(1) {
     animation-delay: 0.1s;
-    z-index: 1000; /* Higher z-index for dropdown field */
+    z-index: 1000;
   }
   &:nth-child(2) { animation-delay: 0.2s; }
   &:nth-child(3) { animation-delay: 0.3s; }
@@ -389,6 +398,7 @@
   font-family: "Vazirmatn", sans-serif;
   color: var(--color-text-dark);
   text-align: right;
+  box-sizing: border-box;
 
   &:hover {
     border-color: var(--color-border-light);
@@ -419,7 +429,7 @@
 }
 
 .field.textarea {
-  z-index: 1; /* Lower z-index so dropdown appears on top */
+  z-index: 1;
 }
 
 .field textarea {
@@ -434,7 +444,8 @@
   align-items: flex-start;
   animation: slideUp 0.4s ease-out 0.4s forwards;
   opacity: 0;
-  z-index: 1; /* Lower z-index so dropdown appears on top */
+  z-index: 1;
+  box-sizing: border-box;
 }
 
 .file-btn {
@@ -453,6 +464,7 @@
   gap: 0.5rem;
   box-shadow: var(--shadow-md);
   font-family: "Vazirmatn", sans-serif;
+  box-sizing: border-box;
 
   &::before {
     content: "📎";
@@ -493,6 +505,7 @@
   overflow: hidden;
   transition: all var(--transition-normal);
   position: relative;
+  box-sizing: border-box;
 
   &:hover {
     border-color: var(--color-primary);
@@ -511,6 +524,7 @@
     object-fit: contain;
     padding: 1rem;
     animation: scaleIn 0.4s ease-out;
+    box-sizing: border-box;
   }
 }
 
@@ -565,6 +579,7 @@
   justify-content: center;
   gap: 1rem;
   padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .remove-btn {
@@ -581,6 +596,7 @@
   align-items: center;
   gap: 0.3rem;
   font-family: "Vazirmatn", sans-serif;
+  box-sizing: border-box;
 
   &::before {
     content: "✖";
@@ -628,7 +644,8 @@
   animation: slideUp 0.4s ease-out 0.5s forwards;
   opacity: 0;
   font-family: "Vazirmatn", sans-serif;
-  z-index: 1; /* Lower z-index so dropdown appears on top */
+  z-index: 1;
+  box-sizing: border-box;
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
@@ -689,6 +706,7 @@
 
   .file-preview {
     width: 100%;
+    min-width: auto;
     height: 200px;
   }
 
@@ -715,6 +733,10 @@
     padding: 1.5rem;
   }
 
+  .dropdown-content {
+    max-height: 300px; /* Slightly smaller on very small screens */
+  }
+
   .dropdown-options {
     max-height: 200px;
   }
@@ -727,6 +749,27 @@
   .file-preview {
     height: 180px;
   }
+
+  /* Ensure tap targets are at least 44px */
+  .clear-btn,
+  .dropdown-arrow {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .submit-btn {
+    padding: 0.9rem; /* Larger tap area */
+  }
+}
+
+/* Ensure no horizontal overflow on any screen */
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
 }
 
 /* -------------------- Loading State -------------------- */
@@ -742,8 +785,6 @@
 .loading {
   animation: pulse 1.5s infinite;
 }
-
-
 
 /* -------------------- File Section Loading -------------------- */
 .file-section-loading {
@@ -771,10 +812,7 @@
   }
 }
 
-
-
 /* ==================== TICKET PAGE LOADING STYLES ==================== */
-
 .ticket-card.is-loading-page {
   display: flex;
   flex-direction: column;
@@ -795,13 +833,11 @@
   }
 }
 
-// Global shimmer for the button
 @keyframes shimmer-ticket-page {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
-/* Submit Button Loading State (Real Button) */
 .submit-btn {
   position: relative;
   transition: all 0.3s ease;
@@ -838,7 +874,7 @@
 
     .loading-content {
       text-align: center;
-      color: #1976d2; // Primary blue
+      color: #1976d2;
 
       p {
         margin-top: 15px;
