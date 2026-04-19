@@ -32,9 +32,9 @@
       "SerialNumber": "۱۹۲۰۴۸۳۹",
       "service": "بهینه‌سازی SEO",
       "status": "درحال-انجام",
-      "price": "۱۵,۰۰۰,۰۰۰ تومان",
+      "price": "۱,۵۰۰,۰۰۰,۰۰۰ تومان",
       "paymentType": "پرداخت-دوره-ای",
-      "monthlyPayment": "۱,۵۰۰,۰۰۰ تومان",
+      "monthlyPayment": "۱۵۰,۰۰۰,۰۰۰ تومان",
       "totalMonths": 10
     },
     {
@@ -90,21 +90,6 @@
       "totalMonths": 10,
       "username": "jalil",
       "id": "0d54"
-    },
-    {
-      "id": "f851",
-      "FullName": "امیرعلی تومانی",
-      "username": "amiir",
-      "password": "amir123456",
-      "phoneNumber": "09104967717",
-      "roleKey": "USER",
-      "SerialNumber": "52420888",
-      "service": "انتخاب نشده",
-      "price": "۰ تومان",
-      "status": "درحال-انجام",
-      "paymentType": "پرداخت-تکی",
-      "monthlyPayment": null,
-      "totalMonths": null
     }
   ],
   "tickets": [
@@ -271,8 +256,19 @@
       "date": "۱۴۰۵/۰۱/۲۹",
       "time": "۱۱:۳۱",
       "userId": "13",
-      "status": "answered",
+      "status": "pending",
       "adminResponse": "خیف"
+    },
+    {
+      "id": "fdd7",
+      "title": "مشکل نرم افزاری",
+      "shortDetail": "نمستبنتاکسل",
+      "description": "اااااااایییییییییییی",
+      "date": "۱۴۰۵/۰۱/۲۹",
+      "time": "۲۰:۱۸",
+      "userId": "13",
+      "status": "answered",
+      "adminResponse": "مشسبتشیب"
     }
   ],
   "messages": [
@@ -526,6 +522,24 @@
       "senderType": "admin",
       "text": "خیف",
       "timestamp": "۱۴۰۵/۱/۲۹ ۱۲:۳۲",
+      "isRead": false
+    },
+    {
+      "id": "461b",
+      "ticketId": "9aee",
+      "senderId": "13",
+      "senderType": "user",
+      "text": "سشیبتکشمتیلشیلی",
+      "timestamp": "۱۴۰۵/۱/۲۹ ۲۰:۱۸",
+      "isRead": false
+    },
+    {
+      "id": "d20b",
+      "ticketId": "fdd7",
+      "senderId": "3962",
+      "senderType": "admin",
+      "text": "مشسبتشیب",
+      "timestamp": "۱۴۰۵/۱/۲۹ ۲۰:۲۰",
       "isRead": false
     }
   ],

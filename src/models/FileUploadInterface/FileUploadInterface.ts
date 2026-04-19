@@ -4,7 +4,7 @@ export interface FileUploadProps {
     disabled?: boolean;
     initialFile?: File | null;
     initialPreviewUrl?: string | null;
-    maxSize?: number; // in bytes
+    maxSize?: number;
     allowedTypes?: string[];
     allowedExtensions?: string[];
 }
