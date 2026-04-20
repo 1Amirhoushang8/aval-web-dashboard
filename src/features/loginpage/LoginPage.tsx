@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./LoginPage.scss";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
-import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import LoginPageSkeleton from "../../Skeleton/LoginPageSkeleton/LoginPageSkeleton";
 import { motion } from "framer-motion";
 
@@ -26,40 +26,30 @@ const LoginPage: React.FC = () => {
         setError("");
 
         try {
-            const [usersRes, adminsRes] = await Promise.all([
-                apiClient.get<User[]>("/users"),
-                apiClient.get<User[]>("/admins"),
-            ]);
+            const response = await apiClient.post("/auth/login", {
+                username,
+                password,
+            });
 
-            const allUsers = usersRes.data;
-            const allAdmins = adminsRes.data;
+            const { user, token } = response.data;
 
-            const findInArray = (array: User[]): User | undefined =>
-                array.find(
-                    (u: User) =>
-                        u.username?.toLowerCase().trim() === username.toLowerCase().trim() &&
-                        u.password?.toString().trim() === password.trim()
-                );
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", token);
 
-            const adminMatch = findInArray(allAdmins);
-            const userMatch = findInArray(allUsers);
-
-            if (adminMatch) {
-                const adminData = { ...adminMatch, roleKey: "ADMIN" };
-                localStorage.setItem("user", JSON.stringify(adminData));
-                localStorage.setItem("token", "fake-admin-token");
+            if (user.roleKey === "ADMIN") {
                 navigate("/ManageSite", { replace: true });
-            } else if (userMatch) {
-                const userData = { ...userMatch, roleKey: "USER" };
-                localStorage.setItem("user", JSON.stringify(userData));
-                localStorage.setItem("token", "fake-user-token");
-                navigate("/MyTickets", { replace: true });
             } else {
-                setError("نام کاربری یا رمز عبور اشتباه است");
+                navigate("/MyTickets", { replace: true });
             }
         } catch (err) {
-            console.error("Connection error:", err);
-            setError("اتصال به سرور برقرار نشد...");
+            console.error("Login error:", err);
+
+            let errorMessage = "اتصال به سرور برقرار نشد...";
+            if (axios.isAxiosError(err) && err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            }
+
+            setError(errorMessage);
         }
     };
 
@@ -75,10 +65,8 @@ const LoginPage: React.FC = () => {
             transition={{ duration: 0.4 }}
         >
             <div className="login-container">
-
                 <LoginImageSection />
 
-                {/* Form section */}
                 <form id="loginform" dir="rtl" onSubmit={handleLogin}>
                     <h2 id="headerTitle">ورود به پنل کاربری</h2>
 

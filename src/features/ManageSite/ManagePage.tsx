@@ -5,18 +5,17 @@ import ManageSiteChartSkeleton from "../../Skeleton/ManageSiteChartSkeleton/Mana
 import FooterCards from "../../components/ManageSiteFooterCards/FooterCards.tsx";
 import FooterCardsSkeleton from "../../Skeleton/ManageSiteFooterCard/ManageSiteFooterCard.tsx";
 import TodayTickets from "../../components/TodayTickets/TodayTickets.tsx";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface.ts";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-
 interface User {
     id: string | number;
     username: string;
-    FullName: string;
+    fullName: string;   // camelCase from backend
 }
 
 export default function ManageSitePage() {
@@ -53,50 +52,46 @@ export default function ManageSitePage() {
         }).format(new Date());
     };
 
-    const { data: tickets = [], isLoading: ticketsLoading } = useQuery<StoredTicket[]>({
+    const {
+        data: tickets = [],
+        isLoading: ticketsLoading,
+        isError: ticketsError,
+        error: ticketsErrorObj
+    } = useQuery<StoredTicket[]>({
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
             return response.data;
-        },
-        meta: {
-            onError: () => showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.")
         }
     });
 
-    const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+    const {
+        data: users = [],
+        isLoading: usersLoading,
+        isError: usersError,
+        error: usersErrorObj
+    } = useQuery<User[]>({
         queryKey: ["users"],
         queryFn: async () => {
             const response = await apiClient.get("/users");
             return response.data;
-        },
-        meta: {
-            onError: () => showError("خطا در دریافت اطلاعات کاربران.")
         }
     });
 
+    useEffect(() => {
+        if (ticketsError) {
+            console.error("Tickets error:", ticketsErrorObj);
+            showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.");
+        }
+        if (usersError) {
+            console.error("Users error:", usersErrorObj);
+            showError("خطا در دریافت اطلاعات کاربران.");
+        }
+    }, [ticketsError, usersError, ticketsErrorObj, usersErrorObj, showError]);
+
     const isLoading = ticketsLoading || usersLoading;
 
-
-    const uniqueUsersCount = useMemo(() => {
-        const seenUsernames = new Set();
-        const seenFullNames = new Set();
-
-        const uniqueUsers = users.filter(user => {
-            const lowerUsername = user.username?.toLowerCase().trim();
-            const lowerFullName = user.FullName?.toLowerCase().trim();
-
-            if (seenUsernames.has(lowerUsername) || seenFullNames.has(lowerFullName)) {
-                return false;
-            }
-
-            if (lowerUsername) seenUsernames.add(lowerUsername);
-            if (lowerFullName) seenFullNames.add(lowerFullName);
-            return true;
-        });
-
-        return uniqueUsers.length;
-    }, [users]);
+    const uniqueUsersCount = users.length;
 
     const todayTickets = useMemo(() => {
         const today = getTodayPersianDate();
@@ -115,6 +110,10 @@ export default function ManageSitePage() {
         navigate("/AdminTicketPage", { state: { ticketId: String(ticketId) } });
     };
 
+    const handleViewUsers = () => {
+        navigate("/AdminUsersPage");
+    };
+
     return (
         <div className={`mainchart ${isLoading ? 'is-loading' : ''}`} dir="rtl" style={{ fontFamily: "Vazirmatn, Vazir, system-ui, sans-serif" }}>
 
@@ -127,6 +126,7 @@ export default function ManageSitePage() {
             </div>
 
             <div className={`kpi-row ${showTicketList ? 'list-open' : ''}`}>
+                {/* User Count Card */}
                 <div className="kpi-card">
                     {isLoading ? (
                         <>
@@ -135,7 +135,16 @@ export default function ManageSitePage() {
                         </>
                     ) : (
                         <>
-                            <span className="kpi-title">تعداد کاربران</span>
+                            <div className="kpi-header">
+                                <span className="kpi-title">تعداد کاربران</span>
+                                <button
+                                    className="view-button"
+                                    onClick={handleViewUsers}
+                                    aria-label="مشاهده جزئیات کاربران"
+                                >
+                                    مشاهده جزئیات
+                                </button>
+                            </div>
                             <span className="kpi-value">{toPersianNumber(uniqueUsersCount)}</span>
                         </>
                     )}

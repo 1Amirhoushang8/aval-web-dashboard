@@ -12,7 +12,7 @@ export interface StoredTicket {
         name: string;
         type: string;
         size: number;
-        url: string;
+        data: string;
     };
 }
 

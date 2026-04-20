@@ -19,7 +19,6 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.tsx";
 
-
 interface Ticket extends StoredTicket {
     username: string;
     userPhone: string;
@@ -63,7 +62,7 @@ export default function AdminTicketPage() {
 
             fetchedUsers.forEach((u) => {
                 userMap.set(String(u.id), {
-                    username: u.FullName || u.username || "نامشخص",
+                    username: u.fullName || u.username || "نامشخص",
                     phone: u.phoneNumber || "—"
                 });
             });
@@ -97,18 +96,29 @@ export default function AdminTicketPage() {
     }, []);
 
     const handleDownload = (file: StoredTicket['file'] | boolean): void => {
-        if (!file || file === true || typeof file === "boolean") {
-            setSnackbar({ open: true, message: "فایل آماده دانلود است (عملکرد بزودی اضافه می‌شود)", severity: "info" });
+        // If no file or just a boolean flag
+        if (!file || typeof file === "boolean") {
+            setSnackbar({ open: true, message: "فایلی برای دانلود وجود ندارد", severity: "info" });
             return;
         }
 
+        // File is an object with name, type, size, data (Base64)
+        const fileObj = file as { name: string; type: string; size: number; data: string };
+
+        if (!fileObj.data) {
+            setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
+            return;
+        }
+
+        // Create a download link using the Base64 data
         const link = document.createElement('a');
-        link.href = file.url;
-        link.download = file.name || 'download';
-        link.target = "_blank";
+        link.href = fileObj.data;
+        link.download = fileObj.name || 'download';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        setSnackbar({ open: true, message: "دانلود فایل آغاز شد", severity: "success" });
     };
 
     const handleNavigateToDetails = (id: string | number) => {
@@ -208,7 +218,6 @@ export default function AdminTicketPage() {
                                 </TableCell>
                                 <TableCell>{ticket.title}</TableCell>
                                 <TableCell>
-                                    {/* Tooltip 'title' attribute removed to stop hover description */}
                                     <div className="ticket-description">
                                         {ticket.shortDetail || "---"}
                                     </div>
@@ -261,7 +270,7 @@ export default function AdminTicketPage() {
                                         >
                                             تغییر وضعیت
                                         </Button>
-                                        <IconButton onClick={() => {setDeleteId(ticket.id); setDeleteConfirmOpen(true);}} sx={{ color: '#dc2626' }}>
+                                        <IconButton onClick={() => { setDeleteId(ticket.id); setDeleteConfirmOpen(true); }} sx={{ color: '#dc2626' }}>
                                             <DeleteIcon />
                                         </IconButton>
                                     </div>
@@ -293,7 +302,7 @@ export default function AdminTicketPage() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar(p => ({...p, open: false}))}
+                onClose={() => setSnackbar(p => ({ ...p, open: false }))}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn', direction: 'rtl' }}>

@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../API/apiClient.ts";
 import "./Chart.scss";
-import type {ChartData} from "../../models/ChartDataInterface/ChartDataInterface.ts"
-
+import type { ChartData } from "../../models/ChartDataInterface/ChartDataInterface.ts";
 
 type TimeFilter = 'day' | 'week' | 'month';
 
@@ -60,7 +59,6 @@ export default function ManageSiteChart() {
     const chartHeight = 300;
     const getBarHeight = (value: number) => (value / maxValue) * chartHeight;
 
-
     const isMonthView = timeFilter === 'month';
 
     return (
@@ -110,7 +108,6 @@ export default function ManageSiteChart() {
                             <div
                                 key={index}
                                 className="chart-bar-group"
-
                                 style={{ width: isMonthView ? '55px' : '85px' }}
                             >
                                 <div className="bar-label" style={{ fontSize: isMonthView ? '0.78rem' : '0.85rem' }}>
@@ -121,7 +118,6 @@ export default function ManageSiteChart() {
                                         className="bar bar-requests"
                                         style={{
                                             height: `${getBarHeight(currentData.requests[index])}px`,
-
                                             width: isMonthView ? '14px' : '22px'
                                         }}
                                         title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`}

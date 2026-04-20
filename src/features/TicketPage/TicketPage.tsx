@@ -13,7 +13,6 @@ export default function ManageTicketPage() {
     const [shortDetail, setShortDetail] = useState("");
     const [description, setDescription] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [fileError, setFileError] = useState<string | null>(null);
     const [uploadKey, setUploadKey] = useState(0);
@@ -78,7 +77,6 @@ export default function ManageTicketPage() {
         setShortDetail("");
         setDescription("");
         setFile(null);
-        setPreviewUrl(null);
         setFileError(null);
         setUploadKey(prev => prev + 1);
     };
@@ -101,6 +99,22 @@ export default function ManageTicketPage() {
         try {
             const { dateStr, timeStr } = getPersianDateTime();
 
+            let fileData = null;
+            if (file) {
+                fileData = await new Promise<{ name: string; type: string; size: number; data: string }>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: reader.result as string,
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
             const ticketData = {
                 title: title.trim(),
                 shortDetail: shortDetail.trim(),
@@ -108,16 +122,9 @@ export default function ManageTicketPage() {
                 date: dateStr,
                 time: timeStr,
                 userId: String(currentUser.id),
-                status: "pending" ,
+                status: "pending",
                 adminResponse: null,
-                ...(file && previewUrl && {
-                    file: {
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        url: previewUrl,
-                    }
-                })
+                ...(fileData && { file: fileData }),
             };
 
             await ticketService.create(ticketData);

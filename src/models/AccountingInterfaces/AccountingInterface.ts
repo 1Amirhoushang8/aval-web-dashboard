@@ -2,9 +2,9 @@ export type User = {
     id: string | number;
     username: string;
     password?: string;
-    FullName: string;
+    fullName: string;
     roleKey?: string;
-    SerialNumber: string;
+    serialNumber: string;
     phoneNumber: string;
     price?: string;
     service: string;
