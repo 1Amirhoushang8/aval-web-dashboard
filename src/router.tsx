@@ -8,7 +8,8 @@ import AdminTicketPage from "./features/AdminTicketPage/AdminTicketPage.tsx";
 import UserMyTicketsPage from "./features/UserSeeTicket/UserSeeTicket.tsx";
 import ManageTicketPage from "./features/TicketPage/TicketPage.tsx";
 import TicketDetails from "./features/TicketDetails/TicketDetails.tsx";
-import UserTicketDetail from "./features/UserTicketDetail/UserTicketDetail.tsx"; // Added this import
+import UserTicketDetail from "./features/UserTicketDetail/UserTicketDetail.tsx";
+import AdminUsersPage from "./features/AdminSeeUsers/AdminUsersPage.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -34,12 +35,11 @@ export default function Router() {
                     <Route path="/Accountp" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AccountingPage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/AdminTicketPage" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AdminTicketPage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/ticket-details/:id" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><TicketDetails /></PageWrapper></ProtectedRoute>} />
+                    <Route path="/AdminUsersPage" element={<ProtectedRoute allowedRole="ADMIN"><PageWrapper><AdminUsersPage /></PageWrapper></ProtectedRoute>} /> {/* New route */}
 
                     {/* USER ROUTES */}
                     <Route path="/MyTickets" element={<ProtectedRoute allowedRole="USER"><PageWrapper><UserMyTicketsPage /></PageWrapper></ProtectedRoute>} />
                     <Route path="/SendTicket" element={<ProtectedRoute allowedRole="USER"><PageWrapper><ManageTicketPage /></PageWrapper></ProtectedRoute>} />
-
-
                     <Route path="/user-ticket-detail/:id" element={<ProtectedRoute allowedRole="USER"><PageWrapper><UserTicketDetail /></PageWrapper></ProtectedRoute>} />
                 </Route>
             </Routes>
