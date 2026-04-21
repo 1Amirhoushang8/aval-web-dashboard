@@ -12,7 +12,6 @@ import {
     Snackbar,
     Alert,
     Fade,
-    Link,
     useMediaQuery,
     useTheme
 } from "@mui/material";
@@ -26,8 +25,15 @@ import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
 import apiClient from "../../API/apiClient";
 import UserTicketDetailSkeleton from "../../Skeleton/UserTicketDetailSkeleton/UserTicketDetailSkeleton.tsx";
-
 import type { Message } from "../../models/Massage/TicketMassage.ts";
+
+// Helper to unwrap ApiResponse from direct apiClient calls
+const unwrap = <T,>(response: { data: { success: boolean; data?: T; message?: string } }): T => {
+    if (response.data.success && response.data.data !== undefined) {
+        return response.data.data;
+    }
+    throw new Error(response.data.message || "خطا در دریافت اطلاعات");
+};
 
 const toPersianNumber = (num: number | string): string => {
     if (!num) return '۰';
@@ -48,21 +54,31 @@ export default function UserTicketDetail() {
     const [error, setError] = useState<boolean>(false);
     const [userReply, setUserReply] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: "success" | "error" | "info" | "warning";
+    }>({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     const fetchTicketAndMessages = useCallback(async () => {
         if (!id) return;
         try {
             setLoading(true);
-            const [ticketRes, messagesRes] = await Promise.all([
-                ticketService.getById(id),
-                apiClient.get<Message[]>("/messages", { params: { ticketId: id } })
-            ]);
-            setTicket(ticketRes.data);
-            const sortedMessages = messagesRes.data.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+            // ticketService.getById now returns unwrapped StoredTicket
+            const ticketData = await ticketService.getById(id);
+            setTicket(ticketData);
+
+            // Fetch messages
+            const messagesResponse = await apiClient.get<{ success: boolean; data: Message[]; message?: string }>(`/messages?ticketId=${id}`);
+            const messagesData = unwrap<Message[]>(messagesResponse);
+            const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
             setMessages(sortedMessages);
             setError(false);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error fetching ticket details:", err);
             setError(true);
         } finally {
@@ -82,22 +98,46 @@ export default function UserTicketDetail() {
         if (!loading) scrollToBottom();
     }, [loading, messages, scrollToBottom]);
 
+    const handleDownload = (file: StoredTicket['file'] | boolean) => {
+        if (!file || typeof file === "boolean") {
+            setSnackbar({ open: true, message: "فایلی برای دانلود وجود ندارد", severity: "info" });
+            return;
+        }
+
+        const fileObj = file as { name: string; type: string; size: number; data: string };
+        if (!fileObj.data) {
+            setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = fileObj.data;
+        link.download = fileObj.name || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setSnackbar({ open: true, message: "دانلود فایل آغاز شد", severity: "success" });
+    };
+
     const handleSendMessage = async () => {
         if (!ticket || !id || !userReply.trim()) return;
 
         setSubmitting(true);
         try {
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('fa-IR') + " " + now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+
             const newMessage: Omit<Message, "id"> = {
                 ticketId: id,
                 senderId: ticket.userId,
                 senderType: "user",
                 text: userReply.trim(),
-                timestamp: new Date().toLocaleDateString('fa-IR') + " " + new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+                timestamp,
                 isRead: false
             };
 
-            const response = await apiClient.post<Message>("/messages", newMessage);
-            const savedMessage = response.data;
+            const messageResponse = await apiClient.post<{ success: boolean; data: Message; message?: string }>("/messages", newMessage);
+            const savedMessage = unwrap<Message>(messageResponse);
 
             const updatedTicket: StoredTicket = {
                 ...ticket,
@@ -109,9 +149,10 @@ export default function UserTicketDetail() {
             setTicket(updatedTicket);
             setUserReply("");
             setSnackbar({ open: true, message: "پیام شما با موفقیت ارسال شد", severity: "success" });
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Failed to send message:", err);
-            setSnackbar({ open: true, message: "خطا در ارسال پیام", severity: "error" });
+            const message = err instanceof Error ? err.message : "خطا در ارسال پیام";
+            setSnackbar({ open: true, message, severity: "error" });
         } finally {
             setSubmitting(false);
         }
@@ -129,25 +170,21 @@ export default function UserTicketDetail() {
         );
     }
 
+    const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    const hasFile = ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file;
-
-    const descriptionMessage = {
+    // First message is the ticket description
+    const descriptionMessage: Message & { hasFile?: boolean } = {
         id: 'description-msg',
+        ticketId: String(ticket.id),
+        senderId: ticket.userId,
+        senderType: 'user',
         text: ticket.description,
-        senderType: 'user' as const,
-        timestamp: ticket.time,
-        date: ticket.date,
-        hasFile: hasFile
+        timestamp: `${ticket.date} ${ticket.time}`,
+        isRead: true,
+        hasFile
     };
 
-    const allMessages = [
-        descriptionMessage,
-        ...messages.map(msg => ({
-            ...msg,
-            hasFile: false
-        }))
-    ];
+    const allMessages = [descriptionMessage, ...messages];
 
     return (
         <Container
@@ -163,9 +200,7 @@ export default function UserTicketDetail() {
             }}
             dir="rtl"
         >
-            <Box sx={{
-
-                mb: isMobile ? 2 : 3 }}>
+            <Box sx={{ mb: isMobile ? 2 : 3 }}>
                 <Button
                     startIcon={<ArrowForwardIcon sx={{ ml: 1, mr: 0 }} />}
                     onClick={() => navigate("/MyTickets")}
@@ -244,22 +279,21 @@ export default function UserTicketDetail() {
                                     {msg.text}
                                 </Typography>
                                 {msg.senderType === 'user' && idx === 0 && hasFile && (
-                                    <Link
-                                        href={ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file ? ticket.file.url : '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <Button
+                                        onClick={() => handleDownload(ticket.file)}
                                         sx={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 0.5,
                                             mt: 1,
                                             color: '#666AF2',
-                                            fontSize: isMobile ? '0.7rem' : '0.75rem'
+                                            fontSize: isMobile ? '0.7rem' : '0.75rem',
+                                            textTransform: 'none'
                                         }}
                                     >
                                         <AttachFileIcon fontSize="small" />
-                                        <Typography variant="caption">مشاهده فایل پیوست</Typography>
-                                    </Link>
+                                        <Typography variant="caption">دانلود فایل پیوست</Typography>
+                                    </Button>
                                 )}
                             </Paper>
                             <Typography variant="caption" sx={{ mt: 0.5, color: '#aaa', fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
@@ -317,7 +351,7 @@ export default function UserTicketDetail() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
             >
                 <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn', borderRadius: 2 }}>
                     {snackbar.message}

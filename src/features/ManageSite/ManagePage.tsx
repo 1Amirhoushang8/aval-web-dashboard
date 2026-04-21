@@ -15,7 +15,7 @@ import Alert from "@mui/material/Alert";
 interface User {
     id: string | number;
     username: string;
-    fullName: string;   // camelCase from backend
+    fullName: string;
 }
 
 export default function ManageSitePage() {
@@ -61,7 +61,11 @@ export default function ManageSitePage() {
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
-            return response.data;
+            // Backend returns ApiResponse<T>: { success, message, data }
+            if (response.data.success) {
+                return response.data.data;
+            }
+            throw new Error(response.data.message || "خطا در دریافت تیکت‌ها");
         }
     });
 
@@ -74,18 +78,21 @@ export default function ManageSitePage() {
         queryKey: ["users"],
         queryFn: async () => {
             const response = await apiClient.get("/users");
-            return response.data;
+            if (response.data.success) {
+                return response.data.data;
+            }
+            throw new Error(response.data.message || "خطا در دریافت کاربران");
         }
     });
 
     useEffect(() => {
         if (ticketsError) {
             console.error("Tickets error:", ticketsErrorObj);
-            showError("خطا در دریافت اطلاعات تیکت‌ها از سرور.");
+            showError(ticketsErrorObj?.message || "خطا در دریافت اطلاعات تیکت‌ها از سرور.");
         }
         if (usersError) {
             console.error("Users error:", usersErrorObj);
-            showError("خطا در دریافت اطلاعات کاربران.");
+            showError(usersErrorObj?.message || "خطا در دریافت اطلاعات کاربران.");
         }
     }, [ticketsError, usersError, ticketsErrorObj, usersErrorObj, showError]);
 
@@ -126,7 +133,6 @@ export default function ManageSitePage() {
             </div>
 
             <div className={`kpi-row ${showTicketList ? 'list-open' : ''}`}>
-                {/* User Count Card */}
                 <div className="kpi-card">
                     {isLoading ? (
                         <>

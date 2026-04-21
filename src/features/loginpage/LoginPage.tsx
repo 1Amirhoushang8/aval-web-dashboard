@@ -31,7 +31,15 @@ const LoginPage: React.FC = () => {
                 password,
             });
 
-            const { user, token } = response.data;
+            // Backend returns ApiResponse<T>: { success, message, data }
+            const { success, message, data } = response.data;
+
+            if (!success) {
+                setError(message || "خطا در ورود");
+                return;
+            }
+
+            const { user, token } = data;
 
             localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("token", token);
@@ -45,8 +53,15 @@ const LoginPage: React.FC = () => {
             console.error("Login error:", err);
 
             let errorMessage = "اتصال به سرور برقرار نشد...";
-            if (axios.isAxiosError(err) && err.response?.data?.message) {
-                errorMessage = err.response.data.message;
+            if (axios.isAxiosError(err)) {
+                const responseData = err.response?.data;
+                if (responseData?.message) {
+                    errorMessage = responseData.message;
+                } else if (responseData?.success === false) {
+                    errorMessage = responseData.message || "خطا در ورود";
+                } else if (err.response?.status === 401) {
+                    errorMessage = "نام کاربری یا رمز عبور اشتباه است";
+                }
             }
 
             setError(errorMessage);
@@ -97,9 +112,9 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     <div className="row" style={{ textAlign: "center", marginTop: "15px" }}>
-            <span style={{ fontSize: "0.9rem", color: "#666" }}>
-              حساب کاربری ندارید؟{" "}
-            </span>
+                        <span style={{ fontSize: "0.9rem", color: "#666" }}>
+                            حساب کاربری ندارید؟{" "}
+                        </span>
                         <Link
                             to="/signup"
                             style={{

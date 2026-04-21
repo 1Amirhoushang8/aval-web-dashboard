@@ -13,7 +13,6 @@ import {
     CircularProgress,
     Avatar,
     Fade,
-    Link,
     useMediaQuery,
     useTheme
 } from "@mui/material";
@@ -25,9 +24,16 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import apiClient from "../../API/apiClient";
 import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
-import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton.tsx";
+import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton";
+import type { Message } from "../../models/Massage/TicketMassage";
 
-import type { Message } from "../../models/Massage/TicketMassage.ts";
+// Helper to unwrap ApiResponse from direct apiClient calls
+const unwrap = <T,>(response: { data: { success: boolean; data?: T; message?: string } }): T => {
+    if (response.data.success && response.data.data !== undefined) {
+        return response.data.data;
+    }
+    throw new Error(response.data.message || "خطا در دریافت اطلاعات");
+};
 
 const toPersianNumber = (num: number | string): string => {
     if (!num) return '۰';
@@ -48,7 +54,15 @@ export default function TicketDetails() {
     const [loading, setLoading] = useState(true);
     const [adminReply, setAdminReply] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: "success" | "error" | "info" | "warning";
+    }>({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     const adminId = localStorage.getItem("userId") || "3962";
 
@@ -56,24 +70,32 @@ export default function TicketDetails() {
         if (!id) return;
         try {
             setLoading(true);
-            const [ticketRes, messagesRes] = await Promise.all([
-                ticketService.getById(id),
-                apiClient.get<Message[]>("/messages", { params: { ticketId: id } })
-            ]);
-            const ticketData = ticketRes.data;
+            // ticketService.getById returns unwrapped StoredTicket
+            const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
-            try {
-                const userRes = await apiClient.get(`/users/${ticketData.userId}`);
-                setUserName(userRes.data.FullName || userRes.data.username || `کاربر ${ticketData.userId}`);
-            } catch {
-                setUserName(`کاربر ${ticketData.userId}`);
-            }
+            // Fetch messages and user in parallel
+            const [messagesResponse, userResponse] = await Promise.all([
+                apiClient.get<{ success: boolean; data: Message[]; message?: string }>(`/messages?ticketId=${id}`),
+                apiClient.get<{ success: boolean; data: { fullName?: string; username?: string }; message?: string }>(`/users/${ticketData.userId}`)
+            ]);
 
-            const sortedMessages = messagesRes.data.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+            // Unwrap messages
+            const messagesData = unwrap<Message[]>(messagesResponse);
+            const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
             setMessages(sortedMessages);
-        } catch (err) {
+
+            // Unwrap user
+            const userData = unwrap<{ fullName?: string; username?: string }>(userResponse);
+            setUserName(userData.fullName || userData.username || `کاربر ${ticketData.userId}`);
+        } catch (err: unknown) {
             console.error("Fetch Error:", err);
+            const message = err instanceof Error ? err.message : "خطا در دریافت اطلاعات";
+            setSnackbar({ open: true, message, severity: "error" });
+            // Set fallback username
+            if (ticket) {
+                setUserName(`کاربر ${ticket.userId}`);
+            }
         } finally {
             setLoading(false);
         }
@@ -91,23 +113,49 @@ export default function TicketDetails() {
         if (!loading) scrollToBottom();
     }, [loading, messages, scrollToBottom]);
 
+    const handleDownload = (file: StoredTicket['file'] | boolean) => {
+        if (!file || typeof file === "boolean") {
+            setSnackbar({ open: true, message: "فایلی برای دانلود وجود ندارد", severity: "info" });
+            return;
+        }
+
+        const fileObj = file as { name: string; type: string; size: number; data: string };
+        if (!fileObj.data) {
+            setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = fileObj.data;
+        link.download = fileObj.name || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setSnackbar({ open: true, message: "دانلود فایل آغاز شد", severity: "success" });
+    };
+
     const handleSubmitResponse = useCallback(async () => {
         if (!ticket || !id || !adminReply.trim()) return;
 
         setSubmitting(true);
         try {
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('fa-IR') + " " + now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+
             const newMessage: Omit<Message, "id"> = {
                 ticketId: id,
                 senderId: adminId,
                 senderType: "admin",
                 text: adminReply.trim(),
-                timestamp: new Date().toLocaleDateString('fa-IR') + " " + new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+                timestamp,
                 isRead: false
             };
 
-            const response = await apiClient.post<Message>("/messages", newMessage);
-            const savedMessage = response.data;
+            // Send message
+            const messageResponse = await apiClient.post<{ success: boolean; data: Message; message?: string }>("/messages", newMessage);
+            const savedMessage = unwrap<Message>(messageResponse);
 
+            // Update ticket
             const updatedTicket: StoredTicket = {
                 ...ticket,
                 adminResponse: adminReply.trim(),
@@ -119,9 +167,10 @@ export default function TicketDetails() {
             setTicket(updatedTicket);
             setAdminReply("");
             setSnackbar({ open: true, message: "پاسخ ارسال شد", severity: "success" });
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error sending message:", err);
-            setSnackbar({ open: true, message: "خطا در برقراری ارتباط", severity: "error" });
+            const message = err instanceof Error ? err.message : "خطا در برقراری ارتباط";
+            setSnackbar({ open: true, message, severity: "error" });
         } finally {
             setSubmitting(false);
         }
@@ -136,24 +185,21 @@ export default function TicketDetails() {
         </Container>
     );
 
-    const hasFile = ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file;
+    const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    const descriptionMessage = {
+    // First message is the ticket description
+    const descriptionMessage: Message & { hasFile?: boolean } = {
         id: 'description-msg',
+        ticketId: String(ticket.id), // ✅ Convert to string
+        senderId: ticket.userId,
+        senderType: 'user',
         text: ticket.description,
-        senderType: 'user' as const,
-        timestamp: ticket.time,
-        date: ticket.date,
-        hasFile: hasFile
+        timestamp: `${ticket.date} ${ticket.time}`,
+        isRead: true,
+        hasFile
     };
 
-    const allMessages = [
-        descriptionMessage,
-        ...messages.map(msg => ({
-            ...msg,
-            hasFile: false
-        }))
-    ];
+    const allMessages = [descriptionMessage, ...messages];
 
     return (
         <Container maxWidth={false} sx={{
@@ -233,15 +279,13 @@ export default function TicketDetails() {
                                 </Typography>
 
                                 {msg.senderType === 'user' && idx === 0 && hasFile && (
-                                    <Link
-                                        href={ticket.file && typeof ticket.file === 'object' && 'url' in ticket.file ? ticket.file.url : '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, color: '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem' }}
+                                    <Button
+                                        onClick={() => handleDownload(ticket.file)}
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, color: '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem', textTransform: 'none' }}
                                     >
                                         <AttachFileIcon fontSize="small" />
-                                        <Typography variant="caption">مشاهده فایل پیوست</Typography>
-                                    </Link>
+                                        <Typography variant="caption">دانلود فایل پیوست</Typography>
+                                    </Button>
                                 )}
 
                                 <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'left', opacity: 0.7, fontSize: isMobile ? '0.6rem' : '0.7rem' }}>

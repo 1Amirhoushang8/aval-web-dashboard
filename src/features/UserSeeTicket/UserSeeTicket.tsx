@@ -23,16 +23,19 @@ export default function UserSeeTickets() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-
     const [tickets, setTickets] = useState<StoredTicket[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userName, setUserName] = useState<string>("");
 
-    const [snackbar, setSnackbar] = useState({
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: "success" | "error" | "info" | "warning";
+    }>({
         open: false,
         message: "",
-        severity: "success" as "success" | "error"
+        severity: "success"
     });
 
     const fetchUserTickets = async () => {
@@ -47,30 +50,36 @@ export default function UserSeeTickets() {
             }
 
             const currentUser = JSON.parse(userStr);
-            setUserName(currentUser.FullName || currentUser.username || "کاربر");
+            // Handle both camelCase and PascalCase from stored user object
+            const displayName = currentUser.fullName || currentUser.FullName || currentUser.username || "کاربر";
+            setUserName(displayName);
 
-            const response = await ticketService.getAll();
-            const userTickets = response.data.filter(
-                (t: StoredTicket) => String(t.userId) === String(currentUser.id)
+            // ticketService.getAll() returns unwrapped StoredTicket[]
+            const allTickets = await ticketService.getAll();
+            const userTickets = allTickets.filter(
+                (t) => String(t.userId) === String(currentUser.id)
             );
 
             setTickets(userTickets.reverse());
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Server connection error:", err);
-            setError("خطا در اتصال به سرور.");
+            const message = err instanceof Error ? err.message : "خطا در اتصال به سرور.";
+            setError(message);
         } finally {
             setTimeout(() => setLoading(false), 800);
         }
     };
 
-    useEffect(() => { fetchUserTickets(); }, []);
+    useEffect(() => {
+        fetchUserTickets();
+    }, []);
 
     const handleNavigateToDetails = (id: string | number) => {
         navigate(`/user-ticket-detail/${id}`);
     };
 
     const getStatusBadge = (status: string) => {
-        const configs: Record<string, { label: string, className: string }> = {
+        const configs: Record<string, { label: string; className: string }> = {
             "answered": { label: "پاسخ داده شده", className: "answered" },
             "in-progress": { label: "در حال بررسی", className: "in-progress" },
             "pending": { label: "در انتظار", className: "pending" }
@@ -192,7 +201,7 @@ export default function UserSeeTickets() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
             >
                 <Alert severity={snackbar.severity} sx={{ fontFamily: 'Vazirmatn', width: '100%', borderRadius: 2 }}>

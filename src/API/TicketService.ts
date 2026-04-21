@@ -1,22 +1,39 @@
-import apiClient from "./apiClient.ts";
-import type { StoredTicket } from "../models/TicketInterfaces/TicketInterface.ts";
+import apiClient from "./apiClient";
+import type { StoredTicket } from "../models/TicketInterfaces/TicketInterface";
 
-type CreateTicketDto = Omit<StoredTicket, "id">;
+// Helper to unwrap ApiResponse<T>
+const unwrap = <T>(response: any): T => {
+    if (response.data.success) {
+        return response.data.data;
+    }
+    throw new Error(response.data.message || "خطا در عملیات");
+};
 
 export const ticketService = {
-    getAll: () =>
-        apiClient.get<StoredTicket[]>("/tickets"),
+    getAll: async (): Promise<StoredTicket[]> => {
+        const response = await apiClient.get("/tickets");
+        return unwrap<StoredTicket[]>(response);
+    },
 
+    getById: async (id: string | number): Promise<StoredTicket> => {
+        const response = await apiClient.get(`/tickets/${id}`);
+        return unwrap<StoredTicket>(response);
+    },
 
-    getById: (id: number | string) =>
-        apiClient.get<StoredTicket>(`/tickets/${id}`),
+    create: async (data: Omit<StoredTicket, "id">): Promise<StoredTicket> => {
+        const response = await apiClient.post("/tickets", data);
+        return unwrap<StoredTicket>(response);
+    },
 
-    create: (data: CreateTicketDto) =>
-        apiClient.post<StoredTicket>("/tickets", data),
+    update: async (id: string | number, data: Partial<StoredTicket>): Promise<StoredTicket> => {
+        const response = await apiClient.put(`/tickets/${id}`, data);
+        return unwrap<StoredTicket>(response);
+    },
 
-    update: (id: number | string, data: CreateTicketDto) =>
-        apiClient.put<StoredTicket>(`/tickets/${id}`, data),
-
-    delete: (id: number | string) =>
-        apiClient.delete<void>(`/tickets/${id}`),
+    delete: async (id: string | number): Promise<void> => {
+        const response = await apiClient.delete(`/tickets/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || "خطا در حذف");
+        }
+    },
 };

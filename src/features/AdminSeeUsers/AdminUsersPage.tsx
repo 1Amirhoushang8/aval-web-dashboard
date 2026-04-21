@@ -11,7 +11,7 @@ import AdminUsersSkeleton from "../../Skeleton/AdminUserPage/AdminUserPage.tsx";
 import { userService } from "../../API/UserService";
 import "./AdminUsersPage.scss";
 
-// ---------- Helper functions (same as Accounting) ----------
+// ---------- Helper functions ----------
 const convertPersianToEnglishDigits = (text: string): string => {
     if (!text) return '';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -43,7 +43,6 @@ interface User {
     username: string;
     fullName: string;
     phoneNumber?: string;
-    // Add other fields as needed
 }
 
 export default function AdminUsersPage() {
@@ -58,16 +57,15 @@ export default function AdminUsersPage() {
     const showError = (message: string) => setError(message);
     const handleCloseError = () => setError(null);
 
-    // Fetch users
+    // Fetch users – now using unwrapped service
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await userService.getAll();
-                const usersData = Array.isArray(response.data) ? response.data : [];
+                const usersData = await userService.getAll(); // returns User[] directly
                 setUsers(usersData);
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Failed to fetch users:", err);
-                showError("خطا در دریافت اطلاعات کاربران");
+                showError(err.message || "خطا در دریافت اطلاعات کاربران");
             } finally {
                 setLoading(false);
             }
@@ -99,11 +97,11 @@ export default function AdminUsersPage() {
     const handleConfirmDelete = async () => {
         if (!deleteUserId) return;
         try {
-            await userService.delete(deleteUserId);
+            await userService.delete(deleteUserId); // no return value on success
             setUsers(prev => prev.filter(user => user.id !== deleteUserId));
             handleCloseDeleteConfirm();
-        } catch (err) {
-            showError("خطا در حذف کاربر");
+        } catch (err: any) {
+            showError(err.message || "خطا در حذف کاربر");
             handleCloseDeleteConfirm();
         }
     };
@@ -113,7 +111,7 @@ export default function AdminUsersPage() {
     };
 
     if (loading) {
-        return <AdminUsersSkeleton />; // or <AccountingSkeleton />
+        return <AdminUsersSkeleton />;
     }
 
     return (

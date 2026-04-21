@@ -1,21 +1,41 @@
-import apiClient from "./apiClient.ts";
-import type { User } from "../models/AccountingInterfaces/AccountingInterface.ts";
+import apiClient from "./apiClient";
+import type { User } from "../models/AccountingInterfaces/AccountingInterface";
 
 type CreateUserDto = Omit<User, "id">;
 
+
+const unwrap = <T>(response: any): T => {
+    if (response.data.success) {
+        return response.data.data;
+    }
+    throw new Error(response.data.message || "خطا در عملیات");
+};
+
 export const userService = {
-    getAll: () =>
-        apiClient.get<User[]>("/users"),
+    getAll: async (): Promise<User[]> => {
+        const response = await apiClient.get("/users");
+        return unwrap<User[]>(response);
+    },
 
-    getById: (id: string | number) =>
-        apiClient.get<User>(`/users/${id}`),
+    getById: async (id: string | number): Promise<User> => {
+        const response = await apiClient.get(`/users/${id}`);
+        return unwrap<User>(response);
+    },
 
-    create: (data: CreateUserDto) =>
-        apiClient.post<User>("/users", data),
+    create: async (data: CreateUserDto): Promise<User> => {
+        const response = await apiClient.post("/users", data);
+        return unwrap<User>(response);
+    },
 
-    update: (id: string | number, data: CreateUserDto) =>
-        apiClient.put<User>(`/users/${id}`, data),
+    update: async (id: string | number, data: Partial<User>): Promise<User> => {
+        const response = await apiClient.put(`/users/${id}`, data);
+        return unwrap<User>(response);
+    },
 
-    delete: (id: string | number) =>
-        apiClient.delete<void>(`/users/${id}`),
+    delete: async (id: string | number): Promise<void> => {
+        const response = await apiClient.delete(`/users/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || "خطا در حذف");
+        }
+    },
 };

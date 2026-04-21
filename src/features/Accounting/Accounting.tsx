@@ -90,7 +90,7 @@ const formatNumberWithCommas = (value: string): string => {
 // ---------- Component ----------
 export default function AccountingPage() {
     const [loading, setLoading] = useState(true);
-    const [allUsers, setAllUsers] = useState<User[]>([]);        // ✅ full list for validation
+    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -100,12 +100,10 @@ export default function AccountingPage() {
     const showError = (message: string) => setError(message);
     const handleCloseError = () => setError(null);
 
-    // Fetch all users
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await userService.getAll();
-                const usersData = Array.isArray(response.data) ? response.data : [];
+                const usersData = await userService.getAll();
                 const normalized = usersData.map(user => ({
                     ...user,
                     price: user.price || "۰ تومان",
@@ -114,17 +112,16 @@ export default function AccountingPage() {
                     totalMonths: user.totalMonths || null,
                 }));
                 setAllUsers(normalized);
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Failed to fetch users:", error);
-                showError("خطا در دریافت اطلاعات کاربران");
+                showError(error.message || "خطا در دریافت اطلاعات کاربران");
             } finally {
                 setLoading(false);
             }
         };
-        fetchUsers().catch(err => console.error("Uncaught error in fetchUsers:", err));
+        fetchUsers();
     }, []);
 
-    // Display list (filtered)
     const filteredUsers = useMemo(() => {
         let list = allUsers.filter(user => {
             const service = user.service;
@@ -186,8 +183,7 @@ export default function AccountingPage() {
         setEditModal(true);
         setEditModalLoading(true);
         try {
-            const response = await userService.getById(user.id);
-            const fetchedUser = response.data;
+            const fetchedUser = await userService.getById(user.id);
             setEditTransaction({
                 serialnumber: fetchedUser.serialNumber || "",
                 fullname: fetchedUser.fullName || "",
@@ -199,8 +195,8 @@ export default function AccountingPage() {
                 monthlyPayment: fetchedUser.monthlyPayment ? extractPriceNumber(fetchedUser.monthlyPayment) : "",
                 totalMonths: fetchedUser.totalMonths?.toString() ?? "",
             });
-        } catch {
-            showError("مشکلی پیش آمد");
+        } catch (error: any) {
+            showError(error.message || "مشکلی پیش آمد");
             setEditTransaction({
                 serialnumber: user.serialNumber || "",
                 fullname: user.fullName || "",
@@ -237,8 +233,8 @@ export default function AccountingPage() {
             await userService.delete(user.id);
             setAllUsers(prev => prev.filter((_, i) => i !== deleteIndex));
             handleCloseDeleteConfirm();
-        } catch {
-            showError("خطا در حذف فاکتور");
+        } catch (error: any) {
+            showError(error.message || "خطا در حذف فاکتور");
             handleCloseDeleteConfirm();
         }
     };
@@ -283,12 +279,12 @@ export default function AccountingPage() {
                 const totalPriceNum = extractPriceNumber(paymentDetails.totalPrice);
                 updatedUserData = { ...user, price: formatPriceWithToman(totalPriceNum) };
             }
-            const response = await userService.update(user.id, updatedUserData as Omit<User, "id">);
-            setAllUsers(prev => prev.map((u, i) => i === activePaymentIndex ? response.data : u));
+            const updatedUser = await userService.update(user.id, updatedUserData as Omit<User, "id">);
+            setAllUsers(prev => prev.map((u, i) => i === activePaymentIndex ? updatedUser : u));
             handleCloseEditPaymentModal();
             handleClosePaymentModal();
-        } catch {
-            showError("خطا در به‌روزرسانی جزئیات پرداخت");
+        } catch (error: any) {
+            showError(error.message || "خطا در به‌روزرسانی جزئیات پرداخت");
         }
     };
 
@@ -354,11 +350,11 @@ export default function AccountingPage() {
                 totalMonths,
                 username: newTransaction.fullname,
             };
-            const response = await userService.create(newUser);
-            setAllUsers(prev => [...prev, response.data]);
+            const createdUser = await userService.create(newUser);
+            setAllUsers(prev => [...prev, createdUser]);
             handleCloseModal();
-        } catch {
-            showError("خطا در ایجاد فاکتور");
+        } catch (error: any) {
+            showError(error.message || "خطا در ایجاد فاکتور");
         }
     };
 
@@ -388,7 +384,7 @@ export default function AccountingPage() {
                 monthlyPayment = calculateMonthlyPaymentPersian(priceNum, monthsStr);
                 totalMonths = monthsNum;
             }
-            const updatedUser: Omit<User, "id"> = {
+            const updatedUserData: Omit<User, "id"> = {
                 username: userToUpdate.username || "",
                 fullName: editTransaction.fullname,
                 serialNumber: toPersianNumber(editTransaction.serialnumber),
@@ -400,11 +396,11 @@ export default function AccountingPage() {
                 monthlyPayment,
                 totalMonths,
             };
-            const response = await userService.update(userToUpdate.id, updatedUser);
-            setAllUsers(prev => prev.map((u, i) => i === editingIndex ? response.data : u));
+            const updatedUser = await userService.update(userToUpdate.id, updatedUserData);
+            setAllUsers(prev => prev.map((u, i) => i === editingIndex ? updatedUser : u));
             handleCloseEditModal();
-        } catch {
-            showError("خطا در ویرایش فاکتور");
+        } catch (error: any) {
+            showError(error.message || "خطا در ویرایش فاکتور");
         }
     };
 
@@ -484,11 +480,11 @@ export default function AccountingPage() {
         if (activeIndex === null) return;
         const user = allUsers[activeIndex];
         try {
-            const updatedUser = { ...user, status };
-            const response = await userService.update(user.id, updatedUser);
-            setAllUsers(prev => prev.map((u, i) => i === activeIndex ? response.data : u));
-        } catch {
-            showError("خطا در تغییر وضعیت");
+            const updatedUserData = { ...user, status };
+            const result = await userService.update(user.id, updatedUserData);
+            setAllUsers(prev => prev.map((u, i) => i === activeIndex ? result : u));
+        } catch (error: any) {
+            showError(error.message || "خطا در تغییر وضعیت");
         } finally {
             handleCloseMenu();
         }

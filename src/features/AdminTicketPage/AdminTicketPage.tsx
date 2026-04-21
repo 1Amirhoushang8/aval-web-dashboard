@@ -16,7 +16,6 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { ticketService } from "../../API/TicketService";
 import { userService } from "../../API/UserService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
-import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.tsx";
 
 interface Ticket extends StoredTicket {
@@ -52,22 +51,20 @@ export default function AdminTicketPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [ticketsRes, usersRes] = await Promise.all([
+            const [ticketsData, usersData] = await Promise.all([
                 ticketService.getAll(),
                 userService.getAll()
             ]);
 
-            const fetchedUsers: User[] = usersRes.data;
             const userMap = new Map<string, { username: string, phone: string }>();
-
-            fetchedUsers.forEach((u) => {
+            usersData.forEach((u) => {
                 userMap.set(String(u.id), {
                     username: u.fullName || u.username || "نامشخص",
                     phone: u.phoneNumber || "—"
                 });
             });
 
-            const ticketsData: Ticket[] = ticketsRes.data.map((t: StoredTicket): Ticket => {
+            const enrichedTickets: Ticket[] = ticketsData.map((t: StoredTicket): Ticket => {
                 const userData = userMap.get(String(t.userId));
                 let localStatus: "pending" | "answered" | "in-progress" = "pending";
 
@@ -82,10 +79,11 @@ export default function AdminTicketPage() {
                 };
             });
 
-            setTickets(ticketsData.reverse());
-        } catch (error) {
+            setTickets(enrichedTickets.reverse());
+        } catch (error: unknown) {
             console.error("Fetch error:", error);
-            setSnackbar({ open: true, message: "خطا در دریافت اطلاعات", severity: "error" });
+            const message = error instanceof Error ? error.message : "خطا در دریافت اطلاعات";
+            setSnackbar({ open: true, message, severity: "error" });
         } finally {
             setLoading(false);
         }
@@ -96,21 +94,17 @@ export default function AdminTicketPage() {
     }, []);
 
     const handleDownload = (file: StoredTicket['file'] | boolean): void => {
-        // If no file or just a boolean flag
         if (!file || typeof file === "boolean") {
             setSnackbar({ open: true, message: "فایلی برای دانلود وجود ندارد", severity: "info" });
             return;
         }
 
-        // File is an object with name, type, size, data (Base64)
         const fileObj = file as { name: string; type: string; size: number; data: string };
-
         if (!fileObj.data) {
             setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
             return;
         }
 
-        // Create a download link using the Base64 data
         const link = document.createElement('a');
         link.href = fileObj.data;
         link.download = fileObj.name || 'download';
@@ -131,9 +125,10 @@ export default function AdminTicketPage() {
             await ticketService.delete(deleteId);
             setTickets(prev => prev.filter(t => t.id !== deleteId));
             setSnackbar({ open: true, message: "تیکت حذف شد", severity: "success" });
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Delete error:", error);
-            setSnackbar({ open: true, message: "خطا در حذف تیکت", severity: "error" });
+            const message = error instanceof Error ? error.message : "خطا در حذف تیکت";
+            setSnackbar({ open: true, message, severity: "error" });
         } finally {
             setDeleteConfirmOpen(false);
             setDeleteId(null);
@@ -145,7 +140,6 @@ export default function AdminTicketPage() {
         const ticket = tickets[activeIndex];
         try {
             const { ...apiData } = ticket;
-
             const updatedPayload: StoredTicket = {
                 ...apiData,
                 adminResponse: newStatus === "answered" ? (ticket.adminResponse || "تایید شد") : (newStatus === "pending" ? null : ticket.adminResponse),
@@ -161,9 +155,10 @@ export default function AdminTicketPage() {
                 status: newStatus
             } : t));
             setSnackbar({ open: true, message: "وضعیت بروز شد", severity: "success" });
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Status update failed:", error);
-            setSnackbar({ open: true, message: "خطا در تغییر وضعیت", severity: "error" });
+            const message = error instanceof Error ? error.message : "خطا در تغییر وضعیت";
+            setSnackbar({ open: true, message, severity: "error" });
         } finally {
             setAnchorEl(null);
             setActiveIndex(null);
