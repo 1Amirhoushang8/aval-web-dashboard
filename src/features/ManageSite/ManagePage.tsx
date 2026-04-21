@@ -52,6 +52,19 @@ export default function ManageSitePage() {
         }).format(new Date());
     };
 
+
+    const unwrapResponse = <T,>(responseData: any): T => {
+        if (responseData.success !== undefined) {
+
+            if (!responseData.success) {
+                throw new Error(responseData.message || "خطا در دریافت اطلاعات");
+            }
+            return responseData.data;
+        }
+
+        return responseData;
+    };
+
     const {
         data: tickets = [],
         isLoading: ticketsLoading,
@@ -61,11 +74,7 @@ export default function ManageSitePage() {
         queryKey: ["tickets"],
         queryFn: async () => {
             const response = await apiClient.get("/tickets");
-            // Backend returns ApiResponse<T>: { success, message, data }
-            if (response.data.success) {
-                return response.data.data;
-            }
-            throw new Error(response.data.message || "خطا در دریافت تیکت‌ها");
+            return unwrapResponse<StoredTicket[]>(response.data);
         }
     });
 
@@ -78,10 +87,7 @@ export default function ManageSitePage() {
         queryKey: ["users"],
         queryFn: async () => {
             const response = await apiClient.get("/users");
-            if (response.data.success) {
-                return response.data.data;
-            }
-            throw new Error(response.data.message || "خطا در دریافت کاربران");
+            return unwrapResponse<User[]>(response.data);
         }
     });
 

@@ -27,12 +27,22 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton";
 import type { Message } from "../../models/Massage/TicketMassage";
 
-// Helper to unwrap ApiResponse from direct apiClient calls
-const unwrap = <T,>(response: { data: { success: boolean; data?: T; message?: string } }): T => {
-    if (response.data.success && response.data.data !== undefined) {
-        return response.data.data;
+const unwrapResponse = <T,>(responseData: unknown): T => {
+    if (
+        responseData &&
+        typeof responseData === 'object' &&
+        'success' in responseData
+    ) {
+        const wrapped = responseData as { success: boolean; message?: string; data?: T };
+        if (!wrapped.success) {
+            throw new Error(wrapped.message || "خطا در دریافت اطلاعات");
+        }
+        if (wrapped.data === undefined) {
+            throw new Error("پاسخ سرور نامعتبر است");
+        }
+        return wrapped.data;
     }
-    throw new Error(response.data.message || "خطا در دریافت اطلاعات");
+    return responseData as T;
 };
 
 const toPersianNumber = (num: number | string): string => {
@@ -70,32 +80,25 @@ export default function TicketDetails() {
         if (!id) return;
         try {
             setLoading(true);
-            // ticketService.getById returns unwrapped StoredTicket
             const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
-            // Fetch messages and user in parallel
-            const [messagesResponse, userResponse] = await Promise.all([
-                apiClient.get<{ success: boolean; data: Message[]; message?: string }>(`/messages?ticketId=${id}`),
-                apiClient.get<{ success: boolean; data: { fullName?: string; username?: string }; message?: string }>(`/users/${ticketData.userId}`)
-            ]);
-
-            // Unwrap messages
-            const messagesData = unwrap<Message[]>(messagesResponse);
+            const messagesResponse = await apiClient.get(`/messages?ticketId=${id}`);
+            const messagesData = unwrapResponse<Message[]>(messagesResponse.data);
             const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
             setMessages(sortedMessages);
 
-            // Unwrap user
-            const userData = unwrap<{ fullName?: string; username?: string }>(userResponse);
-            setUserName(userData.fullName || userData.username || `کاربر ${ticketData.userId}`);
-        } catch (err: unknown) {
+            try {
+                const userResponse = await apiClient.get(`/users/${ticketData.userId}`);
+                const userData = unwrapResponse<{ fullName?: string; username?: string }>(userResponse.data);
+                setUserName(userData.fullName || userData.username || `کاربر ${ticketData.userId}`);
+            } catch {
+                setUserName(`کاربر ${ticketData.userId}`);
+            }
+        } catch (err) {
             console.error("Fetch Error:", err);
             const message = err instanceof Error ? err.message : "خطا در دریافت اطلاعات";
             setSnackbar({ open: true, message, severity: "error" });
-            // Set fallback username
-            if (ticket) {
-                setUserName(`کاربر ${ticket.userId}`);
-            }
         } finally {
             setLoading(false);
         }
@@ -151,11 +154,9 @@ export default function TicketDetails() {
                 isRead: false
             };
 
-            // Send message
-            const messageResponse = await apiClient.post<{ success: boolean; data: Message; message?: string }>("/messages", newMessage);
-            const savedMessage = unwrap<Message>(messageResponse);
+            const messageResponse = await apiClient.post("/messages", newMessage);
+            const savedMessage = unwrapResponse<Message>(messageResponse.data);
 
-            // Update ticket
             const updatedTicket: StoredTicket = {
                 ...ticket,
                 adminResponse: adminReply.trim(),
@@ -167,7 +168,7 @@ export default function TicketDetails() {
             setTicket(updatedTicket);
             setAdminReply("");
             setSnackbar({ open: true, message: "پاسخ ارسال شد", severity: "success" });
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Error sending message:", err);
             const message = err instanceof Error ? err.message : "خطا در برقراری ارتباط";
             setSnackbar({ open: true, message, severity: "error" });
@@ -187,10 +188,9 @@ export default function TicketDetails() {
 
     const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    // First message is the ticket description
     const descriptionMessage: Message & { hasFile?: boolean } = {
         id: 'description-msg',
-        ticketId: String(ticket.id), // ✅ Convert to string
+        ticketId: String(ticket.id),
         senderId: ticket.userId,
         senderType: 'user',
         text: ticket.description,
@@ -341,7 +341,7 @@ export default function TicketDetails() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
                 <Alert severity={snackbar.severity} variant="filled" sx={{ fontFamily: 'Vazirmatn', borderRadius: 3 }}>

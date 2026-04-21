@@ -31,15 +31,24 @@ const LoginPage: React.FC = () => {
                 password,
             });
 
-            // Backend returns ApiResponse<T>: { success, message, data }
-            const { success, message, data } = response.data;
+            const responseData = response.data;
 
-            if (!success) {
-                setError(message || "خطا در ورود");
-                return;
+            let user, token;
+
+            // 检测响应格式：包装格式 (ApiResponse) 或 未包装格式
+            if (responseData.success !== undefined) {
+                // 包装格式：{ success, message, data }
+                if (!responseData.success) {
+                    setError(responseData.message || "خطا در ورود");
+                    return;
+                }
+                user = responseData.data.user;
+                token = responseData.data.token;
+            } else {
+                // 未包装格式：{ user, token }
+                user = responseData.user;
+                token = responseData.token;
             }
-
-            const { user, token } = data;
 
             localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("token", token);

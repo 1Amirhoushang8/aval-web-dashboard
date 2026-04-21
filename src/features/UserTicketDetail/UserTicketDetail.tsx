@@ -27,12 +27,22 @@ import apiClient from "../../API/apiClient";
 import UserTicketDetailSkeleton from "../../Skeleton/UserTicketDetailSkeleton/UserTicketDetailSkeleton.tsx";
 import type { Message } from "../../models/Massage/TicketMassage.ts";
 
-// Helper to unwrap ApiResponse from direct apiClient calls
-const unwrap = <T,>(response: { data: { success: boolean; data?: T; message?: string } }): T => {
-    if (response.data.success && response.data.data !== undefined) {
-        return response.data.data;
+const unwrapResponse = <T,>(responseData: unknown): T => {
+    if (
+        responseData &&
+        typeof responseData === 'object' &&
+        'success' in responseData
+    ) {
+        const wrapped = responseData as { success: boolean; message?: string; data?: T };
+        if (!wrapped.success) {
+            throw new Error(wrapped.message || "خطا در دریافت اطلاعات");
+        }
+        if (wrapped.data === undefined) {
+            throw new Error("پاسخ سرور نامعتبر است");
+        }
+        return wrapped.data;
     }
-    throw new Error(response.data.message || "خطا در دریافت اطلاعات");
+    return responseData as T;
 };
 
 const toPersianNumber = (num: number | string): string => {
@@ -68,17 +78,15 @@ export default function UserTicketDetail() {
         if (!id) return;
         try {
             setLoading(true);
-            // ticketService.getById now returns unwrapped StoredTicket
             const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
-            // Fetch messages
-            const messagesResponse = await apiClient.get<{ success: boolean; data: Message[]; message?: string }>(`/messages?ticketId=${id}`);
-            const messagesData = unwrap<Message[]>(messagesResponse);
+            const response = await apiClient.get(`/messages?ticketId=${id}`);
+            const messagesData = unwrapResponse<Message[]>(response.data);
             const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
             setMessages(sortedMessages);
             setError(false);
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Error fetching ticket details:", err);
             setError(true);
         } finally {
@@ -136,8 +144,8 @@ export default function UserTicketDetail() {
                 isRead: false
             };
 
-            const messageResponse = await apiClient.post<{ success: boolean; data: Message; message?: string }>("/messages", newMessage);
-            const savedMessage = unwrap<Message>(messageResponse);
+            const response = await apiClient.post("/messages", newMessage);
+            const savedMessage = unwrapResponse<Message>(response.data);
 
             const updatedTicket: StoredTicket = {
                 ...ticket,
@@ -149,7 +157,7 @@ export default function UserTicketDetail() {
             setTicket(updatedTicket);
             setUserReply("");
             setSnackbar({ open: true, message: "پیام شما با موفقیت ارسال شد", severity: "success" });
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Failed to send message:", err);
             const message = err instanceof Error ? err.message : "خطا در ارسال پیام";
             setSnackbar({ open: true, message, severity: "error" });
@@ -172,7 +180,6 @@ export default function UserTicketDetail() {
 
     const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    // First message is the ticket description
     const descriptionMessage: Message & { hasFile?: boolean } = {
         id: 'description-msg',
         ticketId: String(ticket.id),

@@ -11,7 +11,6 @@ import AdminUsersSkeleton from "../../Skeleton/AdminUserPage/AdminUserPage.tsx";
 import { userService } from "../../API/UserService";
 import "./AdminUsersPage.scss";
 
-// ---------- Helper functions ----------
 const convertPersianToEnglishDigits = (text: string): string => {
     if (!text) return '';
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -57,15 +56,15 @@ export default function AdminUsersPage() {
     const showError = (message: string) => setError(message);
     const handleCloseError = () => setError(null);
 
-    // Fetch users – now using unwrapped service
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const usersData = await userService.getAll(); // returns User[] directly
+                const usersData = await userService.getAll();
                 setUsers(usersData);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Failed to fetch users:", err);
-                showError(err.message || "خطا در دریافت اطلاعات کاربران");
+                const message = err instanceof Error ? err.message : "خطا در دریافت اطلاعات کاربران";
+                showError(message);
             } finally {
                 setLoading(false);
             }
@@ -73,7 +72,6 @@ export default function AdminUsersPage() {
         fetchUsers();
     }, []);
 
-    // Filter users by name
     const filteredUsers = useMemo(() => {
         if (!searchTerm.trim()) return users;
         const term = normalizePersianText(searchTerm);
@@ -97,11 +95,12 @@ export default function AdminUsersPage() {
     const handleConfirmDelete = async () => {
         if (!deleteUserId) return;
         try {
-            await userService.delete(deleteUserId); // no return value on success
+            await userService.delete(deleteUserId);
             setUsers(prev => prev.filter(user => user.id !== deleteUserId));
             handleCloseDeleteConfirm();
-        } catch (err: any) {
-            showError(err.message || "خطا در حذف کاربر");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در حذف کاربر";
+            showError(message);
             handleCloseDeleteConfirm();
         }
     };
@@ -116,7 +115,6 @@ export default function AdminUsersPage() {
 
     return (
         <div className="admin-users-page" dir="rtl">
-
             <div className="page-header">
                 <Tooltip title="بازگشت" arrow>
                     <IconButton onClick={handleBack} className="back-button" sx={{ color: 'var(--color-primary)' }}>
@@ -143,7 +141,6 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            {/* Users Table */}
             <TableContainer component={Paper} className="users-table-card">
                 <Table>
                     <TableHead>
@@ -195,7 +192,6 @@ export default function AdminUsersPage() {
                 </Table>
             </TableContainer>
 
-            {/* Delete Confirmation Dialog */}
             <Dialog
                 open={deleteConfirmOpen}
                 onClose={handleCloseDeleteConfirm}
@@ -213,7 +209,7 @@ export default function AdminUsersPage() {
                         آیا از حذف این کاربر اطمینان دارید؟
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        این عمل قابل بازگشت نیست.
+                        این عمل قابل بازگشت نیست و تمام تیکت‌ها و پیام‌های مرتبط نیز حذف خواهند شد.
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
@@ -226,7 +222,6 @@ export default function AdminUsersPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Error Snackbar */}
             <Snackbar
                 open={!!error}
                 autoHideDuration={6000}

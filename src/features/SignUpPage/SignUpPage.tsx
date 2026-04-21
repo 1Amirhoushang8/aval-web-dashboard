@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./SignUpPage.scss";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import apiClient from "../../API/apiClient.ts";
 import LoginImageSection from "../../components/LoginPageImageSetion/LoginPageImage.tsx";
-import type { User } from "../../models/AccountingInterfaces/AccountingInterface";
 import SignUpPageSkeleton from "../../Skeleton/SignUpPageSkeleton/SignUpPageSkeleton";
 import { motion } from "framer-motion";
 
@@ -47,11 +47,7 @@ const SignUpPage: React.FC = () => {
 
         const englishNoSpaceRegex = /^[A-Za-z0-9_]+$/;
         if (!englishNoSpaceRegex.test(formData.username)) {
-            if (formData.username.includes(" ")) {
-                setError("استفاده از فاصله (Space) در نام کاربری مجاز نیست");
-            } else {
-                setError("نام کاربری باید فقط شامل حروف انگلیسی و اعداد باشد");
-            }
+            setError("نام کاربری باید فقط شامل حروف انگلیسی، اعداد و زیرخط باشد");
             return;
         }
 
@@ -63,50 +59,53 @@ const SignUpPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const existingUsersRes = await apiClient.get<User[]>("/users");
-            const users = existingUsersRes.data;
-
-            const isUsernameDuplicate = users.some(
-                (u) => u.username.toLowerCase() === formData.username.toLowerCase()
-            );
-            if (isUsernameDuplicate) {
-                setError("این نام کاربری قبلاً انتخاب شده است");
-                setLoading(false);
-                return;
-            }
-
-            const isPasswordDuplicate = users.some((u) => u.password === formData.password);
-            if (isPasswordDuplicate) {
-                setError("این رمز عبور قبلاً استفاده شده است؛ لطفا رمز دیگری انتخاب کنید");
-                setLoading(false);
-                return;
-            }
-
-            const newUser: Omit<User, "id"> = {
-                FullName: formData.fullName,
-                username: formData.username,
+            const response = await apiClient.post("/auth/signup", {
+                fullName: formData.fullName.trim(),
+                username: formData.username.trim(),
                 password: formData.password,
-                phoneNumber: formData.phoneNumber,
-                roleKey: "USER",
-                SerialNumber: Math.floor(10000000 + Math.random() * 90000000).toString(),
-                service: "انتخاب نشده",
-                price: "۰ تومان",
-                status: "درحال-انجام",
-                paymentType: "پرداخت-تکی",
-                monthlyPayment: null,
-                totalMonths: null
-            };
+                phoneNumber: formData.phoneNumber.trim()
+            });
 
-            await apiClient.post("/users", newUser);
+            const responseData = response.data;
+            let success = true;
+            let message = "ثبت نام با موفقیت انجام شد";
+
+            // Handle both wrapped and unwrapped responses
+            if (responseData && typeof responseData === 'object') {
+                if ('success' in responseData) {
+                    success = Boolean(responseData.success);
+                    message = typeof responseData.message === 'string' ? responseData.message : message;
+                }
+            }
+
+            if (!success) {
+                setError(message);
+                setLoading(false);
+                return;
+            }
 
             setError("ثبت نام با موفقیت انجام شد! در حال انتقال...");
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("SignUp Error:", err);
-            setError("خطا در برقراری ارتباط با سرور");
+            let errorMessage = "خطا در برقراری ارتباط با سرور";
+            if (axios.isAxiosError(err)) {
+                const responseData = err.response?.data;
+                if (responseData && typeof responseData === 'object') {
+                    if ('message' in responseData && typeof responseData.message === 'string') {
+                        errorMessage = responseData.message;
+                    } else if ('success' in responseData && responseData.success === false) {
+                        errorMessage = 'message' in responseData && typeof responseData.message === 'string'
+                            ? responseData.message
+                            : "خطا در ثبت نام";
+                    }
+                }
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
