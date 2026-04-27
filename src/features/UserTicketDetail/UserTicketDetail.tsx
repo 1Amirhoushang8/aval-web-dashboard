@@ -25,25 +25,16 @@ import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
 import apiClient from "../../API/apiClient";
 import UserTicketDetailSkeleton from "../../Skeleton/UserTicketDetailSkeleton/UserTicketDetailSkeleton.tsx";
-import type { Message } from "../../models/Massage/TicketMassage.ts";
 
-const unwrapResponse = <T,>(responseData: unknown): T => {
-    if (
-        responseData &&
-        typeof responseData === 'object' &&
-        'success' in responseData
-    ) {
-        const wrapped = responseData as { success: boolean; message?: string; data?: T };
-        if (!wrapped.success) {
-            throw new Error(wrapped.message || "خطا در دریافت اطلاعات");
-        }
-        if (wrapped.data === undefined) {
-            throw new Error("پاسخ سرور نامعتبر است");
-        }
-        return wrapped.data;
-    }
-    return responseData as T;
-};
+// Matches backend MessageDto exactly
+interface Message {
+    id: string;
+    ticketId: string;
+    senderId: string;
+    messageText: string;
+    timestamp: string;
+    isRead: boolean;
+}
 
 const toPersianNumber = (num: number | string): string => {
     if (!num) return '۰';
@@ -82,9 +73,12 @@ export default function UserTicketDetail() {
             setTicket(ticketData);
 
             const response = await apiClient.get(`/messages?ticketId=${id}`);
-            const messagesData = unwrapResponse<Message[]>(response.data);
-            const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-            setMessages(sortedMessages);
+            // Backend returns the list directly (no wrapper)
+            const messagesData: Message[] = response.data;
+            const sorted = [...messagesData].sort((a, b) =>
+                a.timestamp.localeCompare(b.timestamp)
+            );
+            setMessages(sorted);
             setError(false);
         } catch (err) {
             console.error("Error fetching ticket details:", err);
@@ -132,20 +126,15 @@ export default function UserTicketDetail() {
 
         setSubmitting(true);
         try {
-            const now = new Date();
-            const timestamp = now.toLocaleDateString('fa-IR') + " " + now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-
-            const newMessage: Omit<Message, "id"> = {
+            // Send with backend‑expected field name "messageText"
+            const newMessagePayload = {
                 ticketId: id,
                 senderId: ticket.userId,
-                senderType: "user",
-                text: userReply.trim(),
-                timestamp,
-                isRead: false
+                messageText: userReply.trim()
             };
 
-            const response = await apiClient.post("/messages", newMessage);
-            const savedMessage = unwrapResponse<Message>(response.data);
+            const response = await apiClient.post("/messages", newMessagePayload);
+            const savedMessage: Message = response.data; // MessageDto from backend
 
             const updatedTicket: StoredTicket = {
                 ...ticket,
@@ -153,7 +142,9 @@ export default function UserTicketDetail() {
             };
             await ticketService.update(id, updatedTicket);
 
-            setMessages(prev => [...prev, savedMessage].sort((a, b) => a.timestamp.localeCompare(b.timestamp)));
+            setMessages(prev => [...prev, savedMessage].sort((a, b) =>
+                a.timestamp.localeCompare(b.timestamp)
+            ));
             setTicket(updatedTicket);
             setUserReply("");
             setSnackbar({ open: true, message: "پیام شما با موفقیت ارسال شد", severity: "success" });
@@ -180,18 +171,20 @@ export default function UserTicketDetail() {
 
     const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    const descriptionMessage: Message & { hasFile?: boolean } = {
+    // Virtual first message: ticket description
+    const descriptionMessage: Message = {
         id: 'description-msg',
         ticketId: String(ticket.id),
         senderId: ticket.userId,
-        senderType: 'user',
-        text: ticket.description,
+        messageText: ticket.description,
         timestamp: `${ticket.date} ${ticket.time}`,
-        isRead: true,
-        hasFile
+        isRead: true
     };
 
     const allMessages = [descriptionMessage, ...messages];
+
+    // Helper to decide if a message is from the ticket owner (user)
+    const isUserMessage = (msg: Message) => msg.senderId === ticket.userId;
 
     return (
         <Container
@@ -252,63 +245,66 @@ export default function UserTicketDetail() {
                     gap: isMobile ? 2 : 3
                 }}
             >
-                {allMessages.map((msg, idx) => (
-                    <Fade in key={msg.id} timeout={500}>
-                        <Box sx={{
-                            alignSelf: msg.senderType === 'user' ? 'flex-start' : 'flex-end',
-                            maxWidth: isMobile ? '95%' : '85%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: msg.senderType === 'user' ? 'flex-start' : 'flex-end'
-                        }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                {msg.senderType === 'user' ? <PersonIcon fontSize="small" sx={{ color: '#555' }} /> : <AdminPanelSettingsIcon fontSize="small" sx={{ color: '#666AF2' }} />}
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: msg.senderType === 'user' ? '#555' : '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
-                                    {msg.senderType === 'user' ? 'شما' : 'پشتیبانی'}
+                {allMessages.map((msg, idx) => {
+                    const userMsg = isUserMessage(msg);
+                    return (
+                        <Fade in key={msg.id} timeout={500}>
+                            <Box sx={{
+                                alignSelf: userMsg ? 'flex-start' : 'flex-end',
+                                maxWidth: isMobile ? '95%' : '85%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: userMsg ? 'flex-start' : 'flex-end'
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                    {userMsg ? <PersonIcon fontSize="small" sx={{ color: '#555' }} /> : <AdminPanelSettingsIcon fontSize="small" sx={{ color: '#666AF2' }} />}
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: userMsg ? '#555' : '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
+                                        {userMsg ? 'شما' : 'پشتیبانی'}
+                                    </Typography>
+                                </Box>
+
+                                <Paper sx={{
+                                    p: isMobile ? 1.5 : 2,
+                                    borderRadius: userMsg ? '0 20px 20px 20px' : '20px 0 20px 20px',
+                                    bgcolor: userMsg ? '#fff' : '#f0f1ff',
+                                    border: userMsg ? '1px solid #e0e0e0' : '1px solid #d1d4f9',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                                    width: '100%'
+                                }}>
+                                    <Typography sx={{
+                                        fontFamily: 'Vazirmatn',
+                                        fontSize: isMobile ? '0.85rem' : '0.95rem',
+                                        lineHeight: 1.6,
+                                        color: '#333',
+                                        wordBreak: 'break-word'
+                                    }}>
+                                        {msg.messageText}
+                                    </Typography>
+                                    {userMsg && idx === 0 && hasFile && (
+                                        <Button
+                                            onClick={() => handleDownload(ticket.file)}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 0.5,
+                                                mt: 1,
+                                                color: '#666AF2',
+                                                fontSize: isMobile ? '0.7rem' : '0.75rem',
+                                                textTransform: 'none'
+                                            }}
+                                        >
+                                            <AttachFileIcon fontSize="small" />
+                                            <Typography variant="caption">دانلود فایل پیوست</Typography>
+                                        </Button>
+                                    )}
+                                </Paper>
+                                <Typography variant="caption" sx={{ mt: 0.5, color: '#aaa', fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
+                                    {toPersianNumber(msg.timestamp)}
                                 </Typography>
                             </Box>
-
-                            <Paper sx={{
-                                p: isMobile ? 1.5 : 2,
-                                borderRadius: msg.senderType === 'user' ? '0 20px 20px 20px' : '20px 0 20px 20px',
-                                bgcolor: msg.senderType === 'user' ? '#fff' : '#f0f1ff',
-                                border: msg.senderType === 'user' ? '1px solid #e0e0e0' : '1px solid #d1d4f9',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                                width: '100%'
-                            }}>
-                                <Typography sx={{
-                                    fontFamily: 'Vazirmatn',
-                                    fontSize: isMobile ? '0.85rem' : '0.95rem',
-                                    lineHeight: 1.6,
-                                    color: '#333',
-                                    wordBreak: 'break-word'
-                                }}>
-                                    {msg.text}
-                                </Typography>
-                                {msg.senderType === 'user' && idx === 0 && hasFile && (
-                                    <Button
-                                        onClick={() => handleDownload(ticket.file)}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 0.5,
-                                            mt: 1,
-                                            color: '#666AF2',
-                                            fontSize: isMobile ? '0.7rem' : '0.75rem',
-                                            textTransform: 'none'
-                                        }}
-                                    >
-                                        <AttachFileIcon fontSize="small" />
-                                        <Typography variant="caption">دانلود فایل پیوست</Typography>
-                                    </Button>
-                                )}
-                            </Paper>
-                            <Typography variant="caption" sx={{ mt: 0.5, color: '#aaa', fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
-                                {toPersianNumber(msg.timestamp)}
-                            </Typography>
-                        </Box>
-                    </Fade>
-                ))}
+                        </Fade>
+                    );
+                })}
                 <div ref={scrollRef} />
             </Paper>
 

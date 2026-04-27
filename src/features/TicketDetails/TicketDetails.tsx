@@ -25,25 +25,16 @@ import apiClient from "../../API/apiClient";
 import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
 import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton";
-import type { Message } from "../../models/Massage/TicketMassage";
 
-const unwrapResponse = <T,>(responseData: unknown): T => {
-    if (
-        responseData &&
-        typeof responseData === 'object' &&
-        'success' in responseData
-    ) {
-        const wrapped = responseData as { success: boolean; message?: string; data?: T };
-        if (!wrapped.success) {
-            throw new Error(wrapped.message || "خطا در دریافت اطلاعات");
-        }
-        if (wrapped.data === undefined) {
-            throw new Error("پاسخ سرور نامعتبر است");
-        }
-        return wrapped.data;
-    }
-    return responseData as T;
-};
+// Backend DTO – no senderType
+interface Message {
+    id: string;
+    ticketId: string;
+    senderId: string;
+    messageText: string;
+    timestamp: string;
+    isRead: boolean;
+}
 
 const toPersianNumber = (num: number | string): string => {
     if (!num) return '۰';
@@ -80,17 +71,23 @@ export default function TicketDetails() {
         if (!id) return;
         try {
             setLoading(true);
+
+            // 1. Fetch ticket
             const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
+            // 2. Fetch messages (endpoint returns array directly)
             const messagesResponse = await apiClient.get(`/messages?ticketId=${id}`);
-            const messagesData = unwrapResponse<Message[]>(messagesResponse.data);
-            const sortedMessages = [...messagesData].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+            const messagesData: Message[] = messagesResponse.data;
+            const sortedMessages = [...(messagesData || [])].sort(
+                (a, b) => a.timestamp.localeCompare(b.timestamp)
+            );
             setMessages(sortedMessages);
 
+            // 3. Fetch user info
             try {
                 const userResponse = await apiClient.get(`/users/${ticketData.userId}`);
-                const userData = unwrapResponse<{ fullName?: string; username?: string }>(userResponse.data);
+                const userData = userResponse.data;
                 setUserName(userData.fullName || userData.username || `کاربر ${ticketData.userId}`);
             } catch {
                 setUserName(`کاربر ${ticketData.userId}`);
@@ -122,7 +119,18 @@ export default function TicketDetails() {
             return;
         }
 
-        const fileObj = file as { name: string; type: string; size: number; data: string };
+        let fileObj: { name: string; type: string; size: number; data: string };
+        try {
+            if (typeof file === "object") {
+                fileObj = file as { name: string; type: string; size: number; data: string };
+            } else {
+                fileObj = JSON.parse(file as string);
+            }
+        } catch {
+            setSnackbar({ open: true, message: "داده فایل معتبر نیست", severity: "error" });
+            return;
+        }
+
         if (!fileObj.data) {
             setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
             return;
@@ -142,21 +150,16 @@ export default function TicketDetails() {
 
         setSubmitting(true);
         try {
-            const now = new Date();
-            const timestamp = now.toLocaleDateString('fa-IR') + " " + now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-
-            const newMessage: Omit<Message, "id"> = {
+            const newMessagePayload = {
                 ticketId: id,
                 senderId: adminId,
-                senderType: "admin",
-                text: adminReply.trim(),
-                timestamp,
-                isRead: false
+                messageText: adminReply.trim(),
             };
 
-            const messageResponse = await apiClient.post("/messages", newMessage);
-            const savedMessage = unwrapResponse<Message>(messageResponse.data);
+            const messageResponse = await apiClient.post("/messages", newMessagePayload);
+            const savedMessage: Message = messageResponse.data; // MessageDto
 
+            // Update ticket status to answered
             const updatedTicket: StoredTicket = {
                 ...ticket,
                 adminResponse: adminReply.trim(),
@@ -186,20 +189,22 @@ export default function TicketDetails() {
         </Container>
     );
 
-    const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
+    const hasFile = ticket.file && (typeof ticket.file === 'string' || typeof ticket.file === 'object');
 
-    const descriptionMessage: Message & { hasFile?: boolean } = {
+    // Virtual first message – ticket description (no senderType)
+    const descriptionMessage: Message = {
         id: 'description-msg',
         ticketId: String(ticket.id),
         senderId: ticket.userId,
-        senderType: 'user',
-        text: ticket.description,
+        messageText: ticket.description,
         timestamp: `${ticket.date} ${ticket.time}`,
-        isRead: true,
-        hasFile
+        isRead: true
     };
 
     const allMessages = [descriptionMessage, ...messages];
+
+    // Helper: determine if a message is from the ticket owner
+    const isUserMessage = (msg: Message) => msg.senderId === ticket.userId;
 
     return (
         <Container maxWidth={false} sx={{
@@ -243,58 +248,80 @@ export default function TicketDetails() {
                     gap: isMobile ? 2 : 3
                 }}
             >
-                {allMessages.map((msg, idx) => (
-                    <Fade in key={msg.id}>
-                        <Box sx={{
-                            alignSelf: msg.senderType === 'admin' ? 'flex-end' : 'flex-start',
-                            maxWidth: isMobile ? '95%' : '85%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: msg.senderType === 'admin' ? 'flex-end' : 'flex-start'
-                        }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                {msg.senderType === 'admin' && <Typography variant="caption" sx={{ color: '#a0aec0', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>مدیریت</Typography>}
-                                <Avatar sx={{
-                                    width: isMobile ? 24 : 28,
-                                    height: isMobile ? 24 : 28,
-                                    bgcolor: msg.senderType === 'admin' ? '#666AF2' : '#cbd5e0',
-                                    fontSize: 14
-                                }}>
-                                    {msg.senderType === 'admin' ? <AdminPanelSettingsIcon sx={{ fontSize: isMobile ? 14 : 16 }} /> : <PersonIcon sx={{ fontSize: isMobile ? 14 : 16 }} />}
-                                </Avatar>
-                                {msg.senderType === 'user' && <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, fontSize: isMobile ? '0.7rem' : '0.75rem' }}>{userName}</Typography>}
-                            </Box>
-
-                            <Paper sx={{
-                                p: isMobile ? 1.5 : 2,
-                                borderRadius: msg.senderType === 'admin' ? '20px 0 20px 20px' : '0 20px 20px 20px',
-                                bgcolor: msg.senderType === 'admin' ? '#f0f1ff' : '#ffffff',
-                                color: '#2d3748',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                                border: '1px solid #e0e0e0',
-                                width: '100%'
+                {allMessages.map((msg, idx) => {
+                    const userMsg = isUserMessage(msg);
+                    return (
+                        <Fade in key={msg.id}>
+                            <Box sx={{
+                                // ADMIN on LEFT (flex-start), USER on RIGHT (flex-end)
+                                alignSelf: userMsg ? 'flex-end' : 'flex-start',
+                                maxWidth: isMobile ? '95%' : '85%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: userMsg ? 'flex-end' : 'flex-start'
                             }}>
-                                <Typography sx={{ fontFamily: 'Vazirmatn', fontSize: isMobile ? '0.85rem' : '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
-                                    {msg.text}
-                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                    {userMsg ? (
+                                        // User: label first, then Avatar
+                                        <>
+                                            <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, fontSize: isMobile ? '0.7rem' : '0.75rem' }}>{userName}</Typography>
+                                            <Avatar sx={{
+                                                width: isMobile ? 24 : 28,
+                                                height: isMobile ? 24 : 28,
+                                                bgcolor: '#cbd5e0',
+                                                fontSize: 14
+                                            }}>
+                                                <PersonIcon sx={{ fontSize: isMobile ? 14 : 16 }} />
+                                            </Avatar>
+                                        </>
+                                    ) : (
+                                        // Admin: Avatar first, then label
+                                        <>
+                                            <Avatar sx={{
+                                                width: isMobile ? 24 : 28,
+                                                height: isMobile ? 24 : 28,
+                                                bgcolor: '#666AF2',
+                                                fontSize: 14
+                                            }}>
+                                                <AdminPanelSettingsIcon sx={{ fontSize: isMobile ? 14 : 16 }} />
+                                            </Avatar>
+                                            <Typography variant="caption" sx={{ color: '#a0aec0', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>مدیریت</Typography>
+                                        </>
+                                    )}
+                                </Box>
 
-                                {msg.senderType === 'user' && idx === 0 && hasFile && (
-                                    <Button
-                                        onClick={() => handleDownload(ticket.file)}
-                                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, color: '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem', textTransform: 'none' }}
-                                    >
-                                        <AttachFileIcon fontSize="small" />
-                                        <Typography variant="caption">دانلود فایل پیوست</Typography>
-                                    </Button>
-                                )}
+                                <Paper sx={{
+                                    p: isMobile ? 1.5 : 2,
+                                    borderRadius: userMsg ? '20px 0 20px 20px' : '0 20px 20px 20px',
+                                    bgcolor: userMsg ? '#ffffff' : '#f0f1ff',
+                                    color: '#2d3748',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                                    border: userMsg ? '1px solid #e0e0e0' : '1px solid #d1d4f9',
+                                    width: '100%'
+                                }}>
+                                    <Typography sx={{ fontFamily: 'Vazirmatn', fontSize: isMobile ? '0.85rem' : '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
+                                        {msg.messageText}
+                                    </Typography>
 
-                                <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'left', opacity: 0.7, fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
-                                    {toPersianNumber(msg.timestamp)}
-                                </Typography>
-                            </Paper>
-                        </Box>
-                    </Fade>
-                ))}
+                                    {/* Show download button only on the user's first message (description) */}
+                                    {userMsg && idx === 0 && hasFile && (
+                                        <Button
+                                            onClick={() => handleDownload(ticket.file)}
+                                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, color: '#666AF2', fontSize: isMobile ? '0.7rem' : '0.75rem', textTransform: 'none' }}
+                                        >
+                                            <AttachFileIcon fontSize="small" />
+                                            <Typography variant="caption">دانلود فایل پیوست</Typography>
+                                        </Button>
+                                    )}
+
+                                    <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'left', opacity: 0.7, fontSize: isMobile ? '0.6rem' : '0.7rem' }}>
+                                        {toPersianNumber(msg.timestamp)}
+                                    </Typography>
+                                </Paper>
+                            </Box>
+                        </Fade>
+                    );
+                })}
                 <div ref={scrollRef} />
             </Paper>
 

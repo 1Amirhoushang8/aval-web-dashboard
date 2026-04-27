@@ -30,6 +30,21 @@ const toPersianNumber = (num: number | string): string => {
     return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
 };
 
+// Helper to safely get file name from the file property
+const getFileDisplayName = (file: StoredTicket['file']): string => {
+    if (!file || typeof file === "boolean") return "";
+    try {
+        if (typeof file === "object") {
+            return (file as { name?: string })?.name || "فایل پیوست";
+        }
+        // string (JSON)
+        const parsed = JSON.parse(file);
+        return parsed?.name || "فایل پیوست";
+    } catch {
+        return "";
+    }
+};
+
 export default function AdminTicketPage() {
     const navigate = useNavigate();
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -99,14 +114,19 @@ export default function AdminTicketPage() {
             return;
         }
 
-        // The backend now returns the file as a JSON string, parse it back to an object
-        let fileObj: { name: string; type: string; size: number; data: string };
+        // The backend now returns the file as a JSON string; parse it back to an object
+        interface FileData {
+            name: string;
+            type: string;
+            size: number;
+            data: string;
+        }
+        let fileObj: FileData;
         try {
-            // If file is already an object (legacy data), assign directly; otherwise parse the JSON string
             if (typeof file === "object") {
-                fileObj = file as { name: string; type: string; size: number; data: string };
+                fileObj = file as FileData;
             } else {
-                fileObj = JSON.parse(file as string);
+                fileObj = JSON.parse(file as string) as FileData;
             }
         } catch {
             setSnackbar({ open: true, message: "داده فایل معتبر نیست", severity: "error" });
@@ -210,81 +230,88 @@ export default function AdminTicketPage() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tickets.map((ticket, index) => (
-                            <TableRow key={ticket.id} className={`${ticket.localStatus}-row`}>
-                                <TableCell>
-                                    <div className="user-info" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <PersonIcon fontSize="small" sx={{ color: '#666AF2' }} />
-                                            <span className="user-name"><b>{ticket.username}</b></span>
+                        {tickets.map((ticket, index) => {
+                            // Show download icon only if there's a real file (not boolean, not empty string)
+                            const hasRealFile = ticket.file
+                                && typeof ticket.file !== "boolean"
+                                && (typeof ticket.file !== "string" || (ticket.file as string).length > 0);
+
+                            return (
+                                <TableRow key={ticket.id} className={`${ticket.localStatus}-row`}>
+                                    <TableCell>
+                                        <div className="user-info" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <PersonIcon fontSize="small" sx={{ color: '#666AF2' }} />
+                                                <span className="user-name"><b>{ticket.username}</b></span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666', fontSize: '0.85rem' }}>
+                                                <PhoneIcon sx={{ fontSize: '1rem' }} />
+                                                <span>{toPersianNumber(ticket.userPhone)}</span>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666', fontSize: '0.85rem' }}>
-                                            <PhoneIcon sx={{ fontSize: '1rem' }} />
-                                            <span>{toPersianNumber(ticket.userPhone)}</span>
+                                    </TableCell>
+                                    <TableCell>{ticket.title}</TableCell>
+                                    <TableCell>
+                                        <div className="ticket-description">
+                                            {ticket.shortDetail || "---"}
                                         </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{ticket.title}</TableCell>
-                                <TableCell>
-                                    <div className="ticket-description">
-                                        {ticket.shortDetail || "---"}
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    {ticket.file ? (
-                                        <Tooltip title={typeof ticket.file === 'string' ? "دانلود فایل" : `دانلود فایل: ${(ticket.file as any)?.name || '...'}`}>
-                                            <IconButton onClick={() => handleDownload(ticket.file)}>
-                                                <AttachFileIcon sx={{ color: '#666AF2', transform: 'rotate(45deg)' }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    ) : (
-                                        <span style={{ color: '#ccc', fontSize: '0.8rem' }}>بدون فایل</span>
-                                    )}
-                                </TableCell>
-                                <TableCell>
-                                    <div className="date-time">
-                                        <span>{toPersianNumber(ticket.date)}</span>
-                                        <span className="time">{toPersianNumber(ticket.time)}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span className={`status-badge ${ticket.localStatus}`}>
-                                        {ticket.localStatus === 'answered' ? 'پاسخ داده شد' :
-                                            ticket.localStatus === 'in-progress' ? 'در حال بررسی' : 'در انتظار'}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <Button
-                                        size="small"
-                                        variant="outlined"
-                                        className="quick-change-btn"
-                                        style={{ fontFamily: 'Vazirmatn' }}
-                                        onClick={() => handleNavigateToDetails(ticket.id)}
-                                    >
-                                        مشاهده جزئیات
-                                    </Button>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="action-buttons">
+                                    </TableCell>
+                                    <TableCell>
+                                        {hasRealFile ? (
+                                            <Tooltip title={`دانلود فایل: ${getFileDisplayName(ticket.file)}`}>
+                                                <IconButton onClick={() => handleDownload(ticket.file)}>
+                                                    <AttachFileIcon sx={{ color: '#666AF2', transform: 'rotate(45deg)' }} />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
+                                            <span style={{ color: '#ccc', fontSize: '0.8rem' }}>بدون فایل</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="date-time">
+                                            <span>{toPersianNumber(ticket.date)}</span>
+                                            <span className="time">{toPersianNumber(ticket.time)}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className={`status-badge ${ticket.localStatus}`}>
+                                            {ticket.localStatus === 'answered' ? 'پاسخ داده شد' :
+                                                ticket.localStatus === 'in-progress' ? 'در حال بررسی' : 'در انتظار'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
                                         <Button
                                             size="small"
                                             variant="outlined"
                                             className="quick-change-btn"
                                             style={{ fontFamily: 'Vazirmatn' }}
-                                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                                setAnchorEl(e.currentTarget);
-                                                setActiveIndex(index);
-                                            }}
+                                            onClick={() => handleNavigateToDetails(ticket.id)}
                                         >
-                                            تغییر وضعیت
+                                            مشاهده جزئیات
                                         </Button>
-                                        <IconButton onClick={() => { setDeleteId(ticket.id); setDeleteConfirmOpen(true); }} sx={{ color: '#dc2626' }}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="action-buttons">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                className="quick-change-btn"
+                                                style={{ fontFamily: 'Vazirmatn' }}
+                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                                    setAnchorEl(e.currentTarget);
+                                                    setActiveIndex(index);
+                                                }}
+                                            >
+                                                تغییر وضعیت
+                                            </Button>
+                                            <IconButton onClick={() => { setDeleteId(ticket.id); setDeleteConfirmOpen(true); }} sx={{ color: '#dc2626' }}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
