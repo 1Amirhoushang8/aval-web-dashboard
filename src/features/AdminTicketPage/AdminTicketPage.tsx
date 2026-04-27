@@ -99,7 +99,20 @@ export default function AdminTicketPage() {
             return;
         }
 
-        const fileObj = file as { name: string; type: string; size: number; data: string };
+        // The backend now returns the file as a JSON string, parse it back to an object
+        let fileObj: { name: string; type: string; size: number; data: string };
+        try {
+            // If file is already an object (legacy data), assign directly; otherwise parse the JSON string
+            if (typeof file === "object") {
+                fileObj = file as { name: string; type: string; size: number; data: string };
+            } else {
+                fileObj = JSON.parse(file as string);
+            }
+        } catch {
+            setSnackbar({ open: true, message: "داده فایل معتبر نیست", severity: "error" });
+            return;
+        }
+
         if (!fileObj.data) {
             setSnackbar({ open: true, message: "داده فایل موجود نیست", severity: "error" });
             return;
@@ -219,7 +232,7 @@ export default function AdminTicketPage() {
                                 </TableCell>
                                 <TableCell>
                                     {ticket.file ? (
-                                        <Tooltip title={typeof ticket.file === 'object' ? `دانلود فایل: ${ticket.file.name}` : "دانلود پیوست"}>
+                                        <Tooltip title={typeof ticket.file === 'string' ? "دانلود فایل" : `دانلود فایل: ${(ticket.file as any)?.name || '...'}`}>
                                             <IconButton onClick={() => handleDownload(ticket.file)}>
                                                 <AttachFileIcon sx={{ color: '#666AF2', transform: 'rotate(45deg)' }} />
                                             </IconButton>

@@ -59,31 +59,14 @@ const SignUpPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await apiClient.post("/auth/signup", {
+            await apiClient.post("/auth/register", {
                 fullName: formData.fullName.trim(),
                 username: formData.username.trim(),
                 password: formData.password,
                 phoneNumber: formData.phoneNumber.trim()
             });
 
-            const responseData = response.data;
-            let success = true;
-            let message = "ثبت نام با موفقیت انجام شد";
-
-            // Handle both wrapped and unwrapped responses
-            if (responseData && typeof responseData === 'object') {
-                if ('success' in responseData) {
-                    success = Boolean(responseData.success);
-                    message = typeof responseData.message === 'string' ? responseData.message : message;
-                }
-            }
-
-            if (!success) {
-                setError(message);
-                setLoading(false);
-                return;
-            }
-
+            // Success – the backend returns { userId: "..." }
             setError("ثبت نام با موفقیت انجام شد! در حال انتقال...");
             setTimeout(() => {
                 navigate("/");
@@ -93,14 +76,9 @@ const SignUpPage: React.FC = () => {
             let errorMessage = "خطا در برقراری ارتباط با سرور";
             if (axios.isAxiosError(err)) {
                 const responseData = err.response?.data;
-                if (responseData && typeof responseData === 'object') {
-                    if ('message' in responseData && typeof responseData.message === 'string') {
-                        errorMessage = responseData.message;
-                    } else if ('success' in responseData && responseData.success === false) {
-                        errorMessage = 'message' in responseData && typeof responseData.message === 'string'
-                            ? responseData.message
-                            : "خطا در ثبت نام";
-                    }
+                // Backend returns { message: "..." } for validation errors
+                if (responseData?.message) {
+                    errorMessage = responseData.message;
                 }
             } else if (err instanceof Error) {
                 errorMessage = err.message;

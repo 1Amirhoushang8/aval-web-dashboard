@@ -32,23 +32,9 @@ const LoginPage: React.FC = () => {
             });
 
             const responseData = response.data;
-
-            let user, token;
-
-            // 检测响应格式：包装格式 (ApiResponse) 或 未包装格式
-            if (responseData.success !== undefined) {
-                // 包装格式：{ success, message, data }
-                if (!responseData.success) {
-                    setError(responseData.message || "خطا در ورود");
-                    return;
-                }
-                user = responseData.data.user;
-                token = responseData.data.token;
-            } else {
-                // 未包装格式：{ user, token }
-                user = responseData.user;
-                token = responseData.token;
-            }
+            // The backend now returns: { user: {...}, token: "eyJ..." }
+            const user = responseData.user;
+            const token = responseData.token;
 
             localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("token", token);
@@ -64,10 +50,9 @@ const LoginPage: React.FC = () => {
             let errorMessage = "اتصال به سرور برقرار نشد...";
             if (axios.isAxiosError(err)) {
                 const responseData = err.response?.data;
+                // Backend now returns { message: "..." } for 400/401 errors
                 if (responseData?.message) {
                     errorMessage = responseData.message;
-                } else if (responseData?.success === false) {
-                    errorMessage = responseData.message || "خطا در ورود";
                 } else if (err.response?.status === 401) {
                     errorMessage = "نام کاربری یا رمز عبور اشتباه است";
                 }
