@@ -1,15 +1,24 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Tooltip } from "@mui/material";
 import apiClient from "../../API/apiClient.ts";
 import "./Chart.scss";
 import type { ChartData } from "../../models/ChartDataInterface/ChartDataInterface.ts";
 
 type TimeFilter = 'day' | 'week' | 'month';
 
+// -- Type‑safe backend response --
+interface FinancialStatsResponse {
+    day: ChartData;
+    week: ChartData;
+    month: ChartData;
+}
+
 export default function ManageSiteChart() {
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
-    const { data: allStats, isError, isLoading } = useQuery({
+    // Fetch typed data
+    const { data: allStats, isError, isLoading } = useQuery<FinancialStatsResponse>({
         queryKey: ["financialStats"],
         queryFn: async () => {
             const response = await apiClient.get("/financialStats");
@@ -30,11 +39,15 @@ export default function ManageSiteChart() {
 
     const rawData: ChartData | null = allStats ? allStats[timeFilter] : null;
 
-    const currentData = rawData ? {
-        ...rawData,
-        totalRequests: rawData.totalRequests || rawData.requests.reduce((a, b) => a + b, 0),
-        totalPayments: rawData.totalPayments || rawData.payments.reduce((a, b) => a + b, 0)
-    } : null;
+    const currentData = rawData
+        ? {
+            ...rawData,
+            totalRequests: rawData.totalRequests || rawData.requests.reduce((a, b) => a + b, 0),
+            totalPayments: rawData.totalPayments || rawData.payments.reduce((a, b) => a + b, 0),
+            // Quick check if all values are zero
+            allZero: rawData.requests.every(v => v === 0) && rawData.payments.every(v => v === 0)
+        }
+        : null;
 
     if (isLoading) {
         return (
@@ -58,7 +71,6 @@ export default function ManageSiteChart() {
     const maxValue = Math.max(...currentData.requests, ...currentData.payments, 1);
     const chartHeight = 300;
     const getBarHeight = (value: number) => (value / maxValue) * chartHeight;
-
     const isMonthView = timeFilter === 'month';
 
     return (
@@ -94,6 +106,11 @@ export default function ManageSiteChart() {
             </div>
 
             <div className="big-chart-container">
+                {/* Show a friendly note when there is no data */}
+                {currentData.allZero && (
+                    <div className="empty-chart-note">داده‌ای برای این بازه وجود ندارد</div>
+                )}
+
                 <div className="vertical-bar-chart">
                     <div className="chart-y-axis">
                         {[1, 0.75, 0.5, 0.25, 0].map((ratio, i) => (
@@ -108,40 +125,46 @@ export default function ManageSiteChart() {
                             <div
                                 key={index}
                                 className="chart-bar-group"
-                                style={{ width: isMonthView ? '55px' : '85px' }}
+                                // Responsive width using clamp (40px min, 8vw preferred, 85px max)
+                                style={{ width: isMonthView ? 'clamp(36px, 6vw, 55px)' : 'clamp(48px, 9vw, 85px)' }}
                             >
                                 <div className="bar-label" style={{ fontSize: isMonthView ? '0.78rem' : '0.85rem' }}>
                                     {label}
                                 </div>
                                 <div className="bars-wrapper">
-                                    <div
-                                        className="bar bar-requests"
-                                        style={{
-                                            height: `${getBarHeight(currentData.requests[index])}px`,
-                                            width: isMonthView ? '14px' : '22px'
-                                        }}
-                                        title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`}
-                                    >
-                                        {!isMonthView && (
-                                            <span className="bar-value">
-                                                {formatCurrencyPersian(currentData.requests[index])}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div
-                                        className="bar bar-payments"
-                                        style={{
-                                            height: `${getBarHeight(currentData.payments[index])}px`,
-                                            width: isMonthView ? '14px' : '22px'
-                                        }}
-                                        title={`واریزی‌ها: ${formatCurrencyPersian(currentData.payments[index])}`}
-                                    >
-                                        {!isMonthView && (
-                                            <span className="bar-value">
-                                                {formatCurrencyPersian(currentData.payments[index])}
-                                            </span>
-                                        )}
-                                    </div>
+                                    {/* Request bar with custom Tooltip */}
+                                    <Tooltip title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`} arrow placement="top">
+                                        <div
+                                            className="bar bar-requests"
+                                            style={{
+                                                height: `${getBarHeight(currentData.requests[index])}px`,
+                                                width: isMonthView ? '14px' : '22px'
+                                            }}
+                                        >
+                                            {!isMonthView && (
+                                                <span className="bar-value">
+                                                    {formatCurrencyPersian(currentData.requests[index])}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Tooltip>
+
+                                    {/* Payment bar with custom Tooltip */}
+                                    <Tooltip title={`واریزی‌ها: ${formatCurrencyPersian(currentData.payments[index])}`} arrow placement="top">
+                                        <div
+                                            className="bar bar-payments"
+                                            style={{
+                                                height: `${getBarHeight(currentData.payments[index])}px`,
+                                                width: isMonthView ? '14px' : '22px'
+                                            }}
+                                        >
+                                            {!isMonthView && (
+                                                <span className="bar-value">
+                                                    {formatCurrencyPersian(currentData.payments[index])}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Tooltip>
                                 </div>
                             </div>
                         ))}

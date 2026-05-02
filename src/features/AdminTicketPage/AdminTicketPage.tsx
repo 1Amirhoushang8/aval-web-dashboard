@@ -172,14 +172,18 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-            const { ...apiData } = ticket;
-            const updatedPayload: StoredTicket = {
-                ...apiData,
-                adminResponse: newStatus === "answered" ? (ticket.adminResponse || "تایید شد") : (newStatus === "pending" ? null : ticket.adminResponse),
-                status: newStatus
+            // Only send the fields that UpdateTicketRequest expects – omit file to prevent corruption
+            const updatedPayload = {
+                title: ticket.title,
+                shortDetail: ticket.shortDetail,
+                description: ticket.description,
+                status: newStatus,
+                adminResponse: newStatus === "answered"
+                    ? (ticket.adminResponse || "تایید شد")
+                    : (newStatus === "pending" ? null : ticket.adminResponse),
             };
 
-            await ticketService.update(ticket.id, updatedPayload);
+            await ticketService.update(ticket.id, updatedPayload as StoredTicket);
 
             setTickets(prev => prev.map((t, i) => i === activeIndex ? {
                 ...t,

@@ -73,7 +73,6 @@ export default function UserTicketDetail() {
             setTicket(ticketData);
 
             const response = await apiClient.get(`/messages?ticketId=${id}`);
-            // Backend returns the list directly (no wrapper)
             const messagesData: Message[] = response.data;
             const sorted = [...messagesData].sort((a, b) =>
                 a.timestamp.localeCompare(b.timestamp)
@@ -126,7 +125,6 @@ export default function UserTicketDetail() {
 
         setSubmitting(true);
         try {
-            // Send with backend‑expected field name "messageText"
             const newMessagePayload = {
                 ticketId: id,
                 senderId: ticket.userId,
@@ -134,18 +132,22 @@ export default function UserTicketDetail() {
             };
 
             const response = await apiClient.post("/messages", newMessagePayload);
-            const savedMessage: Message = response.data; // MessageDto from backend
+            const savedMessage: Message = response.data;
 
-            const updatedTicket: StoredTicket = {
-                ...ticket,
-                status: "pending"
+            // Update ticket status without touching the file
+            const updatedTicketPayload = {
+                title: ticket.title,
+                shortDetail: ticket.shortDetail,
+                description: ticket.description,
+                status: "pending",
             };
-            await ticketService.update(id, updatedTicket);
+
+            await ticketService.update(id, updatedTicketPayload as StoredTicket);
 
             setMessages(prev => [...prev, savedMessage].sort((a, b) =>
                 a.timestamp.localeCompare(b.timestamp)
             ));
-            setTicket(updatedTicket);
+            setTicket(prev => prev ? { ...prev, status: "pending" } : null);
             setUserReply("");
             setSnackbar({ open: true, message: "پیام شما با موفقیت ارسال شد", severity: "success" });
         } catch (err) {
@@ -171,7 +173,6 @@ export default function UserTicketDetail() {
 
     const hasFile = ticket.file && typeof ticket.file === 'object' && 'data' in ticket.file;
 
-    // Virtual first message: ticket description
     const descriptionMessage: Message = {
         id: 'description-msg',
         ticketId: String(ticket.id),
@@ -183,7 +184,6 @@ export default function UserTicketDetail() {
 
     const allMessages = [descriptionMessage, ...messages];
 
-    // Helper to decide if a message is from the ticket owner (user)
     const isUserMessage = (msg: Message) => msg.senderId === ticket.userId;
 
     return (

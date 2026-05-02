@@ -733,3 +733,17 @@
     background: #a1a1a1;
   }
 }
+
+
+// Empty state note
+.empty-chart-note {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+// Smooth bar height animation
+.bar {
+  transition: height 0.3s ease-in-out;
+}

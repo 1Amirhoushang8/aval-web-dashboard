@@ -72,11 +72,9 @@ export default function TicketDetails() {
         try {
             setLoading(true);
 
-            // 1. Fetch ticket
             const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
-            // 2. Fetch messages (endpoint returns array directly)
             const messagesResponse = await apiClient.get(`/messages?ticketId=${id}`);
             const messagesData: Message[] = messagesResponse.data;
             const sortedMessages = [...(messagesData || [])].sort(
@@ -84,7 +82,6 @@ export default function TicketDetails() {
             );
             setMessages(sortedMessages);
 
-            // 3. Fetch user info
             try {
                 const userResponse = await apiClient.get(`/users/${ticketData.userId}`);
                 const userData = userResponse.data;
@@ -157,18 +154,21 @@ export default function TicketDetails() {
             };
 
             const messageResponse = await apiClient.post("/messages", newMessagePayload);
-            const savedMessage: Message = messageResponse.data; // MessageDto
+            const savedMessage: Message = messageResponse.data;
 
-            // Update ticket status to answered
-            const updatedTicket: StoredTicket = {
-                ...ticket,
+            // Update ticket status without touching the file
+            const updatedTicketPayload = {
+                title: ticket.title,
+                shortDetail: ticket.shortDetail,
+                description: ticket.description,
+                status: "answered",
                 adminResponse: adminReply.trim(),
-                status: "answered"
             };
-            await ticketService.update(id, updatedTicket);
+
+            await ticketService.update(id, updatedTicketPayload as StoredTicket);
 
             setMessages(prev => [...prev, savedMessage].sort((a, b) => a.timestamp.localeCompare(b.timestamp)));
-            setTicket(updatedTicket);
+            setTicket(prev => prev ? { ...prev, adminResponse: adminReply.trim(), status: "answered" } : null);
             setAdminReply("");
             setSnackbar({ open: true, message: "پاسخ ارسال شد", severity: "success" });
         } catch (err) {
@@ -191,7 +191,6 @@ export default function TicketDetails() {
 
     const hasFile = ticket.file && (typeof ticket.file === 'string' || typeof ticket.file === 'object');
 
-    // Virtual first message – ticket description (no senderType)
     const descriptionMessage: Message = {
         id: 'description-msg',
         ticketId: String(ticket.id),
@@ -203,7 +202,6 @@ export default function TicketDetails() {
 
     const allMessages = [descriptionMessage, ...messages];
 
-    // Helper: determine if a message is from the ticket owner
     const isUserMessage = (msg: Message) => msg.senderId === ticket.userId;
 
     return (
@@ -253,7 +251,6 @@ export default function TicketDetails() {
                     return (
                         <Fade in key={msg.id}>
                             <Box sx={{
-                                // ADMIN on LEFT (flex-start), USER on RIGHT (flex-end)
                                 alignSelf: userMsg ? 'flex-end' : 'flex-start',
                                 maxWidth: isMobile ? '95%' : '85%',
                                 display: 'flex',
@@ -262,7 +259,6 @@ export default function TicketDetails() {
                             }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                     {userMsg ? (
-                                        // User: label first, then Avatar
                                         <>
                                             <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, fontSize: isMobile ? '0.7rem' : '0.75rem' }}>{userName}</Typography>
                                             <Avatar sx={{
@@ -275,7 +271,6 @@ export default function TicketDetails() {
                                             </Avatar>
                                         </>
                                     ) : (
-                                        // Admin: Avatar first, then label
                                         <>
                                             <Avatar sx={{
                                                 width: isMobile ? 24 : 28,
@@ -303,7 +298,6 @@ export default function TicketDetails() {
                                         {msg.messageText}
                                     </Typography>
 
-                                    {/* Show download button only on the user's first message (description) */}
                                     {userMsg && idx === 0 && hasFile && (
                                         <Button
                                             onClick={() => handleDownload(ticket.file)}
