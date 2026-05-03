@@ -32,12 +32,11 @@ const LoginPage: React.FC = () => {
             });
 
             const responseData = response.data;
-            // The backend now returns: { user: {...}, token: "eyJ..." }
+            // Backend now returns only { user: {...} } – the token is in an HttpOnly cookie
             const user = responseData.user;
-            const token = responseData.token;
 
+            // Store only the user object (non-sensitive info) for client-side use
             localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", token);
 
             if (user.roleKey === "ADMIN") {
                 navigate("/ManageSite", { replace: true });
@@ -50,7 +49,6 @@ const LoginPage: React.FC = () => {
             let errorMessage = "اتصال به سرور برقرار نشد...";
             if (axios.isAxiosError(err)) {
                 const responseData = err.response?.data;
-                // Backend now returns { message: "..." } for 400/401 errors
                 if (responseData?.message) {
                     errorMessage = responseData.message;
                 } else if (err.response?.status === 401) {
