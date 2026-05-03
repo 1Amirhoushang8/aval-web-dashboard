@@ -18,6 +18,30 @@ interface User {
     fullName: string;
 }
 
+interface WrappedResponse<T> {
+    success: boolean;
+    message?: string;
+    data?: T;
+}
+
+function unwrapResponse<T>(responseData: unknown): T {
+    if (
+        typeof responseData === 'object' &&
+        responseData !== null &&
+        'success' in responseData
+    ) {
+        const wrapped = responseData as WrappedResponse<T>;
+        if (!wrapped.success) {
+            throw new Error(wrapped.message || "خطا در دریافت اطلاعات");
+        }
+        if (wrapped.data === undefined) {
+            throw new Error("پاسخ سرور نامعتبر است");
+        }
+        return wrapped.data;
+    }
+    return responseData as T;
+}
+
 export default function ManageSitePage() {
     const navigate = useNavigate();
     const [showTicketList, setShowTicketList] = useState(false);
@@ -52,19 +76,6 @@ export default function ManageSitePage() {
         }).format(new Date());
     };
 
-
-    const unwrapResponse = <T,>(responseData: any): T => {
-        if (responseData.success !== undefined) {
-
-            if (!responseData.success) {
-                throw new Error(responseData.message || "خطا در دریافت اطلاعات");
-            }
-            return responseData.data;
-        }
-
-        return responseData;
-    };
-
     const {
         data: tickets = [],
         isLoading: ticketsLoading,
@@ -94,11 +105,17 @@ export default function ManageSitePage() {
     useEffect(() => {
         if (ticketsError) {
             console.error("Tickets error:", ticketsErrorObj);
-            showError(ticketsErrorObj?.message || "خطا در دریافت اطلاعات تیکت‌ها از سرور.");
+            const message = ticketsErrorObj instanceof Error
+                ? ticketsErrorObj.message
+                : "خطا در دریافت اطلاعات تیکت‌ها از سرور.";
+            showError(message);
         }
         if (usersError) {
             console.error("Users error:", usersErrorObj);
-            showError(usersErrorObj?.message || "خطا در دریافت اطلاعات کاربران.");
+            const message = usersErrorObj instanceof Error
+                ? usersErrorObj.message
+                : "خطا در دریافت اطلاعات کاربران.";
+            showError(message);
         }
     }, [ticketsError, usersError, ticketsErrorObj, usersErrorObj, showError]);
 

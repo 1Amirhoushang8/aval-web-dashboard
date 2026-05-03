@@ -3,48 +3,54 @@ import type { User } from "../models/AccountingInterfaces/AccountingInterface";
 
 type CreateUserDto = Omit<User, "id">;
 
-// Robust unwrap that handles both wrapped and unwrapped responses
-const unwrap = <T>(responseData: any): T => {
-    // Already unwrapped (array or object without 'success' property)
-    if (responseData && typeof responseData === 'object' && !('success' in responseData)) {
-        return responseData as T;
-    }
-    // Wrapped ApiResponse format
-    if (responseData.success !== undefined) {
-        if (!responseData.success) {
-            throw new Error(responseData.message || "خطا در عملیات");
+interface WrappedApiResponse<T> {
+    success: boolean;
+    message?: string;
+    data?: T;
+}
+
+function unwrap<T>(responseData: unknown): T {
+    if (typeof responseData === 'object' && responseData !== null) {
+        if (!('success' in responseData)) {
+            return responseData as T;
         }
-        return responseData.data as T;
+        const wrapped = responseData as WrappedApiResponse<T>;
+        if (wrapped.success === false) {
+            throw new Error(wrapped.message || "خطا در عملیات");
+        }
+        if (wrapped.data !== undefined) {
+            return wrapped.data;
+        }
     }
     throw new Error("Invalid API response format");
-};
+}
 
 export const userService = {
     getAll: async (): Promise<User[]> => {
-        const response = await apiClient.get("/users");
+        const response = await apiClient.get<User[]>("/users");
         return unwrap<User[]>(response.data);
     },
 
     getById: async (id: string | number): Promise<User> => {
-        const response = await apiClient.get(`/users/${id}`);
+        const response = await apiClient.get<User>(`/users/${id}`);
         return unwrap<User>(response.data);
     },
 
     create: async (data: CreateUserDto): Promise<User> => {
-        const response = await apiClient.post("/users", data);
+        const response = await apiClient.post<User>("/users", data);
         return unwrap<User>(response.data);
     },
 
     update: async (id: string | number, data: Partial<User>): Promise<User> => {
-        const response = await apiClient.put(`/users/${id}`, data);
+        const response = await apiClient.put<User>(`/users/${id}`, data);
         return unwrap<User>(response.data);
     },
 
     delete: async (id: string | number): Promise<void> => {
-        const response = await apiClient.delete(`/users/${id}`);
-        if (response.data && response.data.success === false) {
-            throw new Error(response.data.message || "خطا در حذف");
-        }
+        await apiClient.delete(`/users/${id}`);
+    },
 
+    deleteService: async (id: string | number): Promise<void> => {
+        await apiClient.delete(`/users/${id}/service`);
     },
 };

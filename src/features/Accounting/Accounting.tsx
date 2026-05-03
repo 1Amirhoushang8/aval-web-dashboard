@@ -227,11 +227,12 @@ export default function AccountingPage() {
         setDeleteIndex(null);
     };
 
+    // FIXED: now deletes only the service/invoice, not the whole user
     const handleConfirmDelete = async () => {
         if (deleteIndex === null) return;
         const user = allUsers[deleteIndex];
         try {
-            await userService.delete(user.id);
+            await userService.deleteService(user.id);
             setAllUsers(prev => prev.filter((_, i) => i !== deleteIndex));
             handleCloseDeleteConfirm();
         } catch (err: unknown) {
@@ -750,14 +751,14 @@ export default function AccountingPage() {
                 </Table>
             </TableContainer>
 
-            {/* Status Change Menu */}
+
             <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu} anchorOrigin={{ vertical: "bottom", horizontal: "right" }} transformOrigin={{ vertical: "top", horizontal: "right" }}>
                 <MenuItem onClick={() => handleStatusChange("درحال-انجام")}>درحال انجام</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("پرداخت-شده")}>پرداخت شده</MenuItem>
                 <MenuItem onClick={() => handleStatusChange("لغو-شده")}>لغو شده</MenuItem>
             </Menu>
 
-            {/* Error Snackbar */}
+
             <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>{error}</Alert>
             </Snackbar>
