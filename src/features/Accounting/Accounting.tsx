@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import React from 'react';
 import SinglePaymentButton from "../../components/SinglePayButton/SinglePayButton.tsx";
 import MultiPaymentButton from "../../components/MultiPayButton/MultiPayButton.tsx";
 import AccountingSkeleton from "../../Skeleton/AccountingSkeleton/AccountingSkeleton.tsx";
@@ -112,14 +111,15 @@ export default function AccountingPage() {
                     totalMonths: user.totalMonths || null,
                 }));
                 setAllUsers(normalized);
-            } catch (error: any) {
-                console.error("Failed to fetch users:", error);
-                showError(error.message || "خطا در دریافت اطلاعات کاربران");
+            } catch (err: unknown) {
+                console.error("Failed to fetch users:", err);
+                const message = err instanceof Error ? err.message : "خطا در دریافت اطلاعات کاربران";
+                showError(message);
             } finally {
                 setLoading(false);
             }
         };
-        fetchUsers();
+        void fetchUsers();
     }, []);
 
     const filteredUsers = useMemo(() => {
@@ -195,8 +195,9 @@ export default function AccountingPage() {
                 monthlyPayment: fetchedUser.monthlyPayment ? extractPriceNumber(fetchedUser.monthlyPayment) : "",
                 totalMonths: fetchedUser.totalMonths?.toString() ?? "",
             });
-        } catch (error: any) {
-            showError(error.message || "مشکلی پیش آمد");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "مشکلی پیش آمد";
+            showError(message);
             setEditTransaction({
                 serialnumber: user.serialNumber || "",
                 fullname: user.fullName || "",
@@ -233,8 +234,9 @@ export default function AccountingPage() {
             await userService.delete(user.id);
             setAllUsers(prev => prev.filter((_, i) => i !== deleteIndex));
             handleCloseDeleteConfirm();
-        } catch (error: any) {
-            showError(error.message || "خطا در حذف فاکتور");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در حذف فاکتور";
+            showError(message);
             handleCloseDeleteConfirm();
         }
     };
@@ -283,8 +285,9 @@ export default function AccountingPage() {
             setAllUsers(prev => prev.map((u, i) => i === activePaymentIndex ? updatedUser : u));
             handleCloseEditPaymentModal();
             handleClosePaymentModal();
-        } catch (error: any) {
-            showError(error.message || "خطا در به‌روزرسانی جزئیات پرداخت");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در به‌روزرسانی جزئیات پرداخت";
+            showError(message);
         }
     };
 
@@ -353,8 +356,9 @@ export default function AccountingPage() {
             const createdUser = await userService.create(newUser);
             setAllUsers(prev => [...prev, createdUser]);
             handleCloseModal();
-        } catch (error: any) {
-            showError(error.message || "خطا در ایجاد فاکتور");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در ایجاد فاکتور";
+            showError(message);
         }
     };
 
@@ -399,8 +403,9 @@ export default function AccountingPage() {
             const updatedUser = await userService.update(userToUpdate.id, updatedUserData);
             setAllUsers(prev => prev.map((u, i) => i === editingIndex ? updatedUser : u));
             handleCloseEditModal();
-        } catch (error: any) {
-            showError(error.message || "خطا در ویرایش فاکتور");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در ویرایش فاکتور";
+            showError(message);
         }
     };
 
@@ -483,8 +488,9 @@ export default function AccountingPage() {
             const updatedUserData = { ...user, status };
             const result = await userService.update(user.id, updatedUserData);
             setAllUsers(prev => prev.map((u, i) => i === activeIndex ? result : u));
-        } catch (error: any) {
-            showError(error.message || "خطا در تغییر وضعیت");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "خطا در تغییر وضعیت";
+            showError(message);
         } finally {
             handleCloseMenu();
         }
