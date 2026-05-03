@@ -7,7 +7,6 @@ import type { ChartData } from "../../models/ChartDataInterface/ChartDataInterfa
 
 type TimeFilter = 'day' | 'week' | 'month';
 
-// -- Type‑safe backend response --
 interface FinancialStatsResponse {
     day: ChartData;
     week: ChartData;
@@ -17,13 +16,14 @@ interface FinancialStatsResponse {
 export default function ManageSiteChart() {
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
-    // Fetch typed data
+    // Poll every 10 seconds – chart will reflect database changes automatically
     const { data: allStats, isError, isLoading } = useQuery<FinancialStatsResponse>({
         queryKey: ["financialStats"],
         queryFn: async () => {
             const response = await apiClient.get("/financialStats");
             return response.data;
-        }
+        },
+        refetchInterval: 10_000,   // 10 seconds
     });
 
     const toPersianNumber = (num: number | string): string => {
@@ -44,7 +44,6 @@ export default function ManageSiteChart() {
             ...rawData,
             totalRequests: rawData.totalRequests || rawData.requests.reduce((a, b) => a + b, 0),
             totalPayments: rawData.totalPayments || rawData.payments.reduce((a, b) => a + b, 0),
-            // Quick check if all values are zero
             allZero: rawData.requests.every(v => v === 0) && rawData.payments.every(v => v === 0)
         }
         : null;
@@ -106,7 +105,6 @@ export default function ManageSiteChart() {
             </div>
 
             <div className="big-chart-container">
-                {/* Show a friendly note when there is no data */}
                 {currentData.allZero && (
                     <div className="empty-chart-note">داده‌ای برای این بازه وجود ندارد</div>
                 )}
@@ -125,14 +123,12 @@ export default function ManageSiteChart() {
                             <div
                                 key={index}
                                 className="chart-bar-group"
-                                // Responsive width using clamp (40px min, 8vw preferred, 85px max)
                                 style={{ width: isMonthView ? 'clamp(36px, 6vw, 55px)' : 'clamp(48px, 9vw, 85px)' }}
                             >
                                 <div className="bar-label" style={{ fontSize: isMonthView ? '0.78rem' : '0.85rem' }}>
                                     {label}
                                 </div>
                                 <div className="bars-wrapper">
-                                    {/* Request bar with custom Tooltip */}
                                     <Tooltip title={`طلب‌ها: ${formatCurrencyPersian(currentData.requests[index])}`} arrow placement="top">
                                         <div
                                             className="bar bar-requests"
@@ -149,7 +145,6 @@ export default function ManageSiteChart() {
                                         </div>
                                     </Tooltip>
 
-                                    {/* Payment bar with custom Tooltip */}
                                     <Tooltip title={`واریزی‌ها: ${formatCurrencyPersian(currentData.payments[index])}`} arrow placement="top">
                                         <div
                                             className="bar bar-payments"
