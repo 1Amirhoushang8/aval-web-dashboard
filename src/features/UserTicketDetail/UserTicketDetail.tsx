@@ -134,16 +134,8 @@ export default function UserTicketDetail() {
             const response = await apiClient.post("/messages", newMessagePayload);
             const savedMessage: Message = response.data;
 
-            // Update ticket status without touching the file
-            const updatedTicketPayload = {
-                title: ticket.title,
-                shortDetail: ticket.shortDetail,
-                description: ticket.description,
-                status: "pending",
-            };
-
-            await ticketService.update(id, updatedTicketPayload as StoredTicket);
-
+            // ✅ Backend automatically sets ticket status to "pending" when user replies.
+            // No need to call ticketService.update here; just reflect the new status locally.
             setMessages(prev => [...prev, savedMessage].sort((a, b) =>
                 a.timestamp.localeCompare(b.timestamp)
             ));

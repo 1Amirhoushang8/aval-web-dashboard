@@ -8,29 +8,40 @@ const apiClient = axios.create({
     },
 });
 
-// ---------- CSRF token management ----------
-let csrfToken: string | null = null;
+let csrfRequestToken: string | null = null;
 
-// Call this ONCE after the app starts (or after login) to get a fresh token
-export async function fetchCsrfToken(): Promise<void> {
-    const response = await apiClient.get("/csrf");
-    csrfToken = response.data.token;
-}
-
-
-apiClient.interceptors.request.use((config) => {
-    if (
-        csrfToken &&
-        ["post", "put", "delete", "patch"].includes(
-            config.method?.toLowerCase() ?? ""
-        )
-    ) {
-        config.headers["X-CSRF-TOKEN"] = csrfToken;
+export const initCsrfToken = async (): Promise<string | null> => {
+    try {
+        const response = await apiClient.get("/csrf");
+        csrfRequestToken = response.data.token;
+        return csrfRequestToken;
+    } catch {
+        return null;
     }
+};
+
+const ensureCsrfRequestToken = async (): Promise<string | null> => {
+    if (!csrfRequestToken) {
+        await initCsrfToken();
+    }
+    return csrfRequestToken;
+};
+
+apiClient.interceptors.request.use(async (config) => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const method = config.method?.toLowerCase() ?? "";
+    if (["post", "put", "delete", "patch"].includes(method)) {
+        const reqToken = await ensureCsrfRequestToken();
+        if (reqToken) {
+            config.headers["X-CSRF-TOKEN"] = reqToken;
+        }
+    }
+
     return config;
 });
-
-
-fetchCsrfToken();
 
 export default apiClient;

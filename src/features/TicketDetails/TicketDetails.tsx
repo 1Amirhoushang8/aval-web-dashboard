@@ -26,7 +26,6 @@ import { ticketService } from "../../API/TicketService";
 import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface";
 import AdminTicketDetailSkeleton from "../../Skeleton/TicketDetailSkeleton/TicketDetailSkeleton";
 
-// Backend DTO – no senderType
 interface Message {
     id: string;
     ticketId: string;
@@ -71,7 +70,6 @@ export default function TicketDetails() {
         if (!id) return;
         try {
             setLoading(true);
-
             const ticketData = await ticketService.getById(id);
             setTicket(ticketData);
 
@@ -156,19 +154,10 @@ export default function TicketDetails() {
             const messageResponse = await apiClient.post("/messages", newMessagePayload);
             const savedMessage: Message = messageResponse.data;
 
-            // Update ticket status without touching the file
-            const updatedTicketPayload = {
-                title: ticket.title,
-                shortDetail: ticket.shortDetail,
-                description: ticket.description,
-                status: "answered",
-                adminResponse: adminReply.trim(),
-            };
-
-            await ticketService.update(id, updatedTicketPayload as StoredTicket);
-
+            // Backend automatically sets ticket status to "answered" for admin replies.
+            // No need to call ticketService.update here; just reflect the new status locally.
             setMessages(prev => [...prev, savedMessage].sort((a, b) => a.timestamp.localeCompare(b.timestamp)));
-            setTicket(prev => prev ? { ...prev, adminResponse: adminReply.trim(), status: "answered" } : null);
+            setTicket(prev => prev ? { ...prev, status: "answered", adminResponse: adminReply.trim() } : null);
             setAdminReply("");
             setSnackbar({ open: true, message: "پاسخ ارسال شد", severity: "success" });
         } catch (err) {

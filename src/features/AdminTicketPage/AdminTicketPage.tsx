@@ -21,7 +21,7 @@ import AdminTicketSkeleton from "../../Skeleton/AdminTicketPage/AdminTicketPage.
 interface Ticket extends StoredTicket {
     username: string;
     userPhone: string;
-    localStatus: "pending" | "answered" | "in-progress";
+    localStatus: "pending" | "answered" | "in-progress";   // mirrors DB status exactly
 }
 
 const toPersianNumber = (num: number | string): string => {
@@ -30,14 +30,12 @@ const toPersianNumber = (num: number | string): string => {
     return num.toString().replace(/\d/g, (x) => persianDigits[parseInt(x)]);
 };
 
-// Helper to safely get file name from the file property
 const getFileDisplayName = (file: StoredTicket['file']): string => {
     if (!file || typeof file === "boolean") return "";
     try {
         if (typeof file === "object") {
             return (file as { name?: string })?.name || "فایل پیوست";
         }
-        // string (JSON)
         const parsed = JSON.parse(file);
         return parsed?.name || "فایل پیوست";
     } catch {
@@ -79,18 +77,14 @@ export default function AdminTicketPage() {
                 });
             });
 
+            // 🔧 FIX: localStatus now follows the actual DB 'status' field
             const enrichedTickets: Ticket[] = ticketsData.map((t: StoredTicket): Ticket => {
                 const userData = userMap.get(String(t.userId));
-                let localStatus: "pending" | "answered" | "in-progress" = "pending";
-
-                if (t.adminResponse) localStatus = "answered";
-                if (t.status === "in-progress") localStatus = "in-progress";
-
                 return {
                     ...t,
                     username: userData?.username || `کاربر ${toPersianNumber(t.userId || "")}`,
                     userPhone: userData?.phone || "",
-                    localStatus
+                    localStatus: (t.status as "pending" | "answered" | "in-progress") || "pending"
                 };
             });
 
@@ -114,7 +108,6 @@ export default function AdminTicketPage() {
             return;
         }
 
-        // The backend now returns the file as a JSON string; parse it back to an object
         interface FileData {
             name: string;
             type: string;
@@ -172,15 +165,16 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-            // Only send the fields that UpdateTicketRequest expects – omit file to prevent corruption
+            // 🔧 FIX: Preserve existing adminResponse when switching to non-answered statuses
             const updatedPayload = {
                 title: ticket.title,
                 shortDetail: ticket.shortDetail,
                 description: ticket.description,
                 status: newStatus,
-                adminResponse: newStatus === "answered"
-                    ? (ticket.adminResponse || "تایید شد")
-                    : (newStatus === "pending" ? null : ticket.adminResponse),
+                adminResponse:
+                    newStatus === "answered"
+                        ? (ticket.adminResponse || "تایید شد")
+                        : ticket.adminResponse   // keep existing response for other statuses
             };
 
             await ticketService.update(ticket.id, updatedPayload as StoredTicket);
@@ -235,7 +229,6 @@ export default function AdminTicketPage() {
                     </TableHead>
                     <TableBody>
                         {tickets.map((ticket, index) => {
-                            // Show download icon only if there's a real file (not boolean, not empty string)
                             const hasRealFile = ticket.file
                                 && typeof ticket.file !== "boolean"
                                 && (typeof ticket.file !== "string" || (ticket.file as string).length > 0);
