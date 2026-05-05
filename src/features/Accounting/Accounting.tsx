@@ -106,7 +106,7 @@ export default function AccountingPage() {
             try {
 
 
-                // 2️⃣ Load actual data
+
                 const [servicesData, usersData] = await Promise.all([
                     servicesService.getAll(),
                     userService.getAll(),
@@ -502,7 +502,7 @@ export default function AccountingPage() {
                 </div>
             </div>
 
-            {/* Create Modal */}
+
             <Modal open={openModal} onClose={handleCloseModal}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 450, bgcolor: 'background.paper', boxShadow: 24, p: 4, borderRadius: 2, direction: 'rtl' }}>
                     <Typography variant="h6" sx={{ mb: 3, textAlign: 'center' }}>ایجاد فاکتور جدید</Typography>
@@ -542,7 +542,7 @@ export default function AccountingPage() {
                 </Box>
             </Modal>
 
-            {/* Edit Modal */}
+
             <Modal open={editModal} onClose={handleCloseEditModal}>
                 {editModalLoading ? (
                     <ModalSkeleton />
@@ -585,7 +585,7 @@ export default function AccountingPage() {
                 )}
             </Modal>
 
-            {/* Payment Modal */}
+
             <Dialog open={paymentModal} onClose={handleClosePaymentModal} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>جزئیات پرداخت</DialogTitle>
                 <DialogContent>
@@ -639,7 +639,7 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Edit Payment Modal */}
+
             <Dialog open={editPaymentModal} onClose={handleCloseEditPaymentModal} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl' } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>ویرایش جزئیات پرداخت</DialogTitle>
                 <DialogContent>
@@ -668,7 +668,7 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Delete Confirmation Dialog */}
+
             <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 'var(--radius-lg)', direction: 'rtl', p: 2 } } }}>
                 <DialogTitle sx={{ textAlign: 'center', fontWeight: 700, color: '#ef4444', borderBottom: '2px solid #fee2e2' }}>تایید حذف</DialogTitle>
                 <DialogContent sx={{ textAlign: 'center' }}>
@@ -681,7 +681,7 @@ export default function AccountingPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* Main Table */}
+
             <TableContainer component={Paper} className="accounting-card">
                 <Table>
                     <TableHead>

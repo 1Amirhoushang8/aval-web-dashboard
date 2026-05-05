@@ -32,10 +32,10 @@ const LoginPage: React.FC = () => {
             });
 
             const responseData = response.data;
-            // Backend now returns only { user: {...} } – the token is in an HttpOnly cookie
+
             const user = responseData.user;
 
-            // Store only the user object (non-sensitive info) for client-side use
+
             localStorage.setItem("user", JSON.stringify(user));
 
             if (user.roleKey === "ADMIN") {

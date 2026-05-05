@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
-/* ==================== VARIABLES ==================== */
+
 :root {
   --color-bg: #f6f7fb;
   --color-white: #ffffff;
@@ -29,7 +29,7 @@
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==================== PERSIAN NUMBER FONTS ==================== */
+
 .financial-chart-section {
   .chart-title,
   .legend-value,
@@ -40,7 +40,7 @@
     font-family: 'Vazirmatn', sans-serif;
   }
 
-  /* Apply Persian numbers to all numeric displays */
+
   .legend-value,
   .y-axis-label,
   .bar-value,
@@ -51,7 +51,7 @@
   }
 }
 
-/* ==================== LOADING STATE ==================== */
+
 .chart-loading {
   width: 90%;
   margin: 2rem auto;
@@ -81,7 +81,7 @@
   }
 }
 
-/* ==================== ERROR STATE ==================== */
+
 .chart-error {
   width: 90%;
   margin: 2rem auto;
@@ -149,7 +149,7 @@
   }
 }
 
-/* ==================== CHART SECTION ==================== */
+
 .financial-chart-section {
   width: 90%;
   margin: 0 auto 2rem auto;
@@ -281,7 +281,7 @@
     min-height: 500px;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
 
-    /* Vertical Bar Chart Styles */
+
     .vertical-bar-chart {
       display: flex;
       flex-direction: column;
@@ -441,7 +441,7 @@
   }
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -468,7 +468,7 @@
   }
 }
 
-/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+
 [dir="rtl"] {
   .financial-chart-section {
     .chart-title::after {
@@ -507,7 +507,7 @@
   }
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 1200px) {
   .financial-chart-section {
     .big-chart-container {
@@ -714,7 +714,7 @@
   }
 }
 
-/* ==================== SCROLLBAR STYLING ==================== */
+
 .financial-chart-section ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -735,7 +735,7 @@
 }
 
 
-// Empty state note
+
 .empty-chart-note {
   text-align: center;
   color: #666;
@@ -743,7 +743,7 @@
   margin-bottom: 1rem;
 }
 
-// Smooth bar height animation
+
 .bar {
   transition: height 0.3s ease-in-out;
 }

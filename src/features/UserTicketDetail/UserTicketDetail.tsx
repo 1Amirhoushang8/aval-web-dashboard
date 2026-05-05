@@ -26,7 +26,7 @@ import type { StoredTicket } from "../../models/TicketInterfaces/TicketInterface
 import apiClient from "../../API/apiClient";
 import UserTicketDetailSkeleton from "../../Skeleton/UserTicketDetailSkeleton/UserTicketDetailSkeleton.tsx";
 
-// Matches backend MessageDto exactly
+
 interface Message {
     id: string;
     ticketId: string;
@@ -134,8 +134,7 @@ export default function UserTicketDetail() {
             const response = await apiClient.post("/messages", newMessagePayload);
             const savedMessage: Message = response.data;
 
-            // ✅ Backend automatically sets ticket status to "pending" when user replies.
-            // No need to call ticketService.update here; just reflect the new status locally.
+
             setMessages(prev => [...prev, savedMessage].sort((a, b) =>
                 a.timestamp.localeCompare(b.timestamp)
             ));

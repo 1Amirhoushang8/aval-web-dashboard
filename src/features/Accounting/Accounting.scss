@@ -49,7 +49,7 @@
 
 
 .accounting {
-  /* Table elements */
+
   .MuiTable-root,
   .MuiTableCell-head,
   .MuiTableCell-body,
@@ -58,14 +58,14 @@
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Buttons */
+
   .MuiButton-root,
   .change-btn,
   .quick-change-btn {
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Modal elements */
+
   .MuiTypography-root,
   .MuiFormControl-root,
   .MuiInputLabel-root,
@@ -75,24 +75,24 @@
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Menu dropdown */
+
   .MuiMenu-paper,
   .MuiMenuItem-root {
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Bootstrap dropdown */
+
   .dropdown-menu,
   .dropdown-item {
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Status badges */
+
   .status {
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  /* Payment type */
+
   .payment-type {
     font-family: "Vazirmatn", sans-serif !important;
   }
@@ -129,7 +129,7 @@
   }
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 1200px) {
   .accounting-header {
     width: 90%;
@@ -168,7 +168,7 @@
 
 
 
-/* ==================== ADD BUTTON SECTION ==================== */
+
 .mydp {
   width: 100%;
   display: flex;
@@ -225,7 +225,7 @@
   }
 }
 
-/* ==================== CARD STYLES ==================== */
+
 .accounting-card {
   border-radius: var(--radius-lg) !important;
   background-color: var(--color-white) !important;
@@ -244,14 +244,14 @@
   }
 }
 
-/* ==================== TABLE STYLES ==================== */
+
 .accounting .MuiTable-root {
   border-collapse: separate;
   border-spacing: 0 var(--spacing-sm);
   min-width: 800px;
 }
 
-/* Table Header */
+
 .accounting .MuiTableHead-root {
   th {
     font-family: "Vazirmatn", sans-serif !important;
@@ -278,7 +278,7 @@
   }
 }
 
-/* Table Body */
+
 .accounting .MuiTableBody-root {
   tr {
     transition: all 0.3s ease;
@@ -319,7 +319,7 @@
   }
 }
 
-/* ==================== PAYMENT TYPE STYLES ==================== */
+
 .payment-type {
   font-family: "Vazirmatn", sans-serif !important;
   padding: 10px 16px;
@@ -370,7 +370,7 @@
     opacity: 0.9;
   }
 
-  /* Single Payment Styling */
+
   &.پرداخت-تکی {
     background: linear-gradient(135deg, #6366f1, #818cf8);
     color: var(--color-white);
@@ -387,7 +387,7 @@
     }
   }
 
-  /* Installment Payment Styling - Matching single payment style */
+
   &.پرداخت-دوره-ای {
     background: linear-gradient(135deg, #10b981, #34d399);
     color: var(--color-white);
@@ -405,7 +405,7 @@
   }
 }
 
-/* ==================== ACTION BUTTONS CONTAINER ==================== */
+
 .action-buttons {
   display: flex;
   align-items: center;
@@ -434,7 +434,7 @@
   }
 }
 
-/* ==================== STATUS BADGES ==================== */
+
 .status {
   font-family: "Vazirmatn", sans-serif !important;
   padding: 8px 16px;
@@ -470,7 +470,7 @@
     }
   }
 
-  /* Status Variations */
+
   &.درحال-انجام {
     background: linear-gradient(135deg, #ffee99, #fbbf24);
     color: black;
@@ -490,7 +490,7 @@
   }
 }
 
-/* ==================== EDIT BUTTON ==================== */
+
 .MuiIconButton-root[aria-label="edit"] {
   color: var(--color-primary) !important;
   transition: all 0.3s ease !important;
@@ -501,7 +501,7 @@
   }
 }
 
-/* ==================== DELETE BUTTON - ENHANCED RED ==================== */
+
 .MuiIconButton-root[aria-label="delete"] {
   color: var(--color-error-bright) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -545,7 +545,7 @@
   }
 }
 
-/* ==================== DIALOG STYLES ==================== */
+
 .MuiDialog-paper {
   border-radius: var(--radius-lg) !important;
   font-family: "Vazirmatn", sans-serif !important;
@@ -569,7 +569,7 @@
   }
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes ripple {
   0% {
     transform: scale(0, 0);
@@ -619,7 +619,7 @@
   animation: pulse 0.6s ease-in-out;
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 1200px) {
   .accounting {
     padding: var(--spacing-lg);
@@ -760,7 +760,7 @@
   }
 }
 
-/* ==================== SCROLLBAR STYLING ==================== */
+
 .accounting-card::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -780,7 +780,7 @@
   }
 }
 
-/* ==================== PRINT STYLES ==================== */
+
 @media print {
   .accounting {
     background: none;
@@ -799,11 +799,11 @@
 }
 
 
-/* ==================== PERSIAN NUMBER FONT IMPORTS ==================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-/* ==================== PERSIAN NUMBER FONT FEATURE ==================== */
+
 @font-face {
   font-family: 'Vazirmatn Persian';
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
@@ -812,9 +812,9 @@
   font-display: swap;
 }
 
-/* ==================== PERSIAN NUMBER STYLES ==================== */
+
 .accounting {
-  /* Apply Persian numbers to all numeric displays */
+
   font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
 
   .MuiTableCell-root,
@@ -843,7 +843,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Ensure all numbers in table cells are Persian */
+
   .MuiTableCell-body {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -851,7 +851,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Serial number column */
+
   td:first-child {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -859,7 +859,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Price column */
+
   .price-cell {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -867,7 +867,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Modal input fields */
+
   .MuiInputBase-input {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -875,7 +875,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Payment type buttons */
+
   .payment-type {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -883,7 +883,7 @@
     -moz-font-feature-settings: "ss02";
   }
 
-  /* Status badges */
+
   .status {
     font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
     font-feature-settings: "ss02";
@@ -892,7 +892,7 @@
   }
 }
 
-/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+
 [dir="rtl"] {
   .accounting {
     .MuiTable-root {
@@ -912,7 +912,7 @@
       right: 0;
     }
 
-    /* Adjust table borders for RTL */
+
     td:first-child {
       border-radius: 0 var(--radius-md) var(--radius-md) 0;
       padding-right: var(--spacing-lg);
@@ -923,56 +923,56 @@
       padding-left: var(--spacing-lg);
     }
 
-    /* Modal text alignment */
+
     .MuiDialogTitle-root,
     .MuiDialogContent-root,
     .MuiDialogActions-root {
       text-align: right;
     }
 
-    /* Form labels */
+
     .MuiFormLabel-root {
       right: 0;
       left: auto;
       transform-origin: right;
     }
 
-    /* Input adornments */
+
     .MuiInputAdornment-root {
       margin-right: 0;
       margin-left: 8px;
     }
 
-    /* Select dropdown */
+
     .MuiSelect-select {
       text-align: right;
     }
 
-    /* Menu items */
+
     .MuiMenuItem-root {
       text-align: right;
     }
   }
 }
 
-/* ==================== PERSIAN TEXT OPTIMIZATIONS ==================== */
+
 .accounting {
-  /* Better rendering for Persian text */
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
-  /* Ensure proper line height for Persian text */
+
   line-height: 1.6;
 
-  /* Proper word spacing for Persian */
+
   word-spacing: 1px;
 
-  /* Letter spacing for better readability */
+
   letter-spacing: 0.3px;
 }
 
-/* ==================== PERSIAN DIGIT UTILITY CLASS ==================== */
+
 .persian-digits {
   font-family: 'Vazirmatn', 'Vazirmatn Persian', sans-serif !important;
   font-feature-settings: "ss02";
@@ -980,7 +980,7 @@
   -moz-font-feature-settings: "ss02";
 }
 
-/* ==================== ENSURE ALL ELEMENTS USE PERSIAN FONT ==================== */
+
 .MuiTypography-root,
 .MuiButton-root,
 .MuiTableCell-root,

@@ -1,4 +1,4 @@
-/* ==================== SKELETON ANIMATIONS ==================== */
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -35,7 +35,7 @@
   .skeleton-x-label { width: 100px; height: 14px; margin: 0 auto; }
 }
 
-/* Ensure bars align at bottom during loading */
+
 .skeleton-loading .bars-wrapper {
   align-items: flex-end;
 }

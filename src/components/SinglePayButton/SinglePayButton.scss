@@ -1,10 +1,7 @@
-// components/SinglePaymentButton/SinglePaymentButton.scss
-
-/* ==================== FONT IMPORTS ==================== */
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-/* ==================== PERSIAN NUMBER FONT FEATURE ==================== */
+
 @font-face {
   font-family: 'Vazirmatn Persian';
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
@@ -13,7 +10,7 @@
   font-display: swap;
 }
 
-/* ==================== BASE STYLES ==================== */
+
 .single-payment-button {
   display: inline-flex;
   align-items: center;
@@ -33,11 +30,11 @@
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
   min-width: 140px;
 
-  /* RTL specific adjustments */
+
   direction: rtl;
   text-align: center;
 
-  /* Apply Persian numbers to any numeric content */
+
   font-feature-settings: "ss02";
   -webkit-font-feature-settings: "ss02";
   -moz-font-feature-settings: "ss02";
@@ -78,13 +75,13 @@
     font-size: 1.2rem;
     z-index: 2;
     transition: transform 0.3s ease;
-    /* Mirror icon for RTL if needed - but payment icon should stay as is */
+
   }
 
   .payment-text {
     z-index: 2;
     letter-spacing: 0.5px;
-    /* Ensure proper word spacing for Persian text */
+
     word-spacing: 2px;
   }
 
@@ -92,7 +89,7 @@
     transform: scale(1.1);
   }
 
-  /* Size Variations */
+
   &.small {
     padding: 6px 12px;
     font-size: 0.8rem;
@@ -129,7 +126,7 @@
   }
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -146,7 +143,7 @@
   animation: pulse 0.6s ease-in-out;
 }
 
-/* ==================== RIPPLE EFFECT ==================== */
+
 .single-payment-button::after {
   content: '';
   position: absolute;
@@ -176,16 +173,16 @@
   }
 }
 
-/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+
 [dir="rtl"] {
   .single-payment-button {
-    /* Ensure proper spacing for RTL text */
+
     .payment-icon {
       margin-left: 4px;
       margin-right: 0;
     }
 
-    /* Adjust any RTL-specific padding if needed */
+
     &.small {
       padding: 6px 12px;
     }
@@ -200,18 +197,18 @@
   }
 }
 
-/* ==================== PERSIAN TEXT OPTIMIZATIONS ==================== */
+
 .single-payment-button .payment-text {
-  /* Better rendering for Persian text */
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
-  /* Ensure proper line height for Persian text */
+
   line-height: 1.5;
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 768px) {
   .single-payment-button {
     min-width: 120px;
@@ -242,7 +239,7 @@
   }
 }
 
-/* ==================== DARK MODE SUPPORT ==================== */
+
 @media (prefers-color-scheme: dark) {
   .single-payment-button {
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
@@ -253,7 +250,7 @@
   }
 }
 
-/* ==================== PRINT STYLES ==================== */
+
 @media print {
   .single-payment-button {
     box-shadow: none;
@@ -267,8 +264,9 @@
   }
 }
 
-/* ==================== HIGH CONTRAST MODE SUPPORT ==================== */
-@media (prefers-contrast: high) {
+
+/* FIXED: changed 'high' to 'more' */
+@media (prefers-contrast: more) {
   .single-payment-button {
     border: 3px solid #000;
     background: #6366f1;
@@ -279,7 +277,7 @@
   }
 }
 
-/* ==================== REDUCED MOTION SUPPORT ==================== */
+
 @media (prefers-reduced-motion: reduce) {
   .single-payment-button {
     animation: none;

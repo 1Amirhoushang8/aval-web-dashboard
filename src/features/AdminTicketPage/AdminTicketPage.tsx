@@ -77,7 +77,7 @@ export default function AdminTicketPage() {
                 });
             });
 
-            // 🔧 FIX: localStatus now follows the actual DB 'status' field
+
             const enrichedTickets: Ticket[] = ticketsData.map((t: StoredTicket): Ticket => {
                 const userData = userMap.get(String(t.userId));
                 return {
@@ -165,7 +165,7 @@ export default function AdminTicketPage() {
         if (activeIndex === null) return;
         const ticket = tickets[activeIndex];
         try {
-            // 🔧 FIX: Preserve existing adminResponse when switching to non-answered statuses
+
             const updatedPayload = {
                 title: ticket.title,
                 shortDetail: ticket.shortDetail,

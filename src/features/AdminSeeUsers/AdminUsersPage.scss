@@ -40,7 +40,7 @@
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  // Page header with back button and title
+
   .page-header {
     display: flex;
     align-items: center;
@@ -98,7 +98,7 @@
     }
   }
 
-  // Table card - same style as accounting-card
+
   .users-table-card {
     border-radius: var(--radius-lg) !important;
     background-color: var(--color-white) !important;
@@ -117,7 +117,7 @@
     }
   }
 
-  // Table styles
+
   .MuiTable-root {
     border-collapse: separate;
     border-spacing: 0 var(--spacing-sm);
@@ -185,7 +185,7 @@
     }
   }
 
-  // Delete button enhanced red (same as accounting)
+
   .MuiIconButton-root[aria-label="delete"] {
     color: var(--color-error-bright) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -228,13 +228,13 @@
     }
   }
 
-  // Dialog styles
+
   .MuiDialog-paper {
     border-radius: var(--radius-lg) !important;
     font-family: "Vazirmatn", sans-serif !important;
   }
 
-  // Persian digits
+
   .MuiTableCell-root,
   .MuiTypography-root,
   .MuiButton-root,
@@ -246,7 +246,7 @@
   }
 }
 
-// Responsive adjustments (similar to accounting)
+
 @media (max-width: 1200px) {
   .admin-users-page {
     padding: var(--spacing-lg);
@@ -323,7 +323,7 @@
   }
 }
 
-// Scrollbar styling
+
 .users-table-card::-webkit-scrollbar {
   width: 8px;
   height: 8px;

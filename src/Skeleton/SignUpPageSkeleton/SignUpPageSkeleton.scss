@@ -32,7 +32,7 @@
     }
   }
 
-  // Image placeholder – hidden only on mobile (≤600px), visible on tablet (top) and desktop (left)
+
   .signup-image-placeholder {
     flex: 1;
     min-width: 0;
@@ -51,7 +51,7 @@
     }
   }
 
-  // Form skeleton – uses same ID and classes as real signup form
+
   #signupform {
     flex: 1;
     display: flex;
@@ -68,7 +68,7 @@
     }
 
     @media (max-width: 600px) {
-      padding: 32px 24px; // same padding when image hidden
+      padding: 32px 24px;
     }
 
     #headerTitle {
@@ -108,7 +108,7 @@
   }
 }
 
-// Override MUI skeleton background color to match design
+
 .MuiSkeleton-root {
   background-color: #e0e5f2 !important;
 }

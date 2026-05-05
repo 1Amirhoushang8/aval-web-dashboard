@@ -66,7 +66,7 @@ const SignUpPage: React.FC = () => {
                 phoneNumber: formData.phoneNumber.trim()
             });
 
-            // Success – the backend returns { userId: "..." }
+
             setError("ثبت نام با موفقیت انجام شد! در حال انتقال...");
             setTimeout(() => {
                 navigate("/");

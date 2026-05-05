@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
-/* ==================== VARIABLES ==================== */
+
 :root {
   --color-primary: #3579F3;
   --color-bg: #f6f7fb;
@@ -16,7 +16,7 @@
   --spacing-xl: 3rem;
 }
 
-/* ==================== SKELETON ANIMATION ==================== */
+
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
@@ -32,7 +32,7 @@
   animation: shimmer 2s infinite linear;
 }
 
-/* ==================== BASE STYLES ==================== */
+
 .admin-ticket-skeleton {
   direction: rtl;
   padding: var(--spacing-xl);
@@ -43,7 +43,7 @@
   font-family: "Vazirmatn", sans-serif !important;
 }
 
-/* ==================== HEADER SKELETON ==================== */
+
 .skeleton-header {
   display: flex;
   justify-content: space-between;
@@ -91,7 +91,7 @@
   }
 }
 
-/* ==================== TABLE SKELETON ==================== */
+
 .skeleton-table-container {
   border-radius: var(--radius-lg) !important;
   background-color: var(--color-white) !important;
@@ -126,7 +126,7 @@
   }
 }
 
-/* ==================== SKELETON ELEMENTS ==================== */
+
 .skeleton-cell {
   height: 24px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -257,7 +257,7 @@
   }
 }
 
-/* ==================== RESPONSIVE SKELETON ==================== */
+
 @media (max-width: 1200px) {
   .admin-ticket-skeleton {
     padding: var(--spacing-lg);

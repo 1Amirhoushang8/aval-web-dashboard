@@ -4,18 +4,18 @@ import "./AdminUserPage.scss";
 export default function AdminUsersSkeleton() {
     return (
         <div className="admin-users-skeleton" dir="rtl">
-            {/* Header skeleton */}
+
             <div className="page-header-skeleton">
                 <div className="skeleton-back-button"></div>
                 <div className="skeleton-title"></div>
             </div>
 
-            {/* Search bar skeleton */}
+
             <div className="users-header-skeleton">
                 <div className="skeleton-search"></div>
             </div>
 
-            {/* Table skeleton */}
+
             <TableContainer component={Paper} className="users-table-skeleton">
                 <Table>
                     <TableHead>

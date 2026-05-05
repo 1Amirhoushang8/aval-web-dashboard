@@ -1,4 +1,4 @@
-/* ==================== SKELETON ANIMATIONS & STYLES ==================== */
+
 @keyframes shimmer-summary {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -12,16 +12,16 @@
     border-radius: 6px;
   }
 
-  /* Filter Section */
+
   .skeleton-filter-label { width: 80px; height: 16px; }
   .skeleton-filter-btn { width: 70px; height: 35px; border-radius: var(--radius-md); }
 
-  /* Cards */
+
   .skeleton-card {
-    border-right: 4px solid #eee !important; // Neutral border for skeleton
+    border-right: 4px solid #eee !important;
     pointer-events: none;
 
-    &::before { display: none; } // Disable the hover effect during loading
+    &::before { display: none; }
   }
 
   .skeleton-icon-box {
@@ -36,7 +36,7 @@
   .skeleton-text-period { width: 30%; height: 12px; }
 }
 
-/* Responsive adjustments for skeleton cards */
+
 @media (max-width: 600px) {
   .skeleton-loading-summary {
     .skeleton-icon-box {

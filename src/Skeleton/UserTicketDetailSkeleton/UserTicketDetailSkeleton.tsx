@@ -3,19 +3,19 @@ import { Box, Container, Skeleton, Paper, Divider } from "@mui/material";
 export default function UserTicketDetailSkeleton() {
     return (
         <Container maxWidth="md" sx={{ py: 4 }} dir="rtl">
-            {/* Action Bar Skeleton */}
+
             <Box sx={{ mb: 4 }}>
                 <Skeleton variant="text" width={150} height={40} sx={{ borderRadius: 2 }} />
             </Box>
 
-            {/* Header Section Skeleton */}
+
             <Box sx={{ mb: 4 }}>
                 <Skeleton variant="text" width="60%" height={60} sx={{ mb: 1 }} />
                 <Skeleton variant="text" width="40%" height={30} sx={{ mb: 1 }} />
                 <Skeleton variant="text" width="20%" height={20} />
             </Box>
 
-            {/* User Description Card Skeleton */}
+
             <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid #e0e0e0', mb: 5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
                     <Skeleton variant="circular" width={24} height={24} />
@@ -31,7 +31,7 @@ export default function UserTicketDetailSkeleton() {
                 <Skeleton variant="text" width={100} />
             </Divider>
 
-            {/* Admin Response Section Skeleton */}
+
             <Box sx={{ pr: { md: 6, xs: 0 } }}>
                 <Paper
                     elevation={0}

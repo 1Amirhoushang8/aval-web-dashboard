@@ -50,11 +50,11 @@ export default function UserSeeTickets() {
             }
 
             const currentUser = JSON.parse(userStr);
-            // Handle both camelCase and PascalCase from stored user object
+
             const displayName = currentUser.fullName || currentUser.FullName || currentUser.username || "کاربر";
             setUserName(displayName);
 
-            // ticketService.getAll() returns unwrapped StoredTicket[]
+
             const allTickets = await ticketService.getAll();
             const userTickets = allTickets.filter(
                 (t) => String(t.userId) === String(currentUser.id)

@@ -5,7 +5,7 @@ const SignUpPageSkeleton: React.FC = () => {
     return (
         <div className="signup-page skeleton-page">
             <div className="signup-container">
-                {/* Image skeleton – left side on desktop, top on tablet, hidden on mobile */}
+
                 <div className="signup-image-placeholder">
                     <Skeleton
                         variant="rectangular"
@@ -16,7 +16,7 @@ const SignUpPageSkeleton: React.FC = () => {
                     />
                 </div>
 
-                {/* Form skeleton – right side on desktop, RTL for text alignment */}
+
                 <form id="signupform" dir="rtl">
                     <h2 id="headerTitle">
                         <Skeleton variant="text" width="40%" height={45} />

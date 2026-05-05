@@ -108,14 +108,15 @@ export default function ManageSitePage() {
             const message = ticketsErrorObj instanceof Error
                 ? ticketsErrorObj.message
                 : "خطا در دریافت اطلاعات تیکت‌ها از سرور.";
-            showError(message);
+            // Defer state update to prevent cascading renders
+            setTimeout(() => showError(message), 0);
         }
         if (usersError) {
             console.error("Users error:", usersErrorObj);
             const message = usersErrorObj instanceof Error
                 ? usersErrorObj.message
                 : "خطا در دریافت اطلاعات کاربران.";
-            showError(message);
+            setTimeout(() => showError(message), 0);
         }
     }, [ticketsError, usersError, ticketsErrorObj, usersErrorObj, showError]);
 

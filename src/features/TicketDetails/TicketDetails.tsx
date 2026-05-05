@@ -154,8 +154,7 @@ export default function TicketDetails() {
             const messageResponse = await apiClient.post("/messages", newMessagePayload);
             const savedMessage: Message = messageResponse.data;
 
-            // Backend automatically sets ticket status to "answered" for admin replies.
-            // No need to call ticketService.update here; just reflect the new status locally.
+
             setMessages(prev => [...prev, savedMessage].sort((a, b) => a.timestamp.localeCompare(b.timestamp)));
             setTicket(prev => prev ? { ...prev, status: "answered", adminResponse: adminReply.trim() } : null);
             setAdminReply("");

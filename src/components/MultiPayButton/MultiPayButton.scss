@@ -1,10 +1,7 @@
-// components/MultiPaymentButton/MultiPaymentButton.scss
-
-/* ==================== FONT IMPORTS ==================== */
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-/* ==================== PERSIAN NUMBER FONT FEATURE ==================== */
+
 @font-face {
   font-family: 'Vazirmatn Persian';
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
@@ -13,7 +10,7 @@
   font-display: swap;
 }
 
-/* ==================== BASE STYLES ==================== */
+
 .multi-payment-button {
   display: inline-flex;
   align-items: center;
@@ -33,11 +30,11 @@
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
   min-width: 160px;
 
-  /* RTL specific adjustments */
+
   direction: rtl;
   text-align: center;
 
-  /* Apply Persian numbers to any numeric content */
+
   font-feature-settings: "ss02";
   -webkit-font-feature-settings: "ss02";
   -moz-font-feature-settings: "ss02";
@@ -78,8 +75,8 @@
     font-size: 1.2rem;
     z-index: 2;
     transition: transform 0.3s ease;
-    /* Mirror icon for RTL if needed - but calendar icon should stay as is */
-    transform: scaleX(1); /* Keep icon orientation */
+
+    transform: scaleX(1);
   }
 
   .payment-content {
@@ -94,7 +91,7 @@
     font-size: 0.9rem;
     line-height: 1.4;
     letter-spacing: 0.5px;
-    /* Ensure proper word spacing for Persian text */
+
     word-spacing: 2px;
   }
 
@@ -103,7 +100,7 @@
     font-weight: 500;
     opacity: 0.9;
     white-space: nowrap;
-    /* Apply Persian numbers to monthly payment */
+
     font-feature-settings: "ss02";
     -webkit-font-feature-settings: "ss02";
     -moz-font-feature-settings: "ss02";
@@ -117,7 +114,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     margin-top: 2px;
-    /* Apply Persian numbers to total months */
+
     font-feature-settings: "ss02";
     -webkit-font-feature-settings: "ss02";
     -moz-font-feature-settings: "ss02";
@@ -127,7 +124,7 @@
     transform: scale(1.1);
   }
 
-  /* Size Variations */
+
   &.small {
     padding: 6px 12px;
     min-width: 130px;
@@ -176,7 +173,7 @@
     }
   }
 
-  /* Disabled State */
+
   &.disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -185,7 +182,7 @@
   }
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -202,7 +199,7 @@
   animation: pulse 0.6s ease-in-out;
 }
 
-/* ==================== RIPPLE EFFECT ==================== */
+
 .multi-payment-button::after {
   content: '';
   position: absolute;
@@ -232,10 +229,10 @@
   }
 }
 
-/* ==================== RTL SPECIFIC ADJUSTMENTS ==================== */
+
 [dir="rtl"] {
   .multi-payment-button {
-    /* Ensure proper spacing for RTL text */
+
     .payment-icon {
       margin-left: 4px;
       margin-right: 0;
@@ -245,7 +242,7 @@
       text-align: center;
     }
 
-    /* Adjust any RTL-specific padding if needed */
+
     &.small {
       padding: 6px 12px;
     }
@@ -260,29 +257,29 @@
   }
 }
 
-/* ==================== PERSIAN TEXT OPTIMIZATIONS ==================== */
+
 .multi-payment-button {
   .payment-text,
   .monthly-payment,
   .total-months {
-    /* Better rendering for Persian text */
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
 
-    /* Ensure proper line height for Persian text */
+
     line-height: 1.5;
   }
 
-  /* Specific styles for Persian text with numbers */
+
   .monthly-payment,
   .total-months {
-    /* Ensure numbers are properly formatted in Persian */
+
     direction: rtl;
   }
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 768px) {
   .multi-payment-button {
     min-width: 140px;
@@ -331,7 +328,7 @@
   }
 }
 
-/* ==================== DARK MODE SUPPORT ==================== */
+
 @media (prefers-color-scheme: dark) {
   .multi-payment-button {
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
@@ -342,7 +339,7 @@
   }
 }
 
-/* ==================== PRINT STYLES ==================== */
+
 @media print {
   .multi-payment-button {
     box-shadow: none;
@@ -361,8 +358,9 @@
   }
 }
 
-/* ==================== HIGH CONTRAST MODE SUPPORT ==================== */
-@media (prefers-contrast: high) {
+
+/* FIXED: changed 'high' to 'more' */
+@media (prefers-contrast: more) {
   .multi-payment-button {
     border: 3px solid #000;
     background: #10b981;
@@ -378,7 +376,7 @@
   }
 }
 
-/* ==================== REDUCED MOTION SUPPORT ==================== */
+
 @media (prefers-reduced-motion: reduce) {
   .multi-payment-button {
     animation: none;

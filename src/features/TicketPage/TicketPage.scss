@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
-/* -------------------- Variables -------------------- */
+
 :root {
   --color-primary: #3b82f6;
   --color-primary-dark: #2563eb;
@@ -30,7 +30,7 @@
   --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* -------------------- Page -------------------- */
+
 .ticket-page {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-bg) 0%, #eef2ff 100%);
@@ -75,7 +75,7 @@
   }
 }
 
-/* -------------------- Dropdown Styles -------------------- */
+
 .dropdown-wrapper {
   position: relative;
   width: 100%;
@@ -335,7 +335,7 @@
   }
 }
 
-/* -------------------- Fields -------------------- */
+
 .field {
   display: flex;
   flex-direction: column;
@@ -437,7 +437,7 @@
   min-height: 120px;
 }
 
-/* -------------------- File Section -------------------- */
+
 .file-section {
   display: flex;
   gap: 2.5rem;
@@ -628,7 +628,7 @@
   }
 }
 
-/* -------------------- Submit Button -------------------- */
+
 .submit-btn {
   align-self: flex-end;
   background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
@@ -665,7 +665,7 @@
   }
 }
 
-/* -------------------- Responsive -------------------- */
+
 @media (max-width: 900px) {
   .ticket-page {
     padding: 1.5rem;
@@ -734,7 +734,7 @@
   }
 
   .dropdown-content {
-    max-height: 300px; /* Slightly smaller on very small screens */
+    max-height: 300px;
   }
 
   .dropdown-options {
@@ -750,7 +750,7 @@
     height: 180px;
   }
 
-  /* Ensure tap targets are at least 44px */
+
   .clear-btn,
   .dropdown-arrow {
     min-width: 44px;
@@ -758,11 +758,11 @@
   }
 
   .submit-btn {
-    padding: 0.9rem; /* Larger tap area */
+    padding: 0.9rem;
   }
 }
 
-/* Ensure no horizontal overflow on any screen */
+
 * {
   max-width: 100%;
   box-sizing: border-box;
@@ -772,7 +772,7 @@ body {
   overflow-x: hidden;
 }
 
-/* -------------------- Loading State -------------------- */
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -786,7 +786,7 @@ body {
   animation: pulse 1.5s infinite;
 }
 
-/* -------------------- File Section Loading -------------------- */
+
 .file-section-loading {
   width: 100%;
   height: 200px;
@@ -812,7 +812,7 @@ body {
   }
 }
 
-/* ==================== TICKET PAGE LOADING STYLES ==================== */
+
 .ticket-card.is-loading-page {
   display: flex;
   flex-direction: column;

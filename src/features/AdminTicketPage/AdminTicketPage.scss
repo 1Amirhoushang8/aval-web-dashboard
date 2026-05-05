@@ -48,7 +48,7 @@
   font-family: "Vazirmatn", sans-serif !important;
 }
 
-/* Table elements */
+
 .admin-ticket-page .MuiTable-root,
 .admin-ticket-page .MuiTableCell-head,
 .admin-ticket-page .MuiTableCell-body,
@@ -67,7 +67,7 @@
   font-family: "Vazirmatn", sans-serif !important;
 }
 
-/* ==================== PAGE HEADER ==================== */
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -165,7 +165,7 @@
     }  }
 }
 
-/* ==================== TABLE CONTAINER ==================== */
+
 .tickets-table-container {
   border-radius: var(--radius-lg) !important;
   background-color: var(--color-white) !important;
@@ -179,13 +179,13 @@
   }
 }
 
-/* ==================== TABLE STYLES ==================== */
+
 .tickets-table {
   border-collapse: separate;
   border-spacing: 0 var(--spacing-sm);
   min-width: 1200px;
 
-  /* Table Header */
+
   .MuiTableHead-root {
     th {
       font-size: 1rem !important;
@@ -211,7 +211,7 @@
     }
   }
 
-  /* Table Body */
+
   .MuiTableBody-root {
     tr {
       transition: all 0.3s ease;
@@ -259,7 +259,7 @@
   }
 }
 
-/* ==================== TABLE CELL COMPONENTS ==================== */
+
 .user-info {
   display: flex;
   align-items: center;
@@ -321,7 +321,7 @@
   }
 }
 
-/* ==================== STATUS BADGE ==================== */
+
 .status-badge {
   display: inline-block;
   padding: 6px 12px;
@@ -338,7 +338,7 @@
     filter: brightness(1.05);
   }
 
-  // --- In Progress (Yellow Style) ---
+
   &.in-progress {
     background: linear-gradient(135deg, #ffee99, #fbbf24);
     color: black;
@@ -346,7 +346,7 @@
     box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);
   }
 
-  // --- Answered (Green Style) ---
+
   &.answered {
     background: linear-gradient(135deg, #99ffbb, #10b981);
     color: black;
@@ -354,7 +354,7 @@
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
   }
 
-  // --- Pending (Red Style) ---
+
   &.pending {
     background: linear-gradient(135deg, #ff9090, #ef4444);
     color: black;
@@ -386,7 +386,7 @@
 }
 
 
-/* ==================== RESPONSE SECTION ==================== */
+
 .response-section {
   display: flex;
   flex-direction: column;
@@ -463,7 +463,7 @@
   }
 }
 
-/* ==================== ACTION BUTTONS ==================== */
+
 .action-buttons {
   display: flex;
   align-items: center;
@@ -499,7 +499,7 @@
   }
 }
 
-/* ==================== STATUS MENU ==================== */
+
 .status-menu {
   .MuiPaper-root {
     border-radius: var(--radius-md);
@@ -524,7 +524,7 @@
   }
 }
 
-/* ==================== DELETE DIALOG ==================== */
+
 .delete-dialog {
   .MuiPaper-root {
     border-radius: var(--radius-lg) !important;
@@ -540,7 +540,7 @@
   }
 }
 
-/* ==================== LOADING CONTAINER ==================== */
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -549,7 +549,7 @@
   min-height: 60vh;
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -587,7 +587,7 @@
 .MuiTableBody-root tr:nth-child(19) { animation-delay: 0.57s; }
 .MuiTableBody-root tr:nth-child(20) { animation-delay: 0.60s; }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 1200px) {
   .admin-ticket-page {
     padding: var(--spacing-lg);
@@ -719,7 +719,7 @@
   }
 }
 
-/* ==================== SCROLLBAR STYLING ==================== */
+
 .tickets-table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -739,9 +739,9 @@
   }
 }
 
-/* ==================== PERSIAN NUMBER STYLES ==================== */
+
 .admin-ticket-page {
-  /* Apply Persian numbers to all numeric displays */
+
   font-feature-settings: "ss02";
   -webkit-font-feature-settings: "ss02";
   -moz-font-feature-settings: "ss02";

@@ -1,4 +1,4 @@
-// components/DeleteButton/DeleteButton.scss
+
 
 .delete-button {
   color: #ef4444 !important;
@@ -50,7 +50,7 @@
     transform: scale(1.1);
   }
 
-  /* Size Variations */
+
   &.small {
     padding: 4px !important;
 
@@ -75,7 +75,7 @@
     }
   }
 
-  /* Disabled State */
+
   &.disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -89,7 +89,7 @@
   }
 }
 
-/* Animation for shake effect */
+
 @keyframes shake {
   0%, 100% {
     transform: rotate(0deg);

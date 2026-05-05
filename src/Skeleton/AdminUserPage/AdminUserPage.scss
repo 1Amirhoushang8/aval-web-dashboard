@@ -17,7 +17,7 @@
   min-height: 100vh;
   font-family: "Vazirmatn", sans-serif !important;
 
-  // Shimmer animation
+
   .skeleton-back-button,
   .skeleton-title,
   .skeleton-search,
@@ -29,7 +29,7 @@
     border-radius: 4px;
   }
 
-  // Page header skeleton
+
   .page-header-skeleton {
     display: flex;
     align-items: center;
@@ -51,7 +51,7 @@
     }
   }
 
-  // Search bar skeleton
+
   .users-header-skeleton {
     width: 80%;
     margin-right: 4rem;
@@ -65,7 +65,7 @@
     }
   }
 
-  // Table skeleton
+
   .users-table-skeleton {
     border-radius: var(--radius-lg) !important;
     background-color: var(--color-white) !important;
@@ -129,7 +129,7 @@
     }
   }
 
-  // Responsive adjustments
+
   @media (max-width: 1200px) {
     padding: var(--spacing-lg);
 

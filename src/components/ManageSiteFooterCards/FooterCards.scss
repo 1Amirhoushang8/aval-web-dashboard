@@ -1,9 +1,9 @@
-/* ==================== FOOTER CARDS STYLES ==================== */
+
 .financial-summary {
   width: 90%;
   margin: 0 auto 2rem auto;
 
-  /* Filter Section */
+
   .footer-filter-section {
     display: flex;
     align-items: center;
@@ -97,7 +97,7 @@
     }
   }
 
-  /* Cards Container */
+
   .summary-cards-container {
     display: flex;
     flex-direction: row;
@@ -264,7 +264,7 @@
   margin-right: 4.5rem;
 }
 
-/* ==================== ANIMATIONS ==================== */
+
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -298,7 +298,7 @@
   animation-iteration-count: 1;
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+
 @media (max-width: 1200px) {
   .financial-summary {
     .summary-card {
@@ -428,7 +428,7 @@
   }
 }
 
-/* ==================== HOVER EFFECTS ==================== */
+
 @media (hover: hover) {
   .summary-card:hover {
     .summary-icon {
@@ -446,7 +446,7 @@
   }
 }
 
-/* ==================== PRINT STYLES ==================== */
+
 @media print {
   .financial-summary {
     .footer-filter-section {

@@ -16,7 +16,7 @@ const LoginPageSkeleton: React.FC = () => {
                     />
                 </div>
 
-                {/* Form skeleton – right side on desktop, RTL for text alignment */}
+
                 <form id="loginform" dir="rtl">
                     <h2 id="headerTitle">
                         <Skeleton variant="text" width="70%" height={40} />

@@ -1,4 +1,4 @@
-// components/FileUpload/FileUpload.scss
+
 
 .file-section {
   display: flex;
@@ -301,7 +301,7 @@
   75% { transform: translateX(5px); }
 }
 
-/* Responsive Design */
+
 @media (max-width: 900px) {
   .file-section {
     flex-direction: column;

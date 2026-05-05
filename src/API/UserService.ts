@@ -15,7 +15,8 @@ function unwrap<T>(responseData: unknown): T {
             return responseData as T;
         }
         const wrapped = responseData as WrappedApiResponse<T>;
-        if (wrapped.success === false) {
+
+        if (!wrapped.success) {
             throw new Error(wrapped.message || "خطا در عملیات");
         }
         if (wrapped.data !== undefined) {
@@ -31,15 +32,18 @@ export const userService = {
         return unwrap<User[]>(response.data);
     },
 
+
     getById: async (id: string | number): Promise<User> => {
         const response = await apiClient.get<User>(`/users/${id}`);
         return unwrap<User>(response.data);
     },
 
+
     create: async (data: CreateUserDto): Promise<User> => {
         const response = await apiClient.post<User>("/users", data);
         return unwrap<User>(response.data);
     },
+
 
     update: async (id: string | number, data: Partial<User>): Promise<User> => {
         const response = await apiClient.put<User>(`/users/${id}`, data);
@@ -49,6 +53,7 @@ export const userService = {
     delete: async (id: string | number): Promise<void> => {
         await apiClient.delete(`/users/${id}`);
     },
+
 
     deleteService: async (id: string | number): Promise<void> => {
         await apiClient.delete(`/users/${id}/service`);
