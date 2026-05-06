@@ -76,7 +76,7 @@ const SignUpPage: React.FC = () => {
             let errorMessage = "خطا در برقراری ارتباط با سرور";
             if (axios.isAxiosError(err)) {
                 const responseData = err.response?.data;
-                // Backend returns { message: "..." } for validation errors
+
                 if (responseData?.message) {
                     errorMessage = responseData.message;
                 }
