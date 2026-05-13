@@ -3,45 +3,25 @@ import axios from "axios";
 const apiClient = axios.create({
     baseURL: "https://localhost:7208/api",
     withCredentials: true,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
 });
 
-let csrfRequestToken: string | null = null;
+let csrfToken: string | null = null;
 
-export const initCsrfToken = async (): Promise<string | null> => {
-    try {
-        const response = await apiClient.get("/csrf");
-        csrfRequestToken = response.data.token;
-        return csrfRequestToken;
-    } catch {
-        return null;
+export async function fetchCsrfToken(): Promise<void> {
+    const response = await apiClient.get("/csrf");
+    csrfToken = response.data.token;
+}
+
+apiClient.interceptors.request.use((config) => {
+    if (csrfToken && ["post", "put", "delete", "patch"].includes(
+        config.method?.toLowerCase() ?? "")) {
+        config.headers["X-CSRF-TOKEN"] = csrfToken;
     }
-};
-
-const ensureCsrfRequestToken = async (): Promise<string | null> => {
-    if (!csrfRequestToken) {
-        await initCsrfToken();
-    }
-    return csrfRequestToken;
-};
-
-apiClient.interceptors.request.use(async (config) => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    const method = config.method?.toLowerCase() ?? "";
-    if (["post", "put", "delete", "patch"].includes(method)) {
-        const reqToken = await ensureCsrfRequestToken();
-        if (reqToken) {
-            config.headers["X-CSRF-TOKEN"] = reqToken;
-        }
-    }
-
     return config;
 });
+
+// Fetch token as soon as the module loads
+fetchCsrfToken();
 
 export default apiClient;
